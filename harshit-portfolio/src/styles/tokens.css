@@ -1,0 +1,54 @@
+@font-face {
+  font-family: "Archivo";
+  src: url("../assets/fonts/archivo-var-latin.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Archivo Black";
+  src: url("../assets/fonts/archivo-black-latin.woff2") format("woff2");
+  font-weight: 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("../assets/fonts/jetbrains-mono-var-latin.woff2") format("woff2");
+  font-weight: 100 800;
+  font-display: swap;
+}
+
+:root {
+  --ink: #140e10;
+  --paper: #f6f0e5;
+  --signal: #ff1648;
+  --acid: #c7f36d;
+  --muted: #766d66;
+  --line: color-mix(in srgb, var(--ink) 24%, transparent);
+  --paper-line: color-mix(in srgb, var(--paper) 22%, transparent);
+  --noise: color-mix(in srgb, var(--ink) 20%, transparent);
+  --shadow: 0 1rem 3rem color-mix(in srgb, var(--ink) 20%, transparent);
+  --radius-small: 0.5rem;
+  --radius-medium: 1rem;
+  --radius-large: 1.75rem;
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2.5rem;
+  --space-5: 4rem;
+  --space-6: 7rem;
+  --display: "Archivo Black", "Arial Black", sans-serif;
+  --sans: "Archivo", Arial, sans-serif;
+  --mono: "JetBrains Mono", monospace;
+}
+
+html[data-contrast="high"] {
+  --ink: #000000;
+  --paper: #ffffff;
+  --signal: #ff003c;
+  --acid: #d3ff00;
+  --muted: #302a27;
+  --line: color-mix(in srgb, var(--ink) 45%, transparent);
+  --paper-line: color-mix(in srgb, var(--paper) 45%, transparent);
+}

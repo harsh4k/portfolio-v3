@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Environment / secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Tooling output
+.playwright-mcp/
+*.log
+
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Build inputs: full local copies of the two reference sites this design was
+# studied from (~203 MB). They are not this project's code and include
+# third-party fonts and client videos, so they stay out of the public repo.
+# src/scripts/build.mjs falls back to the committed index.html without them.
+references/
+
+# Byte-identical nested duplicates of directories that already exist one level
+# up. Nothing references these paths.
+harshit-portfolio/public/_astro/_astro/
+harshit-portfolio/public/cdn-cgi/cdn-cgi/

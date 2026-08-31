@@ -1,0 +1,21 @@
+{
+  "name": "harshit-portfolio",
+  "version": "2.0.0",
+  "description": "Harshit Chauhan — Interactive 3D WebGL Portfolio",
+  "type": "module",
+  "main": "server.mjs",
+  "scripts": {
+    "dev": "node server.mjs",
+    "start": "node server.mjs",
+    "build": "node src/scripts/build.mjs && node src/scripts/clean-adrien.mjs && node src/scripts/patch-intro.mjs"
+  },
+  "keywords": [
+    "portfolio",
+    "threejs",
+    "webgl",
+    "gsap",
+    "creative-developer"
+  ],
+  "author": "Harshit Chauhan",
+  "license": "MIT"
+}

@@ -1,0 +1,69 @@
+/* ===================================================================
+   integration.css — Clean Layer Integration & Smooth Transitions
+   =================================================================== */
+
+/* ---------- Intro Layer (Interactive 3D WebGL Scene) ---------- */
+#intro-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background-color: #ff0b36;
+  transition: opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: opacity;
+  overflow: hidden;
+}
+
+/* Suppress all secondary dark overlays from intro */
+#intro-layer .side-panel,
+#intro-layer .side-panel__content,
+#intro-layer .about,
+#intro-layer .projects,
+#intro-layer .media-layer,
+#intro-layer .responsive-layer,
+#intro-layer .mobile-switch {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Smooth Fade on Hand Pull */
+html.intro-done #intro-layer {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* ---------- Header: Remove QR Code ---------- */
+.sb-qr-code,
+.js-qr-code {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* ---------- Highlights Section: Prevent Word Clipping ---------- */
+.s-about .s__awards .s__award__name {
+  font-size: clamp(1.8rem, 4.2vw, 3.8rem) !important;
+  line-height: 1.05 !important;
+  white-space: nowrap !important;
+  word-break: normal !important;
+}
+
+.s-about .s__awards .s__award--awwwards .s__award__name,
+.s-about .s__awards .s__award--fwa .s__award__name,
+.s-about .s__awards .s__award--cssda .s__award__name {
+  font-size: clamp(2rem, 4.8vw, 4.2rem) !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+/* ---------- CTA Circle: Email Clipping Fix ---------- */
+.s__cta__link {
+  font-size: clamp(9px, 1.15vw, 11px) !important;
+  letter-spacing: 0.04em !important;
+  padding: 0.75em 1.2em !important;
+  max-width: 88% !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+}
