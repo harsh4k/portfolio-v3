@@ -41,15 +41,18 @@ if (js.includes(ORIGINAL_INIT)) {
   console.log("patch-intro: site intro gated behind startPortfolioIntro");
 }
 
-// 2. Patch intro() completion to refresh ScrollTrigger and Lenis when scroll lock is released
-const ORIGINAL_INTRO_END =
-  'l.call(()=>{i.style.opacity="1",e.remove(),document.documentElement.classList.remove("is-scroll-blocked"),xe.nextTick(()=>{$.emit("updateViewport")})},null,5)';
-const PATCHED_INTRO_END =
-  'l.call(()=>{i.style.opacity="1",e.remove(),document.documentElement.classList.remove("is-scroll-blocked"),xe.nextTick(()=>{$.emit("updateViewport"),j.refresh(),window.lenis&&window.lenis.resize()})},null,3.2)';
+// 2. Replace intro() with clean handover (no redundant 2D loading animation or missing DOM crashes)
+const INTRO_METHOD_REGEX = /intro\(\)\{const t=document\.querySelector\("\.js-site-wrapper"\)[\s\S]*?\},null,[0-9.]+\)\}/;
+const CLEAN_INTRO =
+  'intro(){const t=document.querySelector(".js-site-wrapper"),e=document.querySelector(".js-intro"),i=document.querySelector(".js-mount");' +
+  't&&(t.style.opacity=""),e&&e.remove(),i&&(i.style.opacity="1"),' +
+  'document.documentElement.classList.remove("is-scroll-blocked"),' +
+  'document.dispatchEvent(new CustomEvent("intro")),' +
+  'xe.nextTick(()=>{$.emit("updateViewport"),j.refresh(),window.lenis&&window.lenis.resize()})}';
 
-if (js.includes(ORIGINAL_INTRO_END)) {
-  js = js.replace(ORIGINAL_INTRO_END, PATCHED_INTRO_END);
-  console.log("patch-intro: ScrollTrigger & Lenis refresh attached to intro unlock");
+if (INTRO_METHOD_REGEX.test(js)) {
+  js = js.replace(INTRO_METHOD_REGEX, CLEAN_INTRO);
+  console.log("patch-intro: intro() replaced with clean instantaneous handover");
 }
 
 // 3. Patch Work section controller (vc): listen to updateViewport and always recalculate on resize

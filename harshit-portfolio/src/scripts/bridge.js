@@ -88,33 +88,40 @@
     return;
   }
 
-  /** Tear down the intro layer, then play the portfolio's own intro */
+  /** Tear down the intro layer, then reveal the portfolio */
   const revealPortfolio = (isFast = false) => {
     if (navigating) return;
     navigating = true;
 
+    const introLayer = document.getElementById("intro-layer");
+    if (introLayer) introLayer.classList.add("is-leaving");
+
     const exitDelay = isFast || isTouchDevice ? TOUCH_EXIT_MS : DEFAULT_EXIT_MS;
 
     window.setTimeout(() => {
-      const introLayer = document.getElementById("intro-layer");
-
       stopIntroEngine(introLayer);
 
       document
         .querySelectorAll("link[data-intro-style]")
         .forEach((link) => link.remove());
 
-      window.dispatchEvent(new Event("resize"));
-      watchScrollUnblock();
-
       window.dispatchEvent(new CustomEvent("startPortfolioIntro"));
-
+      document.documentElement.classList.remove("is-scroll-blocked");
       document.documentElement.classList.add("intro-done");
+
+      const triggerRefresh = () => {
+        window.dispatchEvent(new Event("resize"));
+        if (window.lenis) window.lenis.resize();
+        if (window.ScrollTrigger) window.ScrollTrigger.refresh();
+      };
+      triggerRefresh();
+      setTimeout(triggerRefresh, 100);
+      setTimeout(triggerRefresh, 300);
 
       window.setTimeout(() => {
         introLayer?.remove();
         window.dispatchEvent(new CustomEvent("portfolio:entered"));
-      }, CROSSFADE_MS + 50);
+      }, CROSSFADE_MS);
     }, exitDelay);
   };
 
