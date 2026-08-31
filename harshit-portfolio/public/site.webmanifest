@@ -1,0 +1,26 @@
+{
+  "name": "Harshit Chauhan — Creative Developer",
+  "short_name": "Harshit",
+  "description": "Portfolio of Harshit Chauhan — Computer Engineering student & Creative Developer.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f40c3f",
+  "theme_color": "#160000",
+  "icons": [
+    {
+      "src": "/icons/favicon-48x48.png",
+      "sizes": "48x48",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
