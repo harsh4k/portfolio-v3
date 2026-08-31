@@ -28,8 +28,18 @@ if (fs.existsSync(referenceJsPath)) {
 
 let js = fs.readFileSync(enginePath, "utf8");
 
-// 1. Keep native init() so the site intro plays smoothly on load
-// (No deadlocking behind artificial event listeners)
+// 1. Gate site intro behind startPortfolioIntro event if intro-layer exists
+const ORIGINAL_INIT =
+  "init(){this.initLenis(),xe.init(),this.onResize(),xe.nextTick(this.intro,this)}";
+const GATED_INIT =
+  'init(){this.initLenis(),xe.init(),this.onResize(),document.getElementById("intro-layer")' +
+  '?window.addEventListener("startPortfolioIntro",()=>{xe.nextTick(this.intro,this)},{once:!0})' +
+  ":xe.nextTick(this.intro,this)}";
+
+if (js.includes(ORIGINAL_INIT)) {
+  js = js.replace(ORIGINAL_INIT, GATED_INIT);
+  console.log("patch-intro: site intro gated behind startPortfolioIntro");
+}
 
 // 2. Patch intro() completion to refresh ScrollTrigger and Lenis when scroll lock is released
 const ORIGINAL_INTRO_END =

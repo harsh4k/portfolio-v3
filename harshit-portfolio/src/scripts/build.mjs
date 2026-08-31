@@ -391,6 +391,25 @@ ${JSON.stringify(jsonLd, null, 2)}
 `;
   html = html.substring(0, headEnd) + extraHeadTags + html.substring(headEnd);
 
+  // 15. Inject intro layer into <body>
+  const bodyStartIdx = html.indexOf("<body");
+  const bodyOpenEnd = html.indexOf(">", bodyStartIdx) + 1;
+  const introLayerHtml = `
+  <!-- ============ INTRO LAYER (Interactive 3D WebGL Scene / Touch Entry) ============ -->
+  <div id="intro-layer">
+    <div id="app"></div>
+  </div>
+`;
+  html = html.substring(0, bodyOpenEnd) + introLayerHtml + html.substring(bodyOpenEnd);
+
+  // 16. Inject bridge connector script into <body>
+  const bodyEndIdx = html.lastIndexOf("</body>");
+  const extraScripts = `
+  <!-- Bridge connector -->
+  <script src="/scripts/bridge.js"></script>
+`;
+  html = html.substring(0, bodyEndIdx) + extraScripts + html.substring(bodyEndIdx);
+
   fs.writeFileSync(path.resolve(appRoot, "index.html"), html, "utf8");
   console.log("build: index.html compiled from references markup.");
 } else {
