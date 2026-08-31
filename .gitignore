@@ -11,6 +11,7 @@ harshit-portfolio/dist/
 
 # Tooling output
 .playwright-mcp/
+.wrangler/
 *.log
 
 # OS / editor
