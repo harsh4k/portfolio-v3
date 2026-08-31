@@ -78,11 +78,11 @@ const projects = [
   },
 ];
 
-// Generate work cards HTML with lazy loading & async decoding
+// Generate work cards HTML matching original Wodniack markup structure exactly
 const workCardsHtml = projects
   .map(
     (p) =>
-      `  <a-work class="s__scene__work s__scene__work--video js-work astro-meqjtcea"> <div class="a__inner astro-meqjtcea"> <a href="${p.url}" target="_blank" rel="noopener noreferrer" class="astro-meqjtcea"> <img src="${p.img}" alt="${p.title}" class="a__video js-video astro-meqjtcea" width="1082" height="636" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;display:block;" /> <div class="a__caption astro-meqjtcea"> <div class="a__caption__text astro-meqjtcea"> ${p.title} </div><!-- .a__caption__text --> <div class="a__caption__key astro-meqjtcea"> #${p.key} </div><!-- .a__caption__key --> </div><!-- .a__caption --> </a> </div><!-- .a__inner --> </a-work>`
+      `  <a-work class="s__scene__work s__scene__work--video js-work astro-meqjtcea"> <div class="a__inner astro-meqjtcea"> <a href="${p.url}" target="_blank" rel="noopener noreferrer" class="astro-meqjtcea"> <img src="${p.img}" alt="${p.title}" class="a__video js-video astro-meqjtcea" width="1082" height="636" loading="lazy" decoding="async" /> <div class="a__caption astro-meqjtcea"> <div class="a__caption__text astro-meqjtcea"> ${p.title} </div><!-- .a__caption__text --> <div class="a__caption__key astro-meqjtcea">\n#${p.key} </div><!-- .a__caption__key --> </div><!-- .a__caption --> </a> </div><!-- .a__inner --> </a-work>`
   )
   .join("  \n");
 
