@@ -403,3 +403,91 @@ a-work.astro-meqjtcea.is-inview {
     animation: none !important;
   }
 }
+
+/* ---------- Site Intro Monogram: "HC" (Harshit Chauhan) Animation ---------- */
+.site-intro.astro-j7pv25f6 .sb-logo.astro-j7pv25f6 {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 3rem !important;
+  height: 3rem !important;
+  transform: translate3d(-50%, -50%, 0);
+}
+
+@media only screen and (max-width: 767px) and (orientation: landscape), only screen and (max-width: 576px) {
+  .site-intro.astro-j7pv25f6 .sb-logo.astro-j7pv25f6 {
+    width: 2rem !important;
+    height: 2rem !important;
+  }
+}
+
+.site-intro.astro-j7pv25f6 .sb-logo.astro-j7pv25f6 .sb__path.astro-j7pv25f6 {
+  position: absolute !important;
+  background: var(--color-secondary, #160000) !important;
+}
+
+/* Vertical bars of HC */
+.site-intro.astro-j7pv25f6 .sb-logo.astro-j7pv25f6 .sb__path--v.astro-j7pv25f6 {
+  top: 0 !important;
+  width: 14.2% !important;
+  height: 100% !important;
+  transform-origin: 50% 100% !important;
+}
+
+/* H - Left vertical leg */
+.site-intro.astro-j7pv25f6 .sb-logo.astro-j7pv25f6 .sb__path--v-1.astro-j7pv25f6 {
+  left: 0 !important;
+  right: auto !important;
+}
+
+/* H - Right vertical leg */
+.site-intro.astro-j7pv25f6 .sb-logo.astro-j7pv25f6 .sb__path--v-2.astro-j7pv25f6 {
+  left: 35.5% !important;
+  right: auto !important;
+}
+
+/* C - Vertical spine */
+.site-intro.astro-j7pv25f6 .sb-logo.astro-j7pv25f6 .sb__path--v-3.astro-j7pv25f6 {
+  left: 57.4% !important;
+  right: auto !important;
+}
+
+/* Suppress any extra legacy bars if present */
+.site-intro.astro-j7pv25f6 .sb-logo.astro-j7pv25f6 .sb__path--v-4.astro-j7pv25f6,
+.site-intro.astro-j7pv25f6 .sb-logo.astro-j7pv25f6 .sb__path--v-5.astro-j7pv25f6 {
+  display: none !important;
+}
+
+/* Horizontal bars of HC */
+.site-intro.astro-j7pv25f6 .sb-logo.astro-j7pv25f6 .sb__path--h.astro-j7pv25f6 {
+  position: absolute !important;
+  height: 14.2% !important;
+}
+
+/* H - Middle crossbar */
+.site-intro.astro-j7pv25f6 .sb-logo.astro-j7pv25f6 .sb__path--h-1.astro-j7pv25f6 {
+  top: 42.4% !important;
+  bottom: auto !important;
+  left: 14.2% !important;
+  width: 21.3% !important;
+  transform-origin: 0% 50% !important;
+}
+
+/* C - Top arm */
+.site-intro.astro-j7pv25f6 .sb-logo.astro-j7pv25f6 .sb__path--h-2.astro-j7pv25f6 {
+  top: 0 !important;
+  bottom: auto !important;
+  left: 57.4% !important;
+  width: 42.6% !important;
+  transform-origin: 0% 50% !important;
+}
+
+/* C - Bottom arm */
+.site-intro.astro-j7pv25f6 .sb-logo.astro-j7pv25f6 .sb__path--h-3.astro-j7pv25f6 {
+  top: auto !important;
+  bottom: 0 !important;
+  left: 57.4% !important;
+  width: 42.6% !important;
+  transform-origin: 0% 50% !important;
+}
+

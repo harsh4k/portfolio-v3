@@ -109,6 +109,11 @@ if (fs.existsSync(referenceWodniackPath)) {
   const hcFootLogo = `<path d="M0 0v280h39.755V158.4h59.65V280h39.756V0H99.411v118.8H39.755V0H0Z" fill="#160000" class="astro-75cegwoc"></path> <path d="M160.734 0v280H280V240.245h-79.51V39.755H280V0H160.734Z" fill="#160000" class="astro-75cegwoc"></path>`;
   html = html.replaceAll(awFootLogo, hcFootLogo);
 
+  // 3b. Site intro animation monogram ("HC" instead of "AW")
+  const awIntroLogo = `<div class="sb-logo js-logo astro-j7pv25f6"> <div class="sb__path sb__path--v sb__path--v-1 js-logo-line-v astro-j7pv25f6"></div> <div class="sb__path sb__path--h sb__path--h-1 js-logo-line-h astro-j7pv25f6"></div> <div class="sb__path sb__path--v sb__path--v-2 js-logo-line-v astro-j7pv25f6"></div> <div class="sb__path sb__path--v sb__path--v-3 js-logo-line-v astro-j7pv25f6"></div> <div class="sb__path sb__path--h sb__path--h-2 js-logo-line-h astro-j7pv25f6"></div> <div class="sb__path sb__path--v sb__path--v-4 js-logo-line-v astro-j7pv25f6"></div> <div class="sb__path sb__path--h sb__path--h-3 js-logo-line-h astro-j7pv25f6"></div> <div class="sb__path sb__path--v sb__path--v-5 js-logo-line-v astro-j7pv25f6"></div> </div>`;
+  const hcIntroLogo = `<div class="sb-logo js-logo astro-j7pv25f6"> <div class="sb__path sb__path--v sb__path--v-1 js-logo-line-v astro-j7pv25f6"></div> <div class="sb__path sb__path--v sb__path--v-2 js-logo-line-v astro-j7pv25f6"></div> <div class="sb__path sb__path--h sb__path--h-1 js-logo-line-h astro-j7pv25f6"></div> <div class="sb__path sb__path--v sb__path--v-3 js-logo-line-v astro-j7pv25f6"></div> <div class="sb__path sb__path--h sb__path--h-2 js-logo-line-h astro-j7pv25f6"></div> <div class="sb__path sb__path--h sb__path--h-3 js-logo-line-h astro-j7pv25f6"></div> </div>`;
+  html = html.replace(awIntroLogo, hcIntroLogo);
+
   // 4. Remove QR code from header
   html = html.replace(
     /<a[^>]*class="sb-qr-code[^>]*>[\s\S]*?<\/a><!-- \.sb-qr-code -->/g,
