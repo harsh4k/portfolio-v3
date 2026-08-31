@@ -1,0 +1,10 @@
+{
+  "name": "portfolio-v3",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "npm --prefix harshit-portfolio run build",
+    "dev": "npm --prefix harshit-portfolio run dev"
+  }
+}

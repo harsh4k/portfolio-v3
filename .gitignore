@@ -1,5 +1,7 @@
 # Dependencies
 node_modules/
+dist/
+harshit-portfolio/dist/
 
 # Environment / secrets
 .env
