@@ -28,31 +28,18 @@ if (fs.existsSync(referenceJsPath)) {
 
 let js = fs.readFileSync(enginePath, "utf8");
 
-// 1. Gate site intro behind startPortfolioIntro event if intro-layer exists
-const ORIGINAL_INIT =
-  "init(){this.initLenis(),xe.init(),this.onResize(),xe.nextTick(this.intro,this)}";
-const GATED_INIT =
-  'init(){this.initLenis(),xe.init(),this.onResize(),document.getElementById("intro-layer")' +
-  '?window.addEventListener("startPortfolioIntro",()=>{xe.nextTick(this.intro,this)},{once:!0})' +
-  ":xe.nextTick(this.intro,this)}";
+// 1. Keep init() clean and running immediately on DOM load
+console.log("patch-intro: site init will run smoothly on page load");
 
-if (js.includes(ORIGINAL_INIT)) {
-  js = js.replace(ORIGINAL_INIT, GATED_INIT);
-  console.log("patch-intro: site intro gated behind startPortfolioIntro");
-}
+// 2. Patch intro() completion to refresh ScrollTrigger and Lenis when intro finishes
+const ORIGINAL_INTRO_END =
+  'l.call(()=>{i.style.opacity="1",e.remove(),document.documentElement.classList.remove("is-scroll-blocked"),xe.nextTick(()=>{$.emit("updateViewport")})},null,5)';
+const ENHANCED_INTRO_END =
+  'l.call(()=>{i.style.opacity="1",e.remove(),document.documentElement.classList.remove("is-scroll-blocked"),xe.nextTick(()=>{$.emit("updateViewport"),j.refresh(),window.lenis&&window.lenis.resize()})},null,3.2)';
 
-// 2. Replace intro() with clean handover (no redundant 2D loading animation or missing DOM crashes)
-const INTRO_METHOD_REGEX = /intro\(\)\{const t=document\.querySelector\("\.js-site-wrapper"\)[\s\S]*?\},null,[0-9.]+\)\}/;
-const CLEAN_INTRO =
-  'intro(){const t=document.querySelector(".js-site-wrapper"),e=document.querySelector(".js-intro"),i=document.querySelector(".js-mount");' +
-  't&&(t.style.opacity=""),e&&e.remove(),i&&(i.style.opacity="1"),' +
-  'document.documentElement.classList.remove("is-scroll-blocked"),' +
-  'document.dispatchEvent(new CustomEvent("intro")),' +
-  'xe.nextTick(()=>{$.emit("updateViewport"),j.refresh(),window.lenis&&window.lenis.resize()})}';
-
-if (INTRO_METHOD_REGEX.test(js)) {
-  js = js.replace(INTRO_METHOD_REGEX, CLEAN_INTRO);
-  console.log("patch-intro: intro() replaced with clean instantaneous handover");
+if (js.includes(ORIGINAL_INTRO_END)) {
+  js = js.replace(ORIGINAL_INTRO_END, ENHANCED_INTRO_END);
+  console.log("patch-intro: ScrollTrigger & Lenis refresh attached to authentic intro transition");
 }
 
 // 3. Patch Work section controller (vc): listen to updateViewport and always recalculate on resize
