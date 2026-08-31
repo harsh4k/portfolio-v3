@@ -21,7 +21,13 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
+const repoRoot = path.resolve(appRoot, "..");
+const referenceBundlePath = path.resolve(repoRoot, "references", "adrienlamy", "assets", "index-wQJ6Ws5X.js");
 const bundlePath = path.resolve(appRoot, "public", "assets", "index-wQJ6Ws5X.js");
+
+if (fs.existsSync(referenceBundlePath)) {
+  fs.copyFileSync(referenceBundlePath, bundlePath);
+}
 
 let js = fs.readFileSync(bundlePath, "utf8");
 const fail = (message) => {
@@ -32,15 +38,16 @@ const fail = (message) => {
 // 1. Hand pull ends the intro instead of opening the about panel.
 //    hideUIOutside() hides every hand part and slides the group off the right
 //    edge, which also unwinds the finger's drag stretch.
+//    Crucial: Do NOT trigger Fe.UI_SHOW, so the Vue about panel / project list texts never open!
 const PULLED_SHOW_UI =
-  'showUI(){this.hideUIOutside(),Be.trigger(Fe.UI_SHOW),window.dispatchEvent(new CustomEvent("intro:pull"))}';
+  'showUI(){this.hideUIOutside(),window.dispatchEvent(new CustomEvent("intro:pull"))}';
 const showUiPattern = /(?<![A-Za-z])showUI\(\)\{[^{}]*\}/;
 
 if (js.includes(PULLED_SHOW_UI)) {
   console.log("clean-adrien: showUI already patched");
 } else if (showUiPattern.test(js)) {
   js = js.replace(showUiPattern, PULLED_SHOW_UI);
-  console.log("clean-adrien: showUI now retracts the hand and emits intro:pull");
+  console.log("clean-adrien: showUI now retracts the hand and emits intro:pull without opening side panel");
 } else {
   fail("showUI() not found");
 }
@@ -95,28 +102,24 @@ if (js.includes(HAND_DRIFT)) {
   fail("hand drift term not found");
 }
 
-// 5. The intro app rewrites document.title on focus/blur — use this site's name.
+// 5. Replace all references to Adrien / Adrien Lamy with Harshit / Harshit Chauhan
 const TITLES = [
   ["Adrien Lamy :D", "Harshit Chauhan :D"],
   ["Adrien Lamy :o", "Harshit Chauhan :o"],
   ["Adrien Lamy x/", "Harshit Chauhan x/"],
+  ["Who am I? Adrien Lamy", "Who am I? Harshit Chauhan"],
+  ["Sup, I'm Adrien Lamy,", "Sup, I'm Harshit Chauhan,"],
+  ["Adrien Lamy", "Harshit Chauhan"],
+  ["Adrien", "Harshit"],
+  ["adrienlamy.fr", "harshitchauhan.dev"],
+  ["adrienlamy", "harshitchauhan"],
 ];
-let renamed = 0;
-let alreadyRenamed = 0;
+
 for (const [from, to] of TITLES) {
   if (js.includes(from)) {
     js = js.replaceAll(from, to);
-    renamed += 1;
-  } else if (js.includes(to)) {
-    alreadyRenamed += 1;
   }
 }
-if (renamed > 0) {
-  console.log(`clean-adrien: ${renamed}/${TITLES.length} document titles renamed`);
-  fs.writeFileSync(bundlePath, js, "utf8");
-  console.log("clean-adrien: index-wQJ6Ws5X.js written");
-} else if (alreadyRenamed === TITLES.length) {
-  console.log("clean-adrien: document titles already renamed");
-} else {
-  console.log(`clean-adrien: ${alreadyRenamed}/${TITLES.length} document titles already renamed`);
-}
+
+fs.writeFileSync(bundlePath, js, "utf8");
+console.log("clean-adrien: Adrien references replaced with Harshit Chauhan and index-wQJ6Ws5X.js written successfully.");

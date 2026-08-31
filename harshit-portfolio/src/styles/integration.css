@@ -112,44 +112,148 @@
   transform-origin: 0% 50% !important;
 }
 
-/* ---------- Hero Section Viewport Fit (One section at a time) ---------- */
-.s-hero.astro-7dteeuzc {
-  display: flex !important;
-  flex-direction: column !important;
-  height: calc(100vh - 6rem - 1px) !important;
-  height: calc(100svh - 6rem - 1px) !important;
-  height: calc(100dvh - 6rem - 1px) !important;
-  min-height: calc(100vh - 6rem - 1px) !important;
-  min-height: calc(100svh - 6rem - 1px) !important;
-  min-height: calc(100dvh - 6rem - 1px) !important;
-  max-height: calc(100vh - 6rem - 1px) !important;
-  max-height: calc(100svh - 6rem - 1px) !important;
-  max-height: calc(100dvh - 6rem - 1px) !important;
-  box-sizing: border-box !important;
+/* ---------- 3D WebGL Intro Layer Overlay ---------- */
+#intro-layer {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  z-index: 99999 !important;
+  background-color: #ff0b36 !important;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.45s cubic-bezier(0.86, 0, 0.07, 1), visibility 0.45s;
   overflow: hidden !important;
 }
 
-@media only screen and (max-width: 767px) and (orientation: landscape), only screen and (max-width: 576px) {
-  .s-hero.astro-7dteeuzc {
-    height: calc(100vh - 4rem - 1px) !important;
-    height: calc(100svh - 4rem - 1px) !important;
-    height: calc(100dvh - 4rem - 1px) !important;
-    min-height: calc(100vh - 4rem - 1px) !important;
-    min-height: calc(100svh - 4rem - 1px) !important;
-    min-height: calc(100dvh - 4rem - 1px) !important;
-    max-height: calc(100vh - 4rem - 1px) !important;
-    max-height: calc(100svh - 4rem - 1px) !important;
-    max-height: calc(100dvh - 4rem - 1px) !important;
-  }
+#intro-layer.is-leaving {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
-.s-hero.astro-7dteeuzc .s__waves.astro-7dteeuzc {
-  min-height: 0 !important;
-  flex: 1 1 0% !important;
+#intro-layer .webgl-container {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
   width: 100% !important;
+  height: 100% !important;
 }
 
-.s-hero.astro-7dteeuzc .s__content.astro-7dteeuzc {
-  flex: 0 0 auto !important;
+#intro-layer canvas {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Mobile & Touch Brutalist Tap Affordance */
+.mobile-intro-entry {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 1000 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.75rem !important;
+  padding: 1.5rem 2.25rem !important;
+  background: var(--color-secondary, #160000) !important;
+  color: var(--color-primary, #f40c3f) !important;
+  border: 2px solid var(--color-primary, #f40c3f) !important;
+  font-family: var(--font-family-fraktion, monospace) !important;
+  letter-spacing: 0.1em !important;
+  cursor: pointer !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  text-decoration: none !important;
+}
+
+.mobile-intro-entry strong {
+  font-size: 1.125rem !important;
+  font-weight: 700 !important;
+  color: #fff !important;
+}
+
+.mobile-intro-entry span {
+  font-size: 0.875rem !important;
+  font-weight: 400 !important;
+  color: var(--color-primary, #f40c3f) !important;
+}
+
+.mobile-intro-entry:hover,
+.mobile-intro-entry:active {
+  background: var(--color-primary, #f40c3f) !important;
+  color: var(--color-secondary, #160000) !important;
+  border-color: var(--color-secondary, #160000) !important;
+}
+
+.mobile-intro-entry:hover strong,
+.mobile-intro-entry:active strong {
+  color: var(--color-secondary, #160000) !important;
+}
+
+.mobile-intro-entry:hover span,
+.mobile-intro-entry:active span {
+  color: var(--color-secondary, #160000) !important;
+}
+
+/* Suppress all 2D side-panel / about / project texts inside 3D intro layer */
+#intro-layer .side-panel,
+#intro-layer .about,
+#intro-layer .project-list,
+#intro-layer .media-list,
+#intro-layer .contact,
+#intro-layer .side-panel__content,
+#intro-layer .view-home > h1,
+#intro-layer .view-home > h2,
+#intro-layer .view-home > div:not(.webgl-container) {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* ---------- Contact Circle Email Sizing Fix ---------- */
+.s__cta__link.astro-25kxajgh {
+  font-size: clamp(9px, 1.1vw, 12px) !important;
+  letter-spacing: 0.05em !important;
+  white-space: nowrap !important;
+  max-width: 90vw !important;
+}
+
+/* ---------- Bento Grid Typography Fixes (Prevent Word Splitting) ---------- */
+.s-about.astro-am7g2yfn .s__awards.astro-am7g2yfn .s__award--awwwards.astro-am7g2yfn .s__award__name.astro-am7g2yfn {
+  font-size: clamp(2.4rem, 4.8vw, 4.5rem) !important;
+  line-height: 0.9 !important;
+  white-space: nowrap !important;
+  letter-spacing: -0.02em !important;
+}
+
+.s-about.astro-am7g2yfn .s__awards.astro-am7g2yfn .s__award--fwa.astro-am7g2yfn .s__award__name.astro-am7g2yfn {
+  font-size: clamp(2.2rem, 4.2vw, 4rem) !important;
+  line-height: 0.9 !important;
+  white-space: nowrap !important;
+  letter-spacing: -0.02em !important;
+}
+
+.s-about.astro-am7g2yfn .s__awards.astro-am7g2yfn .s__award--cssda.astro-am7g2yfn .s__award__name.astro-am7g2yfn {
+  font-size: clamp(2.2rem, 4.2vw, 4rem) !important;
+  line-height: 0.9 !important;
+  white-space: nowrap !important;
+}
+
+.s-about.astro-am7g2yfn .s__awards.astro-am7g2yfn .s__award--commArt2017.astro-am7g2yfn .s__award__text.astro-am7g2yfn {
+  font-size: clamp(0.85rem, 1.2vw, 1.15rem) !important;
+  line-height: 1.35 !important;
+  word-break: normal !important;
+}
+
+.s-about.astro-am7g2yfn .s__awards.astro-am7g2yfn .s__award__text.astro-am7g2yfn {
+  line-height: 1.25 !important;
 }
 

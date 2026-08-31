@@ -28,8 +28,18 @@ if (fs.existsSync(referenceJsPath)) {
 
 let js = fs.readFileSync(enginePath, "utf8");
 
-// 1. Keep init() clean and running immediately on DOM load
-console.log("patch-intro: site init will run smoothly on page load");
+// 1. Gate init() behind startPortfolioIntro when #intro-layer is present
+const ORIGINAL_INIT =
+  'init(){this.initLenis(),xe.init(),this.onResize(),xe.nextTick(this.intro,this)}';
+const GATED_INIT =
+  'init(){this.initLenis(),xe.init(),this.onResize(),document.getElementById("intro-layer")?window.addEventListener("startPortfolioIntro",()=>this.intro(),{once:!0}):xe.nextTick(this.intro,this)}';
+
+if (js.includes(ORIGINAL_INIT)) {
+  js = js.replace(ORIGINAL_INIT, GATED_INIT);
+  console.log("patch-intro: site init now waits for startPortfolioIntro when #intro-layer is present");
+} else if (js.includes(GATED_INIT)) {
+  console.log("patch-intro: site init already gated behind startPortfolioIntro");
+}
 
 // 2. Patch intro() completion to refresh ScrollTrigger and Lenis when intro finishes
 const ORIGINAL_INTRO_END =

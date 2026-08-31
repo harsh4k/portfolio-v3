@@ -93,10 +93,10 @@ if (fs.existsSync(referenceWodniackPath)) {
   // 1. Remove cloudflare email decode script
   html = html.replace(/<script[^>]*email-decode\.min\.js[^>]*><\/script>/g, "");
 
-  // 2. Remove opacity: 0 from site-wrapper
+  // 2. Inject 3D intro layer at the top of body
   html = html.replace(
-    '<div class="site-wrapper js-site-wrapper astro-j7pv25f6" style="opacity: 0;">',
-    '<div class="site-wrapper js-site-wrapper astro-j7pv25f6">'
+    '<body class="astro-j7pv25f6">',
+    '<body class="astro-j7pv25f6">\n  <div id="intro-layer" class="intro-layer"><div id="app"></div></div>'
   );
 
   // 3. Header monogram & author
@@ -361,6 +361,7 @@ if (fs.existsSync(referenceWodniackPath)) {
   };
 
   const extraHeadTags = `
+  <link rel="stylesheet" crossorigin href="/assets/index-DG8As337.css" data-intro-style>
   <link rel="canonical" href="https://harshitchauhan.dev/">
   <link rel="manifest" href="/site.webmanifest">
   <script type="application/ld+json">
@@ -390,13 +391,45 @@ ${JSON.stringify(jsonLd, null, 2)}
 `;
   html = html.substring(0, headEnd) + extraHeadTags + html.substring(headEnd);
 
+  // 16. Inject bridge script before </body>
+  const bodyEnd = html.indexOf("</body>");
+  if (bodyEnd !== -1) {
+    const bridgeScript = `  <script type="module" src="/scripts/bridge.js"></script>\n`;
+    html = html.substring(0, bodyEnd) + bridgeScript + html.substring(bodyEnd);
+  }
+
   fs.writeFileSync(path.resolve(appRoot, "index.html"), html, "utf8");
-  console.log("build: index.html compiled from references markup.");
+  console.log("build: index.html compiled from references markup with 3D intro layer.");
 } else {
   console.log("build: references/ directory not found — using committed index.html.");
 }
 
-// 17. ALWAYS assemble dist/ folder for static deployment (Cloudflare Pages, Vercel, Netlify)
+// 17. Sync reference assets to public/
+const syncDir = (src, dest) => {
+  if (fs.existsSync(src)) {
+    fs.mkdirSync(dest, { recursive: true });
+    fs.cpSync(src, dest, { recursive: true });
+  }
+};
+
+const adrienRef = path.resolve(repoRoot, "references", "adrienlamy");
+const wodniackRef = path.resolve(repoRoot, "references", "wodniack");
+const publicDir = path.resolve(appRoot, "public");
+
+if (fs.existsSync(adrienRef)) {
+  syncDir(path.join(adrienRef, "assets"), path.join(publicDir, "assets"));
+  syncDir(path.join(adrienRef, "webgl"), path.join(publicDir, "webgl"));
+  syncDir(path.join(adrienRef, "fonts"), path.join(publicDir, "fonts"));
+  syncDir(path.join(adrienRef, "videos"), path.join(publicDir, "videos"));
+}
+
+if (fs.existsSync(wodniackRef)) {
+  syncDir(path.join(wodniackRef, "_astro"), path.join(publicDir, "_astro"));
+  syncDir(path.join(wodniackRef, "fonts"), path.join(publicDir, "fonts"));
+  syncDir(path.join(wodniackRef, "icons"), path.join(publicDir, "icons"));
+}
+
+// 18. ALWAYS assemble dist/ folder for static deployment (Cloudflare Pages, Vercel, Netlify)
 const distDir = path.resolve(appRoot, "dist");
 fs.rmSync(distDir, { recursive: true, force: true });
 fs.mkdirSync(distDir, { recursive: true });
