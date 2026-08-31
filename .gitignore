@@ -21,7 +21,8 @@ desktop.ini
 # Build inputs: full local copies of the two reference sites this design was
 # studied from (~203 MB). They are not this project's code and include
 # third-party fonts and client videos, so they stay out of the public repo.
-# src/scripts/build.mjs falls back to the committed index.html without them.
+# build.mjs detects their absence and skips the HTML compile, keeping the
+# committed index.html; the bundle patches still run.
 references/
 
 # Byte-identical nested duplicates of directories that already exist one level

@@ -7,10 +7,19 @@ const appRoot = path.resolve(root, "..", "..");
 const repoRoot = path.resolve(appRoot, "..");
 
 const referenceWodniackPath = path.resolve(repoRoot, "references", "wodniack", "index.html");
-const fallbackWodniackPath = path.resolve(appRoot, "index.html");
 
-const sourcePath = fs.existsSync(referenceWodniackPath) ? referenceWodniackPath : fallbackWodniackPath;
-const wodniackHtml = fs.readFileSync(sourcePath, "utf8");
+// index.html is compiled from the reference markup, never from its own output:
+// re-running the transforms over an already-built file injects the intro layer,
+// the stylesheets and the script tags a second time. references/ is not in the
+// repo, so a clone skips this step and keeps the committed index.html.
+if (!fs.existsSync(referenceWodniackPath)) {
+  console.log("build: references/wodniack/index.html not found.");
+  console.log("       Keeping the committed index.html — it is only recompiled");
+  console.log("       from the reference markup. Bundle patches still run.");
+  process.exit(0);
+}
+
+const wodniackHtml = fs.readFileSync(referenceWodniackPath, "utf8");
 
 // Harshit's 11 real projects ONLY for the Work section
 const projects = [
