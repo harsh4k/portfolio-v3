@@ -30,7 +30,8 @@ function sendFile(request, response, filePath) {
   const type = types[extname(filePath).toLowerCase()] || "application/octet-stream";
   const baseHeaders = {
     "Accept-Ranges": "bytes",
-    "Cache-Control": "no-cache",
+    "Cache-Control": "no-store, no-cache, must-revalidate",
+    "Access-Control-Allow-Origin": "*",
     "Content-Type": type,
   };
   const range = request.headers.range;

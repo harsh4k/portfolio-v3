@@ -44,15 +44,32 @@
   /** Re-measure once the site intro releases the scroll lock */
   const watchScrollUnblock = () => {
     const html = document.documentElement;
-    if (!html.classList.contains("is-scroll-blocked")) return;
+    const triggerRefresh = () => {
+      window.dispatchEvent(new Event("resize"));
+      if (window.lenis) window.lenis.resize();
+    };
+
+    if (!html.classList.contains("is-scroll-blocked")) {
+      triggerRefresh();
+      return;
+    }
 
     const observer = new MutationObserver(() => {
       if (html.classList.contains("is-scroll-blocked")) return;
       observer.disconnect();
-      window.dispatchEvent(new Event("resize"));
+      triggerRefresh();
+      setTimeout(triggerRefresh, 150);
+      setTimeout(triggerRefresh, 500);
     });
 
     observer.observe(html, { attributes: true, attributeFilter: ["class"] });
+
+    setTimeout(() => {
+      if (html.classList.contains("is-scroll-blocked")) {
+        html.classList.remove("is-scroll-blocked");
+        triggerRefresh();
+      }
+    }, 4500);
   };
 
   /** Immediate bypass for prefers-reduced-motion */
