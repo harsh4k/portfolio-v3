@@ -118,3 +118,44 @@
   transform-origin: 0% 50% !important;
 }
 
+/* ---------- Hero Section Viewport Fit (One section at a time) ---------- */
+.s-hero.astro-7dteeuzc {
+  display: flex !important;
+  flex-direction: column !important;
+  height: calc(100vh - 6rem - 1px) !important;
+  height: calc(100svh - 6rem - 1px) !important;
+  height: calc(100dvh - 6rem - 1px) !important;
+  min-height: calc(100vh - 6rem - 1px) !important;
+  min-height: calc(100svh - 6rem - 1px) !important;
+  min-height: calc(100dvh - 6rem - 1px) !important;
+  max-height: calc(100vh - 6rem - 1px) !important;
+  max-height: calc(100svh - 6rem - 1px) !important;
+  max-height: calc(100dvh - 6rem - 1px) !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+@media only screen and (max-width: 767px) and (orientation: landscape), only screen and (max-width: 576px) {
+  .s-hero.astro-7dteeuzc {
+    height: calc(100vh - 4rem - 1px) !important;
+    height: calc(100svh - 4rem - 1px) !important;
+    height: calc(100dvh - 4rem - 1px) !important;
+    min-height: calc(100vh - 4rem - 1px) !important;
+    min-height: calc(100svh - 4rem - 1px) !important;
+    min-height: calc(100dvh - 4rem - 1px) !important;
+    max-height: calc(100vh - 4rem - 1px) !important;
+    max-height: calc(100svh - 4rem - 1px) !important;
+    max-height: calc(100dvh - 4rem - 1px) !important;
+  }
+}
+
+.s-hero.astro-7dteeuzc .s__waves.astro-7dteeuzc {
+  min-height: 0 !important;
+  flex: 1 1 0% !important;
+  width: 100% !important;
+}
+
+.s-hero.astro-7dteeuzc .s__content.astro-7dteeuzc {
+  flex: 0 0 auto !important;
+}
+
