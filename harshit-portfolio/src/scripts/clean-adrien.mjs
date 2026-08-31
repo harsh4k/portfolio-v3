@@ -102,13 +102,21 @@ const TITLES = [
   ["Adrien Lamy x/", "Harshit Chauhan x/"],
 ];
 let renamed = 0;
+let alreadyRenamed = 0;
 for (const [from, to] of TITLES) {
   if (js.includes(from)) {
     js = js.replaceAll(from, to);
     renamed += 1;
+  } else if (js.includes(to)) {
+    alreadyRenamed += 1;
   }
 }
-console.log(`clean-adrien: ${renamed}/${TITLES.length} document titles renamed`);
-
-fs.writeFileSync(bundlePath, js, "utf8");
-console.log("clean-adrien: index-wQJ6Ws5X.js written");
+if (renamed > 0) {
+  console.log(`clean-adrien: ${renamed}/${TITLES.length} document titles renamed`);
+  fs.writeFileSync(bundlePath, js, "utf8");
+  console.log("clean-adrien: index-wQJ6Ws5X.js written");
+} else if (alreadyRenamed === TITLES.length) {
+  console.log("clean-adrien: document titles already renamed");
+} else {
+  console.log(`clean-adrien: ${alreadyRenamed}/${TITLES.length} document titles already renamed`);
+}

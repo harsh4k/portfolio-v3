@@ -87,15 +87,15 @@ const projects = [
     title: "GetCited",
     url: "https://github.com/harsh4k/Getcited",
     key: "gtct-0011/11",
-    img: "/images/getcited.png",
+    img: "/images/getcited.webp",
   },
 ];
 
-// Generate work cards HTML
+// Generate work cards HTML with lazy loading & async decoding
 const workCardsHtml = projects
   .map(
     (p) =>
-      `  <a-work class="s__scene__work s__scene__work--video js-work astro-meqjtcea"> <div class="a__inner astro-meqjtcea"> <a href="${p.url}" target="_blank" rel="noopener noreferrer" class="astro-meqjtcea"> <img src="${p.img}" alt="${p.title}" class="a__video js-video astro-meqjtcea" width="1082" height="636" style="width:100%;height:100%;object-fit:cover;display:block;" /> <div class="a__caption astro-meqjtcea"> <div class="a__caption__text astro-meqjtcea"> ${p.title} </div><!-- .a__caption__text --> <div class="a__caption__key astro-meqjtcea"> #${p.key} </div><!-- .a__caption__key --> </div><!-- .a__caption --> </a> </div><!-- .a__inner --> </a-work>`
+      `  <a-work class="s__scene__work s__scene__work--video js-work astro-meqjtcea"> <div class="a__inner astro-meqjtcea"> <a href="${p.url}" target="_blank" rel="noopener noreferrer" class="astro-meqjtcea"> <img src="${p.img}" alt="${p.title}" class="a__video js-video astro-meqjtcea" width="1082" height="636" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;display:block;" /> <div class="a__caption astro-meqjtcea"> <div class="a__caption__text astro-meqjtcea"> ${p.title} </div><!-- .a__caption__text --> <div class="a__caption__key astro-meqjtcea"> #${p.key} </div><!-- .a__caption__key --> </div><!-- .a__caption --> </a> </div><!-- .a__inner --> </a-work>`
   )
   .join("  \n");
 
@@ -136,18 +136,18 @@ html = html.replace(
   "Available for projects & roles →"
 );
 
-// 6. Socials in header
+// 6. Socials in header (with secure rel attributes)
 html = html.replace(
-  /href="https:\/\/codepen\.io\/wodniack"/g,
-  'href="https://github.com/harsh4k"'
+  /<a href="https:\/\/codepen\.io\/wodniack"[^>]*>/g,
+  '<a href="https://github.com/harsh4k" target="_blank" rel="noopener noreferrer" class="astro-5qrshpxv" aria-label="GitHub">'
 );
 html = html.replace(
   /Follow me on CodePen/g,
   "Follow me on GitHub"
 );
 html = html.replace(
-  /href="https:\/\/www\.linkedin\.com\/in\/wodniack\/"/g,
-  'href="https://www.linkedin.com/in/harshit-chauhan-17a898364/"'
+  /<a href="https:\/\/www\.linkedin\.com\/in\/wodniack\/"[^>]*>/g,
+  '<a href="https://www.linkedin.com/in/harshit-chauhan-17a898364/" target="_blank" rel="noopener noreferrer" class="astro-5qrshpxv" aria-label="LinkedIn">'
 );
 
 // 7. Bio & About
@@ -158,11 +158,11 @@ html = html.replace(oldAbout1, newAbout1);
 const oldAbout2Start = html.indexOf("I started with Dreamweaver");
 const oldAbout2End = html.indexOf("</p>", oldAbout2Start);
 if (oldAbout2Start !== -1 && oldAbout2End !== -1) {
-  const newAbout2 = `I'm a Computer Engineering student at NMIMS Mumbai and frontend developer crafting considered digital experiences. I learn quickest by taking things apart, building from scratch, and shipping — from e-commerce platforms like <a href="https://www.velsaro.in/" target="_blank" rel="noreferrer" class="astro-am7g2yfn">Velsaro</a> and <a href="https://nexcart-v1.vercel.app/" target="_blank" rel="noreferrer" class="astro-am7g2yfn">Nexcart</a> to studio sites like <a href="https://synapical-com.pages.dev/" target="_blank" rel="noreferrer" class="astro-am7g2yfn">Synapical</a> and college systems like <a href="https://attendov1.vercel.app/" target="_blank" rel="noreferrer" class="astro-am7g2yfn">Attendo</a>.`;
+  const newAbout2 = `I'm a Computer Engineering student at NMIMS Mumbai and frontend developer crafting considered digital experiences. I learn quickest by taking things apart, building from scratch, and shipping — from e-commerce platforms like <a href="https://www.velsaro.in/" target="_blank" rel="noopener noreferrer" class="astro-am7g2yfn">Velsaro</a> and <a href="https://nexcart-v1.vercel.app/" target="_blank" rel="noopener noreferrer" class="astro-am7g2yfn">Nexcart</a> to studio sites like <a href="https://synapical-com.pages.dev/" target="_blank" rel="noopener noreferrer" class="astro-am7g2yfn">Synapical</a> and college systems like <a href="https://attendov1.vercel.app/" target="_blank" rel="noopener noreferrer" class="astro-am7g2yfn">Attendo</a>.`;
   html = html.substring(0, oldAbout2Start) + newAbout2 + html.substring(oldAbout2End);
 }
 
-// 8. Highlights section: Populate all 10 slots to fill the grid nicely (~20-25% breathing space)
+// 8. Highlights section: Populate all 10 slots
 html = html.replace(
   /<h2 class="s__title astro-am7g2yfn">Awards<\/h2>/g,
   '<h2 class="s__title astro-am7g2yfn">Highlights</h2>'
@@ -278,6 +278,9 @@ html = html.replace(/_astro\/setup-2016\.[^"]+\.webp/g, "images/v11.webp");
 html = html.replace(/_astro\/setup-2020\.[^"]+\.webp/g, "images/2026.webp");
 html = html.replace(/_astro\/legos\.[^"]+\.webp/g, "images/pic1.webp");
 
+// Add loading="lazy" and decoding="async" to archive images
+html = html.replace(/<img class="a__img/g, '<img loading="lazy" decoding="async" class="a__img');
+
 // Captions in s-my-way section
 html = html.replace("Waaark Creative Robots", "Neural Workspace Studio");
 html = html.replace("2011 portfolio", "Generative Poster 1");
@@ -305,22 +308,70 @@ html = html.replace(
   "harshitsinhchauhan250@gmail.com"
 );
 
-// 13. SEO Head replacements
+// 13. SEO Head replacements & Metadata Overhaul
 html = html.replace(
   /<title>[^<]*<\/title>/,
-  "<title>Harshit — Creative Developer & Student</title>"
+  "<title>Harshit Chauhan — Creative Developer &amp; Student</title>"
 );
 html = html.replace(
   /<meta name="description"[^>]*>/,
-  '<meta name="description" content="Harshit Chauhan — Computer Engineering student at NMIMS Mumbai & Creative Developer crafting considered web applications, motion systems, and local AI tools.">'
+  '<meta name="description" content="Harshit Chauhan — Computer Engineering student at NMIMS Mumbai &amp; Creative Developer crafting considered web applications, motion systems, and local AI tools.">'
+);
+html = html.replace(
+  /<meta name="viewport"[^>]*>/,
+  '<meta name="viewport" content="width=device-width, initial-scale=1">'
+);
+html = html.replace(
+  /<meta name="apple-mobile-web-app-title"[^>]*>/,
+  '<meta name="apple-mobile-web-app-title" content="Harshit">'
 );
 
-// 14. Inject stylesheets & image play/pause polyfill into <head>
+// Replace OpenGraph & Twitter tags
+html = html.replace(/<meta property="og:locale"[^>]*>/, '<meta property="og:locale" content="en_US">');
+html = html.replace(/<meta property="og:title"[^>]*>/, '<meta property="og:title" content="Harshit Chauhan — Creative Developer &amp; Student">');
+html = html.replace(/<meta property="og:description"[^>]*>/, '<meta property="og:description" content="Harshit Chauhan — Computer Engineering student at NMIMS Mumbai &amp; Creative Developer crafting considered web applications, motion systems, and local AI tools.">');
+html = html.replace(/<meta property="og:url"[^>]*>/, '<meta property="og:url" content="https://harshitchauhan.dev/">');
+html = html.replace(/<meta property="og:site_name"[^>]*>/, '<meta property="og:site_name" content="Harshit Chauhan Portfolio">');
+html = html.replace(/<meta property="og:image"[^>]*>/, '<meta property="og:image" content="https://harshitchauhan.dev/images/og-image.png">');
+html = html.replace(/<meta property="og:image:height"[^>]*>/, '<meta property="og:image:height" content="630">');
+html = html.replace(/<meta name="twitter:image"[^>]*>/, '<meta name="twitter:image" content="https://harshitchauhan.dev/images/og-image.png">');
+
+// 14. Inject SEO links, Manifest, JSON-LD, Stylesheets & image play/pause polyfill into <head>
 const headEnd = html.indexOf("</head>");
-// data-intro-style marks the intro bundle's stylesheet so bridge.js can detach
-// it once the intro layer is gone — it carries a global html/body reset that
-// otherwise overrides the portfolio's own layout.
-const extraStyles = `
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Harshit Chauhan",
+  "jobTitle": "Creative Developer & Computer Engineering Student",
+  "url": "https://harshitchauhan.dev/",
+  "email": "harshitsinhchauhan250@gmail.com",
+  "alumniOf": {
+    "@type": "CollegeOrUniversity",
+    "name": "NMIMS Mumbai"
+  },
+  "sameAs": [
+    "https://github.com/harsh4k",
+    "https://www.linkedin.com/in/harshit-chauhan-17a898364/"
+  ],
+  "knowsAbout": [
+    "React",
+    "TypeScript",
+    "Next.js",
+    "Three.js",
+    "GSAP",
+    "Supabase",
+    "Python",
+    "WebGL",
+    "Frontend Development"
+  ]
+};
+
+const extraHeadTags = `
+  <link rel="canonical" href="https://harshitchauhan.dev/">
+  <link rel="manifest" href="/site.webmanifest">
+  <script type="application/ld+json">
+${JSON.stringify(jsonLd, null, 2)}
+  </script>
   <link rel="stylesheet" crossorigin data-intro-style href="/assets/index-DG8As337.css">
   <link rel="stylesheet" href="/styles/integration.css">
   <script>
@@ -330,24 +381,22 @@ const extraStyles = `
     }
   </script>
 `;
-html = html.substring(0, headEnd) + extraStyles + html.substring(headEnd);
+html = html.substring(0, headEnd) + extraHeadTags + html.substring(headEnd);
 
-// 15. Inject intro layer and scripts into <body>
+// 15. Inject intro layer into <body>
 const bodyStartIdx = html.indexOf("<body");
 const bodyOpenEnd = html.indexOf(">", bodyStartIdx) + 1;
 const introLayerHtml = `
-  <!-- ============ INTRO LAYER (Interactive 3D WebGL Scene) ============ -->
+  <!-- ============ INTRO LAYER (Interactive 3D WebGL Scene / Touch Entry) ============ -->
   <div id="intro-layer">
     <div id="app"></div>
   </div>
 `;
 html = html.substring(0, bodyOpenEnd) + introLayerHtml + html.substring(bodyOpenEnd);
 
+// 16. Inject bridge connector script into <body> (bridge.js dynamically loads the 3D bundle on desktop only)
 const bodyEndIdx = html.lastIndexOf("</body>");
 const extraScripts = `
-  <!-- WebGL Engine Bundle -->
-  <script type="module" crossorigin src="/assets/index-wQJ6Ws5X.js"></script>
-
   <!-- Bridge connector -->
   <script src="/scripts/bridge.js"></script>
 `;

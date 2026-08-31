@@ -4,36 +4,28 @@
  * The page stacks two independent apps: the Three.js intro scene (#intro-layer)
  * and the GSAP portfolio underneath it. This file owns the handover.
  *
- *   1. hand pulled       → the scene clears itself (hand retracts, face and
- *                          scribbles animate out) over EXIT_MS
- *   2. scene is empty    → the engine is stopped, the canvas destroyed and the
- *                          intro's global stylesheet detached (its html/body
- *                          reset overrides the portfolio's own body padding,
- *                          background and typography), then the site intro is
- *                          released as the page-change transition
- *   3. same moment       → what is left of #intro-layer is a plain red panel, so
- *                          it cross-fades away over the opening of the site
- *                          intro rather than cutting to it
- *
- * Scroll stays blocked throughout; the site intro removes `is-scroll-blocked`
- * itself when it finishes, exactly like the reference implementation.
+ *   1. Desktop (fine pointer): dynamically loads 3D scene. Hand pulled → scene
+ *      clears itself over EXIT_MS.
+ *   2. Mobile / Touch (coarse pointer): skips 819 KB 3D bundle completely,
+ *      presents an instant brutalist tap-to-enter badge with snappy handover.
+ *   3. Reduced Motion: immediately bypasses intro layer without animation delay.
+ *   4. Scene empty / entry triggered → engine stopped, canvas WebGL context released,
+ *      intro stylesheet detached, and site intro dispatched.
  */
 (() => {
-  /** Time for the 3D scene to animate itself empty after the pull */
-  const EXIT_MS = 520;
+  const isTouchDevice = window.matchMedia("(hover: none), (pointer: coarse)").matches;
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /** Time for the 3D scene to animate itself empty after the pull (or snappy on touch) */
+  const DEFAULT_EXIT_MS = 520;
+  const TOUCH_EXIT_MS = 120;
   /** Cross-fade of the leftover red panel into the site intro */
-  const CROSSFADE_MS = 500;
+  const CROSSFADE_MS = 450;
 
   let navigating = false;
 
   /**
-   * Stop the intro engine.
-   *
-   * Removing the layer only detaches the canvas — the engine's RAF manager keeps
-   * updating the scene and rendering into it for the rest of the session, which
-   * roughly doubles per-frame work and makes the portfolio stutter. The flag is
-   * read by the patched RAF manager (see clean-adrien.mjs); losing the context
-   * releases the GPU resources with it.
+   * Stop the intro engine and release WebGL contexts.
    */
   const stopIntroEngine = (introLayer) => {
     window.__introTornDown = true;
@@ -45,9 +37,6 @@
       } catch {
         // Context already gone — nothing to release.
       }
-      // Hidden rather than detached: the engine's resize handler reads
-      // canvas.parentNode.offsetWidth and throws on a parentless canvas. It goes
-      // away with the layer.
       canvas.style.display = "none";
     });
   };
@@ -66,51 +55,76 @@
     observer.observe(html, { attributes: true, attributeFilter: ["class"] });
   };
 
+  /** Immediate bypass for prefers-reduced-motion */
+  if (prefersReducedMotion) {
+    const introLayer = document.getElementById("intro-layer");
+    stopIntroEngine(introLayer);
+    document
+      .querySelectorAll("link[data-intro-style]")
+      .forEach((link) => link.remove());
+    introLayer?.remove();
+    document.documentElement.classList.add("intro-done");
+    document.documentElement.classList.remove("is-scroll-blocked");
+    window.dispatchEvent(new Event("resize"));
+    window.dispatchEvent(new CustomEvent("startPortfolioIntro"));
+    window.dispatchEvent(new CustomEvent("portfolio:entered"));
+    return;
+  }
+
   /** Tear down the intro layer, then play the portfolio's own intro */
-  const revealPortfolio = () => {
+  const revealPortfolio = (isFast = false) => {
     if (navigating) return;
     navigating = true;
+
+    const exitDelay = isFast || isTouchDevice ? TOUCH_EXIT_MS : DEFAULT_EXIT_MS;
 
     window.setTimeout(() => {
       const introLayer = document.getElementById("intro-layer");
 
-      // Engine and canvas go first, so detaching the stylesheet below cannot
-      // restyle a canvas that is still on screen.
       stopIntroEngine(introLayer);
 
       document
         .querySelectorAll("link[data-intro-style]")
         .forEach((link) => link.remove());
 
-      // Let GSAP/ScrollTrigger and Lenis re-measure against the clean layout
-      // before the site intro starts positioning things.
       window.dispatchEvent(new Event("resize"));
       watchScrollUnblock();
 
-      // Release the site intro — the page-change transition.
       window.dispatchEvent(new CustomEvent("startPortfolioIntro"));
 
-      // #intro-layer is now a plain red panel matching the site intro's own
-      // background, so fading it reveals the transition instead of cutting to it.
       document.documentElement.classList.add("intro-done");
 
       window.setTimeout(() => {
         introLayer?.remove();
         window.dispatchEvent(new CustomEvent("portfolio:entered"));
       }, CROSSFADE_MS + 50);
-    }, EXIT_MS);
+    }, exitDelay);
   };
 
-  // --- Primary trigger: the 3D hand was grabbed & pulled far enough ---
-  window.addEventListener("intro:pull", revealPortfolio, { once: true });
+  // --- Dynamic 3D Bundle Loading (Desktop Only) ---
+  if (!isTouchDevice) {
+    import("/assets/index-wQJ6Ws5X.js").catch((err) => {
+      console.warn("Could not load 3D intro bundle, falling back to direct entry", err);
+      revealPortfolio(true);
+    });
+  } else {
+    // Mobile / Touch: Render brutalist tap affordance
+    const introLayer = document.getElementById("intro-layer");
+    if (introLayer) {
+      const entryBtn = document.createElement("button");
+      entryBtn.type = "button";
+      entryBtn.className = "mobile-intro-entry";
+      entryBtn.setAttribute("aria-label", "Enter Harshit Chauhan Portfolio");
+      entryBtn.innerHTML = `<strong>HARSHIT CHAUHAN</strong><span>TAP TO ENTER →</span>`;
+      entryBtn.addEventListener("click", () => revealPortfolio(true));
+      introLayer.appendChild(entryBtn);
 
-  // --- Touch devices: the intro scene builds no hand, so a pull is impossible.
-  //     Without this the layer is a dead end. A tap anywhere enters instead. ---
-  if (window.matchMedia("(hover: none), (pointer: coarse)").matches) {
-    document
-      .getElementById("intro-layer")
-      ?.addEventListener("pointerup", revealPortfolio, { once: true });
+      introLayer.addEventListener("pointerup", () => revealPortfolio(true), { once: true });
+    }
   }
+
+  // --- Primary trigger: the 3D hand was grabbed & pulled far enough ---
+  window.addEventListener("intro:pull", () => revealPortfolio(false), { once: true });
 
   // --- Fallback: the Vue panel opening also means the pull completed ---
   const observer = new MutationObserver((records) => {
@@ -122,7 +136,7 @@
         !el.classList.contains("is-hidden")
       ) {
         observer.disconnect();
-        revealPortfolio();
+        revealPortfolio(false);
         return;
       }
     }
@@ -139,7 +153,7 @@
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" || e.key === "Enter") {
       observer.disconnect();
-      revealPortfolio();
+      revealPortfolio(true);
     }
   });
 })();

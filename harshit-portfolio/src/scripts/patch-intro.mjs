@@ -1,14 +1,12 @@
 /**
- * patch-intro.mjs — gate the portfolio's site intro behind the 3D hand pull.
+ * patch-intro.mjs — gate the portfolio's site intro behind the 3D hand pull,
+ * and silence benign GSAP warnings for elements removed in Harshit's branding.
  *
- * The GSAP engine plays its site intro (logo lines + border draw) from `init()`,
- * which runs on DOMContentLoaded. With the 3D intro layer stacked on top, that
- * animation runs and finishes underneath an opaque layer — by the time the hand
- * is pulled the transition is long over and the portfolio just appears.
- *
- * This defers `intro()` until bridge.js dispatches `startPortfolioIntro`, which
- * it does once the intro layer has been torn down. When no intro layer is
- * present the engine keeps its original behaviour.
+ * 1. Defers `intro()` until bridge.js dispatches `startPortfolioIntro`, which
+ *    it does once the intro layer has been torn down. When no intro layer is
+ *    present the engine keeps its original behaviour.
+ * 2. Adds null check to `ec.intro()` when querying `.js-qr-code` to prevent
+ *    "GSAP target null not found" warnings on startup.
  *
  * Idempotent: safe to re-run after restoring the file from references/.
  */
@@ -26,13 +24,20 @@ const GATED_INIT =
   '?window.addEventListener("startPortfolioIntro",()=>{xe.nextTick(this.intro,this)},{once:!0})' +
   ":xe.nextTick(this.intro,this)}";
 
-let js = fs.readFileSync(enginePath, "utf8");
+const ORIGINAL_QR_ANIM =
+  'r.fromTo(i,{"--bg-p":"0%"},{"--bg-p":"100%",duration:1.5,ease:"expo.out"},1.75)';
+const PATCHED_QR_ANIM =
+  'i&&r.fromTo(i,{"--bg-p":"0%"},{"--bg-p":"100%",duration:1.5,ease:"expo.out"},1.75)';
 
+let js = fs.readFileSync(enginePath, "utf8");
+let modified = false;
+
+// 1. Gate intro
 if (js.includes(GATED_INIT)) {
   console.log("patch-intro: site intro already gated — nothing to do");
 } else if (js.includes(ORIGINAL_INIT)) {
   js = js.replace(ORIGINAL_INIT, GATED_INIT);
-  fs.writeFileSync(enginePath, js, "utf8");
+  modified = true;
   console.log("patch-intro: site intro gated behind startPortfolioIntro");
 } else {
   console.error(
@@ -40,4 +45,19 @@ if (js.includes(GATED_INIT)) {
       "The site intro will play under the 3D layer and never be seen."
   );
   process.exitCode = 1;
+}
+
+// 2. Silence QR null target warning
+if (js.includes(PATCHED_QR_ANIM)) {
+  console.log("patch-intro: QR code null check already applied");
+} else if (js.includes(ORIGINAL_QR_ANIM)) {
+  js = js.replace(ORIGINAL_QR_ANIM, PATCHED_QR_ANIM);
+  modified = true;
+  console.log("patch-intro: QR code null check applied to silence GSAP warnings");
+} else {
+  console.log("patch-intro: QR anim signature not found (may already be patched)");
+}
+
+if (modified) {
+  fs.writeFileSync(enginePath, js, "utf8");
 }
