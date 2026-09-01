@@ -169,7 +169,7 @@ html:not(.intro-started):has(#intro-layer) .site-intro .js-border-right {
 
 #intro-layer .mobile-switch {
   display: flex !important;
-  z-index: 40 !important;
+  z-index: 50 !important;
   pointer-events: auto !important;
   visibility: visible !important;
   top: 68svh !important;
@@ -188,7 +188,7 @@ html.intro-swipe {
 .intro-swipe-catch {
   position: absolute;
   inset: 0;
-  z-index: 20;
+  z-index: 30;
   display: flex;
   align-items: flex-end;
   justify-content: center;

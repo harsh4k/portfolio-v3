@@ -13,9 +13,10 @@
  */
 (() => {
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const isSwipeIntro =
+  const isSwipeMode = () =>
     window.matchMedia("(hover: none)").matches ||
-    window.matchMedia("(max-width: 768px)").matches;
+    window.matchMedia("(max-width: 768px)").matches ||
+    (navigator.maxTouchPoints > 0 && window.innerWidth <= 900);
 
   /** Time for the 3D scene to fade after GSAP has painted the loader's first frame */
   const DEFAULT_EXIT_MS = 520;
@@ -132,83 +133,145 @@
   };
 
   const bindSwipeToEnter = (introLayer) => {
-    if (!introLayer || introLayer.querySelector(".intro-swipe-catch")) return;
+    if (!introLayer) return;
 
-    introLayer.classList.add("intro-layer--swipe");
-    document.documentElement.classList.add("intro-swipe");
+    const ensureHint = () => {
+      introLayer.classList.add("intro-layer--swipe");
+      document.documentElement.classList.add("intro-swipe");
+      if (introLayer.querySelector(".intro-swipe-catch")) {
+        return introLayer.querySelector(".intro-swipe-catch");
+      }
+      const catcher = document.createElement("div");
+      catcher.className = "intro-swipe-catch";
+      catcher.innerHTML = `
+        <p class="intro-swipe-hint">
+          <span class="intro-swipe-hint__chevrons" aria-hidden="true">
+            <span></span><span></span>
+          </span>
+          <span class="intro-swipe-hint__label">Swipe down</span>
+        </p>
+      `;
+      introLayer.appendChild(catcher);
+      return catcher;
+    };
 
-    const catcher = document.createElement("div");
-    catcher.className = "intro-swipe-catch";
-    catcher.innerHTML = `
-      <p class="intro-swipe-hint">
-        <span class="intro-swipe-hint__chevrons" aria-hidden="true">
-          <span></span><span></span>
-        </span>
-        <span class="intro-swipe-hint__label">Swipe down</span>
-      </p>
-    `;
-    introLayer.appendChild(catcher);
-
-    const commitAt = () => Math.max(96, window.innerHeight * 0.2);
+    let catcher = isSwipeMode() ? ensureHint() : introLayer.querySelector(".intro-swipe-catch");
+    const commitAt = () => Math.max(56, window.innerHeight * 0.12);
     let startX = 0;
     let startY = 0;
+    let startT = 0;
     let tracking = false;
     let pointerId = null;
+    let wheelAcc = 0;
+
+    const clientPoint = (event) => {
+      if (event.touches && event.touches[0]) {
+        return { x: event.touches[0].clientX, y: event.touches[0].clientY };
+      }
+      if (event.changedTouches && event.changedTouches[0]) {
+        return { x: event.changedTouches[0].clientX, y: event.changedTouches[0].clientY };
+      }
+      return { x: event.clientX, y: event.clientY };
+    };
 
     const follow = (dy) => {
       const pull = Math.max(0, dy);
       const t = Math.min(1, pull / commitAt());
       introLayer.style.transition = "none";
-      introLayer.style.transform = `translate3d(0, ${pull * 0.35}px, 0)`;
-      introLayer.style.opacity = String(1 - t * 0.28);
-      catcher.style.setProperty("--swipe-t", String(t));
+      introLayer.style.transform = `translate3d(0, ${pull * 0.45}px, 0)`;
+      introLayer.style.opacity = String(1 - t * 0.35);
+      catcher?.style.setProperty("--swipe-t", String(t));
     };
 
-    const onPointerDown = (event) => {
-      if (navigating || event.button) return;
+    const snapBack = () => {
+      introLayer.style.transition =
+        "transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.38s ease";
+      introLayer.style.transform = "translate3d(0, 0, 0)";
+      introLayer.style.opacity = "1";
+      catcher?.style.setProperty("--swipe-t", "0");
+    };
+
+    const tryCommit = (dy, dx, dt) => {
+      const vertical = dy > Math.abs(dx) * 0.85;
+      const flicked = vertical && dy > 36 && dt < 420;
+      if (vertical && (dy >= commitAt() || flicked)) {
+        catcher?.classList.add("is-committed");
+        revealPortfolio(false);
+        return true;
+      }
+      return false;
+    };
+
+    const ignoreTarget = (event) =>
+      event.target instanceof Element && event.target.closest(".mobile-switch");
+
+    const onStart = (event) => {
+      if (tracking || navigating || !isSwipeMode() || ignoreTarget(event)) return;
+      if (event.pointerType === "mouse" && event.button) return;
+      const point = clientPoint(event);
       tracking = true;
-      pointerId = event.pointerId;
-      startX = event.clientX;
-      startY = event.clientY;
-      catcher.setPointerCapture?.(event.pointerId);
+      pointerId = event.pointerId ?? "touch";
+      startX = point.x;
+      startY = point.y;
+      startT = performance.now();
     };
 
-    const onPointerMove = (event) => {
-      if (!tracking || event.pointerId !== pointerId) return;
-      const dy = event.clientY - startY;
-      const dx = event.clientX - startX;
-      if (Math.abs(dy) > 8 && Math.abs(dy) > Math.abs(dx)) {
+    const onMove = (event) => {
+      if (!tracking) return;
+      if (event.pointerId != null && pointerId !== "touch" && event.pointerId !== pointerId) return;
+      const point = clientPoint(event);
+      const dy = point.y - startY;
+      const dx = point.x - startX;
+      if (Math.abs(dy) > 6 && Math.abs(dy) >= Math.abs(dx)) {
         event.preventDefault();
       }
       follow(dy);
     };
 
-    const endGesture = (event) => {
-      if (!tracking || (event && event.pointerId !== pointerId)) return;
+    const onEnd = (event) => {
+      if (!tracking) return;
+      if (event.pointerId != null && pointerId !== "touch" && event.pointerId !== pointerId) return;
       tracking = false;
-      const dy = (event?.clientY ?? startY) - startY;
-      const dx = (event?.clientX ?? startX) - startX;
+      const point = clientPoint(event);
+      const dy = point.y - startY;
+      const dx = point.x - startX;
+      const dt = performance.now() - startT;
       pointerId = null;
-      const vertical = dy > Math.abs(dx) * 1.15;
-      if (vertical && dy >= commitAt()) {
-        catcher.classList.add("is-committed");
-        revealPortfolio(false);
-        return;
-      }
-      introLayer.style.transition = "transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.38s ease";
-      introLayer.style.transform = "translate3d(0, 0, 0)";
-      introLayer.style.opacity = "1";
-      catcher.style.setProperty("--swipe-t", "0");
+      if (!tryCommit(dy, dx, dt)) snapBack();
     };
 
-    catcher.addEventListener("pointerdown", onPointerDown);
-    catcher.addEventListener("pointermove", onPointerMove, { passive: false });
-    catcher.addEventListener("pointerup", endGesture);
-    catcher.addEventListener("pointercancel", endGesture);
+    const onWheel = (event) => {
+      if (navigating || !isSwipeMode() || ignoreTarget(event)) return;
+      if (event.deltaY <= 0) {
+        wheelAcc = Math.max(0, wheelAcc + event.deltaY);
+        return;
+      }
+      event.preventDefault();
+      wheelAcc += event.deltaY;
+      follow(wheelAcc);
+      if (wheelAcc >= commitAt()) {
+        catcher?.classList.add("is-committed");
+        revealPortfolio(false);
+      }
+    };
+
+    const opts = { capture: true, passive: false };
+    window.addEventListener("pointerdown", onStart, opts);
+    window.addEventListener("pointermove", onMove, opts);
+    window.addEventListener("pointerup", onEnd, opts);
+    window.addEventListener("pointercancel", onEnd, opts);
+    if (!window.PointerEvent) {
+      window.addEventListener("touchstart", onStart, opts);
+      window.addEventListener("touchmove", onMove, opts);
+      window.addEventListener("touchend", onEnd, opts);
+    }
+    window.addEventListener("wheel", onWheel, opts);
+    window.addEventListener("resize", () => {
+      if (isSwipeMode()) catcher = ensureHint();
+    });
   };
 
-  const introLayer = document.getElementById("intro-layer");
-  if (isSwipeIntro) bindSwipeToEnter(introLayer);
+  bindSwipeToEnter(document.getElementById("intro-layer"));
 
   import("/assets/index-wQJ6Ws5X.js")
     .then(() => {
