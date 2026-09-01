@@ -4,16 +4,13 @@
  * The page stacks two independent apps: the Three.js intro scene (#intro-layer)
  * and the GSAP portfolio underneath it. This file owns the handover.
  *
- *   1. Desktop (fine pointer): dynamically loads 3D scene. Hand pulled → scene
- *      clears itself over EXIT_MS.
- *   2. Mobile / Touch (coarse pointer): skips 819 KB 3D bundle completely,
- *      presents an instant brutalist tap-to-enter badge with snappy handover.
- *   3. Reduced Motion: immediately bypasses intro layer without animation delay.
- *   4. Scene empty / entry triggered → engine stopped, canvas WebGL context released,
+ *   1. Load the 3D laptop scene on every pointer type (desktop, phone, DevTools).
+ *      Hand pulled → scene clears itself over EXIT_MS.
+ *   2. Reduced Motion: immediately bypasses intro layer without animation delay.
+ *   3. Scene empty / entry triggered → engine stopped, canvas WebGL context released,
  *      intro stylesheet detached, and site intro dispatched.
  */
 (() => {
-  const isTouchDevice = window.matchMedia("(hover: none), (pointer: coarse)").matches;
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   /** Time for the 3D scene to fade after GSAP has painted the loader's first frame */
@@ -108,7 +105,7 @@
     const fadeIntroLayer = () => {
       if (introLayer) introLayer.classList.add("is-leaving");
 
-      const exitDelay = isFast || isTouchDevice ? TOUCH_EXIT_MS : DEFAULT_EXIT_MS;
+      const exitDelay = isFast ? TOUCH_EXIT_MS : DEFAULT_EXIT_MS;
 
       window.setTimeout(() => {
         stopIntroEngine(introLayer);
@@ -129,31 +126,14 @@
     requestAnimationFrame(() => requestAnimationFrame(fadeIntroLayer));
   };
 
-  // --- Dynamic 3D Bundle Loading (Desktop Only) ---
-  if (!isTouchDevice) {
-    import("/assets/index-wQJ6Ws5X.js")
-      .then(() => {
-        window.__resetIntroHand?.();
-      })
-      .catch((err) => {
-        console.warn("Could not load 3D intro bundle, falling back to direct entry", err);
-        revealPortfolio(true);
-      });
-  } else {
-    // Mobile / Touch: Render brutalist tap affordance
-    const introLayer = document.getElementById("intro-layer");
-    if (introLayer) {
-      const entryBtn = document.createElement("button");
-      entryBtn.type = "button";
-      entryBtn.className = "mobile-intro-entry";
-      entryBtn.setAttribute("aria-label", "Enter Harshit Chauhan Portfolio");
-      entryBtn.innerHTML = `<strong>HARSHIT CHAUHAN</strong><span>TAP TO ENTER →</span>`;
-      entryBtn.addEventListener("click", () => revealPortfolio(true));
-      introLayer.appendChild(entryBtn);
-
-      introLayer.addEventListener("pointerup", () => revealPortfolio(true), { once: true });
-    }
-  }
+  import("/assets/index-wQJ6Ws5X.js")
+    .then(() => {
+      window.__resetIntroHand?.();
+    })
+    .catch((err) => {
+      console.warn("Could not load 3D intro bundle, falling back to direct entry", err);
+      revealPortfolio(true);
+    });
 
   // --- Primary trigger: the 3D hand was grabbed & pulled far enough ---
   window.addEventListener("intro:pull", () => revealPortfolio(false), { once: true });

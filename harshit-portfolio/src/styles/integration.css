@@ -48,10 +48,6 @@ html:not(.intro-started):has(#intro-layer) .site-intro .js-border-right {
   .s-my-way.astro-fiibiggq .s__smiley.astro-fiibiggq {
     animation: none !important;
   }
-
-  .mobile-intro-entry {
-    animation: none !important;
-  }
 }
 
 /* ---------- Site Intro Monogram: "HC" (Harshit Chauhan) Animation ---------- */
@@ -169,60 +165,6 @@ html:not(.intro-started):has(#intro-layer) .site-intro .js-border-right {
   display: block !important;
   width: 100% !important;
   height: 100% !important;
-}
-
-/* Mobile & Touch Brutalist Tap Affordance */
-.mobile-intro-entry {
-  position: absolute !important;
-  top: 50% !important;
-  left: 50% !important;
-  transform: translate(-50%, -50%) !important;
-  z-index: 1000 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 0.75rem !important;
-  padding: 1.5rem 2.25rem !important;
-  background: var(--color-secondary, #160000) !important;
-  color: var(--color-primary, #f40c3f) !important;
-  border: 2px solid var(--color-primary, #f40c3f) !important;
-  font-family: var(--font-family-fraktion, monospace) !important;
-  letter-spacing: 0.1em !important;
-  cursor: pointer !important;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
-  -webkit-appearance: none !important;
-  appearance: none !important;
-  text-decoration: none !important;
-}
-
-.mobile-intro-entry strong {
-  font-size: 1.125rem !important;
-  font-weight: 700 !important;
-  color: #fff !important;
-}
-
-.mobile-intro-entry span {
-  font-size: 0.875rem !important;
-  font-weight: 400 !important;
-  color: var(--color-primary, #f40c3f) !important;
-}
-
-.mobile-intro-entry:hover,
-.mobile-intro-entry:active {
-  background: var(--color-primary, #f40c3f) !important;
-  color: var(--color-secondary, #160000) !important;
-  border-color: var(--color-secondary, #160000) !important;
-}
-
-.mobile-intro-entry:hover strong,
-.mobile-intro-entry:active strong {
-  color: var(--color-secondary, #160000) !important;
-}
-
-.mobile-intro-entry:hover span,
-.mobile-intro-entry:active span {
-  color: var(--color-secondary, #160000) !important;
 }
 
 /* Suppress all 2D side-panel / about / project texts inside 3D intro layer */
