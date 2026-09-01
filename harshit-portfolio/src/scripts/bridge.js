@@ -90,28 +90,48 @@
     return;
   }
 
+  const showFullPageUnderlay = () => {
+    document.documentElement.classList.add("intro-started", "intro-page-ready");
+    const wrap = document.querySelector(".js-site-wrapper");
+    if (wrap) wrap.style.opacity = "1";
+    const overlay = document.querySelector(".js-intro");
+    if (overlay) overlay.style.display = "none";
+    document.querySelectorAll(".site-head").forEach((head) => {
+      head.style.opacity = "1";
+    });
+  };
+
   /**
    * Hand pull → Wodniack loader, then drop the 3D layer.
-   *
-   * intro() must run *before* the canvas fades. The loader overlay sits in its
-   * CSS rest state (assembled HC). If that overlay is uncovered first, that
-   * end-frame flashes, then GSAP rewinds to scale 0 and plays — the jitter.
-   * Scroll stays locked until intro() removes the overlay, same as Wodniack.
+   * Swipe → slide the whole intro page off and land on Creative Developer.
    */
-  const revealPortfolio = (isFast = false) => {
+  const revealPortfolio = (isFast = false, { fullPage = false } = {}) => {
     if (navigating) return;
     navigating = true;
 
     const introLayer = document.getElementById("intro-layer");
     document.documentElement.classList.add("intro-started");
     document.documentElement.classList.remove("intro-swipe");
+
+    if (fullPage) showFullPageUnderlay();
+
     window.dispatchEvent(new CustomEvent("startPortfolioIntro"));
     watchScrollUnblock();
 
     const fadeIntroLayer = () => {
-      if (introLayer) introLayer.classList.add("is-leaving");
+      if (introLayer) {
+        if (fullPage) {
+          introLayer.style.transition =
+            "transform 0.48s cubic-bezier(0.16, 1, 0.3, 1)";
+          introLayer.style.opacity = "1";
+          introLayer.style.transform = `translate3d(0, ${Math.max(window.innerHeight, 1)}px, 0)`;
+          introLayer.classList.add("intro-layer--exit-down");
+        } else {
+          introLayer.classList.add("is-leaving");
+        }
+      }
 
-      const exitDelay = isFast ? TOUCH_EXIT_MS : DEFAULT_EXIT_MS;
+      const exitDelay = fullPage ? 480 : isFast ? TOUCH_EXIT_MS : DEFAULT_EXIT_MS;
 
       window.setTimeout(() => {
         stopIntroEngine(introLayer);
@@ -121,11 +141,15 @@
           .forEach((link) => link.remove());
 
         document.documentElement.classList.add("intro-done");
+        if (fullPage) {
+          document.documentElement.classList.remove("is-scroll-blocked");
+          window.dispatchEvent(new Event("resize"));
+        }
 
         window.setTimeout(() => {
           introLayer?.remove();
           window.dispatchEvent(new CustomEvent("portfolio:entered"));
-        }, CROSSFADE_MS);
+        }, fullPage ? 40 : CROSSFADE_MS);
       }, exitDelay);
     };
 
@@ -177,9 +201,10 @@
     const follow = (dy) => {
       const pull = Math.max(0, dy);
       const t = Math.min(1, pull / commitAt());
+      showFullPageUnderlay();
       introLayer.style.transition = "none";
-      introLayer.style.transform = `translate3d(0, ${pull * 0.45}px, 0)`;
-      introLayer.style.opacity = String(1 - t * 0.35);
+      introLayer.style.transform = `translate3d(0, ${pull}px, 0)`;
+      introLayer.style.opacity = "1";
       catcher?.style.setProperty("--swipe-t", String(t));
     };
 
@@ -196,7 +221,7 @@
       const flicked = vertical && dy > 36 && dt < 420;
       if (vertical && (dy >= commitAt() || flicked)) {
         catcher?.classList.add("is-committed");
-        revealPortfolio(false);
+        revealPortfolio(false, { fullPage: true });
         return true;
       }
       return false;
@@ -251,7 +276,7 @@
       follow(wheelAcc);
       if (wheelAcc >= commitAt()) {
         catcher?.classList.add("is-committed");
-        revealPortfolio(false);
+        revealPortfolio(false, { fullPage: true });
       }
     };
 
