@@ -167,6 +167,104 @@ html:not(.intro-started):has(#intro-layer) .site-intro .js-border-right {
   height: 100% !important;
 }
 
+#intro-layer .mobile-switch {
+  display: flex !important;
+  z-index: 40 !important;
+  pointer-events: auto !important;
+  visibility: visible !important;
+  top: 68svh !important;
+}
+
+html.intro-swipe {
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
+.intro-layer--swipe {
+  touch-action: none;
+  overscroll-behavior: none;
+}
+
+.intro-swipe-catch {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 1.25rem calc(1.25rem + env(safe-area-inset-bottom, 0px));
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: grab;
+}
+
+.intro-swipe-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0;
+  pointer-events: none;
+  color: #160000;
+  opacity: calc(0.92 - (var(--swipe-t, 0) * 0.7));
+  transform: translate3d(0, calc(var(--swipe-t, 0) * 28px), 0);
+}
+
+.intro-swipe-hint__chevrons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  height: 1.65rem;
+}
+
+.intro-swipe-hint__chevrons span {
+  display: block;
+  width: 0.72rem;
+  height: 0.72rem;
+  margin-top: -0.28rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  animation: intro-swipe-chevron 1.35s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+}
+
+.intro-swipe-hint__chevrons span:nth-child(2) {
+  animation-delay: 0.18s;
+  opacity: 0.45;
+}
+
+.intro-swipe-hint__label {
+  font-family: var(--font-family-fraktion, ui-monospace, monospace);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+@keyframes intro-swipe-chevron {
+  0%,
+  18% {
+    opacity: 0.2;
+    transform: rotate(45deg) translate(-4px, -4px);
+  }
+  48% {
+    opacity: 1;
+    transform: rotate(45deg) translate(3px, 3px);
+  }
+  100% {
+    opacity: 0.15;
+    transform: rotate(45deg) translate(8px, 8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro-swipe-hint__chevrons span {
+    animation: none;
+  }
+}
+
 /* Suppress all 2D side-panel / about / project texts inside 3D intro layer */
 #intro-layer .side-panel,
 #intro-layer .about,

@@ -121,7 +121,23 @@ if (js.includes('window.__resetIntroHand')) {
   }
 }
 
-// 6. Replace all references to Adrien / Adrien Lamy with Harshit / Harshit Chauhan
+// 6. Treat narrow viewports as mobile even when DevTools keeps a desktop UA.
+//    Otherwise the desktop hand + DRAG scribbles appear and the Vue switch never scales in.
+const DEVICE_ORIGINAL =
+  'this.isMobile=this.device.type==="mobile",this.isTablet=this.device.type==="tablet",this.isDesktop=!this.isMobile&&!this.isTablet';
+const DEVICE_NARROW =
+  'this.isMobile=this.device.type==="mobile"||window.innerWidth<768,this.isTablet=this.device.type==="tablet"&&window.innerWidth>=768,this.isDesktop=!this.isMobile&&!this.isTablet';
+
+if (js.includes(DEVICE_NARROW)) {
+  console.log("clean-adrien: narrow viewports already treated as mobile");
+} else if (js.includes(DEVICE_ORIGINAL)) {
+  js = js.replace(DEVICE_ORIGINAL, DEVICE_NARROW);
+  console.log("clean-adrien: narrow viewports use the mobile intro (switch, no hand)");
+} else {
+  fail("device flags (class vL) not found");
+}
+
+// 7. Replace all references to Adrien / Adrien Lamy with Harshit / Harshit Chauhan
 const TITLES = [
   ["Adrien Lamy :D", "Harshit Chauhan :D"],
   ["Adrien Lamy :o", "Harshit Chauhan :o"],
