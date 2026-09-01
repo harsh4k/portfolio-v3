@@ -146,11 +146,7 @@ if (fs.existsSync(referenceWodniackPath)) {
 
   html = html.replace(
     '<span class="sb__text astro-5qrshpxv">Contact</span> </a> </li> </ul> </nav>',
-    '<span class="sb__text astro-5qrshpxv">Contact</span> </a> </li><li class="sb__item js-menu-item astro-5qrshpxv"> <a href="/resume.pdf" target="_blank" rel="noopener noreferrer" class="js-menu-link astro-5qrshpxv"> <span class="sb__text astro-5qrshpxv">Resume</span> </a> </li> </ul> </nav>'
-  );
-  html = html.replace(
-    'class="sb__link astro-5qrshpxv">Hire me</a>',
-    'class="sb__link astro-5qrshpxv">Hire me</a> <a href="/resume.pdf" target="_blank" rel="noopener noreferrer" class="sb__link sb__link--resume astro-5qrshpxv">Resume</a>'
+    '<span class="sb__text astro-5qrshpxv">Contact</span> </a> </li><li class="sb__item js-menu-item astro-5qrshpxv"> <a href="#resume" class="js-resume-open astro-5qrshpxv"> <span class="sb__text astro-5qrshpxv">Resume</span> </a> </li> </ul> </nav>'
   );
 
   // 7. Bio & About
@@ -406,7 +402,7 @@ ${JSON.stringify(jsonLd, null, 2)}
   // 16. Inject bridge script before </body>
   const bodyEnd = html.indexOf("</body>");
   if (bodyEnd !== -1) {
-    const bridgeScript = `  <script type="module" src="/scripts/bridge.js"></script>\n  <script type="module" src="/scripts/pwa.js"></script>\n`;
+    const bridgeScript = `  <script type="module" src="/scripts/bridge.js"></script>\n  <script type="module" src="/scripts/resume-dock.js"></script>\n  <script type="module" src="/scripts/pwa.js"></script>\n`;
     html = html.substring(0, bodyEnd) + bridgeScript + html.substring(bodyEnd);
   }
 
@@ -480,6 +476,23 @@ fs.copyFileSync(
   path.resolve(appRoot, "src", "scripts", "pwa.js"),
   path.join(distDir, "scripts", "pwa.js")
 );
+fs.copyFileSync(
+  path.resolve(appRoot, "src", "scripts", "resume-dock.js"),
+  path.join(distDir, "scripts", "resume-dock.js")
+);
+
+const resumeDocx = path.resolve(repoRoot, "docs", "Harshit_Resume.docx");
+const resumePdf = path.resolve(repoRoot, "docs", "Harshit_resume.pdf");
+if (fs.existsSync(resumeDocx)) {
+  fs.copyFileSync(resumeDocx, path.join(distDir, "Harshit_Resume.docx"));
+  fs.copyFileSync(resumeDocx, path.join(publicDir, "Harshit_Resume.docx"));
+}
+if (fs.existsSync(path.join(publicDir, "resume.pdf"))) {
+  fs.copyFileSync(path.join(publicDir, "resume.pdf"), path.join(distDir, "resume.pdf"));
+} else if (fs.existsSync(resumePdf)) {
+  fs.copyFileSync(resumePdf, path.join(distDir, "resume.pdf"));
+  fs.copyFileSync(resumePdf, path.join(publicDir, "resume.pdf"));
+}
 
 // Mirror dist to repository root dist/ if different
 if (repoRoot !== appRoot && fs.existsSync(repoRoot)) {
