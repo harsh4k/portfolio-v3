@@ -424,6 +424,12 @@ if (fs.existsSync(adrienRef)) {
   syncDir(path.join(adrienRef, "webgl"), path.join(publicDir, "webgl"));
   syncDir(path.join(adrienRef, "fonts"), path.join(publicDir, "fonts"));
   syncDir(path.join(adrienRef, "videos"), path.join(publicDir, "videos"));
+  syncDir(path.join(adrienRef, "images", "ctas"), path.join(publicDir, "images", "ctas"));
+}
+
+const repoCtas = path.resolve(repoRoot, "dist", "images", "ctas");
+if (!fs.existsSync(path.join(publicDir, "images", "ctas", "tex-ui-switch-fe-on.webp")) && fs.existsSync(repoCtas)) {
+  syncDir(repoCtas, path.join(publicDir, "images", "ctas"));
 }
 
 if (fs.existsSync(wodniackRef)) {
