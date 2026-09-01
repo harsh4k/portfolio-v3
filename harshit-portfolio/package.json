@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "node server.mjs",
     "start": "node server.mjs",
-    "build": "node src/scripts/build.mjs && node src/scripts/clean-adrien.mjs && node src/scripts/patch-intro.mjs"
+    "build": "node src/scripts/build.mjs && node src/scripts/clean-adrien.mjs && node src/scripts/patch-intro.mjs",
+    "icons": "node src/scripts/generate-pwa-icons.mjs"
   },
   "keywords": [
     "portfolio",
@@ -17,5 +18,9 @@
     "creative-developer"
   ],
   "author": "Harshit Chauhan",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "png-to-ico": "^3.0.2",
+    "sharp": "^0.35.4"
+  }
 }

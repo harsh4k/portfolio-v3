@@ -32,6 +32,9 @@ ProtypH/
 │   └── getcited.png               # High-res project graphic asset
 │
 ├── docs/                          # Architectural documentation and design specifications
+│   └── NOTHING-PHONE-4B.md        # PWA + Phone (4b) lock screen / Glyph reality check
+├── web/                           # Pointer only — PWA lives in harshit-portfolio/
+├── android/                       # Optional Trusted Web Activity + home-screen widget
 └── README.md                      # Workspace documentation
 ```
 
@@ -52,6 +55,8 @@ cd harshit-portfolio
 npm run build
 ```
 The build script reads the reference template from `references/wodniack/index.html` and compiles `index.html` with Harshit's 11 real projects, full 10-slot Highlights masonry grid, 3D rotating text, and layer bridge logic.
+
+Phone (4b) install, lock-screen limits, and Glyph facts: [`docs/NOTHING-PHONE-4B.md`](docs/NOTHING-PHONE-4B.md).
 
 ---
 

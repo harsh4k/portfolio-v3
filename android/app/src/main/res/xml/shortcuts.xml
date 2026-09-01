@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutId="about"
+        android:shortcutLongLabel="@string/shortcut_about"
+        android:shortcutShortLabel="@string/shortcut_about">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="https://harshitchauhan.dev/#about"
+            android:targetClass="com.google.androidbrowserhelper.trusted.LauncherActivity"
+            android:targetPackage="dev.harshitchauhan.portfolio" />
+    </shortcut>
+    <shortcut
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutId="work"
+        android:shortcutLongLabel="@string/shortcut_work"
+        android:shortcutShortLabel="@string/shortcut_work">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="https://harshitchauhan.dev/#work"
+            android:targetClass="com.google.androidbrowserhelper.trusted.LauncherActivity"
+            android:targetPackage="dev.harshitchauhan.portfolio" />
+    </shortcut>
+    <shortcut
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutId="contact"
+        android:shortcutLongLabel="@string/shortcut_contact"
+        android:shortcutShortLabel="@string/shortcut_contact">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="https://harshitchauhan.dev/#contact"
+            android:targetClass="com.google.androidbrowserhelper.trusted.LauncherActivity"
+            android:targetPackage="dev.harshitchauhan.portfolio" />
+    </shortcut>
+</shortcuts>

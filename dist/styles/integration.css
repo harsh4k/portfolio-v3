@@ -2,7 +2,30 @@
    integration.css — Harshit Chauhan Portfolio Integration & Polish
    =================================================================== */
 
-/* Accessible high-contrast focus rings */
+/*
+  Hold Wodniack's .site-intro on the GSAP *from* frame until intro() starts.
+  CSS rest state is the assembled monogram (the loader's last draw-in frame).
+  After a delayed 3D pull that rest state would otherwise flash first.
+*/
+html:not(.intro-started):has(#intro-layer) .site-intro .js-logo-line-v {
+  transform: scaleY(0);
+}
+html:not(.intro-started):has(#intro-layer) .site-intro .js-logo-line-h {
+  transform: scaleX(0);
+}
+html:not(.intro-started):has(#intro-layer) .site-intro .js-border-top {
+  transform: scaleY(0);
+}
+html:not(.intro-started):has(#intro-layer) .site-intro .js-border-left,
+html:not(.intro-started):has(#intro-layer) .site-intro .js-border-right {
+  transform: scaleX(0);
+}
+
+@media (display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui) {
+  .site-head.astro-5qrshpxv {
+    padding-top: env(safe-area-inset-top);
+  }
+}
 :focus-visible {
   outline: 2px solid var(--color-secondary, #160000) !important;
   outline-offset: 3px !important;
@@ -227,23 +250,42 @@
 }
 
 /* ---------- Bento Grid Typography Fixes (Prevent Word Splitting) ---------- */
+.s-about.astro-am7g2yfn .s__awards.astro-am7g2yfn .s__award--counter.astro-am7g2yfn .s__award__inner.astro-am7g2yfn {
+  gap: 0.35rem;
+  padding: 0.15rem 0.15rem 0.35rem;
+  box-sizing: border-box;
+}
+
+.s-about.astro-am7g2yfn .s__awards.astro-am7g2yfn .s__award--counter.astro-am7g2yfn .s__award__name.astro-am7g2yfn {
+  display: block;
+  margin: 0;
+  padding-bottom: 0.08em;
+  line-height: 0.92 !important;
+}
+
+.s-about.astro-am7g2yfn .s__awards.astro-am7g2yfn .s__award--counter.astro-am7g2yfn .s__award__counter.astro-am7g2yfn {
+  display: block;
+  margin: 0;
+  line-height: 1.35;
+}
+
 .s-about.astro-am7g2yfn .s__awards.astro-am7g2yfn .s__award--awwwards.astro-am7g2yfn .s__award__name.astro-am7g2yfn {
   font-size: clamp(2.4rem, 4.8vw, 4.5rem) !important;
-  line-height: 0.9 !important;
+  line-height: 0.92 !important;
   white-space: nowrap !important;
   letter-spacing: -0.02em !important;
 }
 
 .s-about.astro-am7g2yfn .s__awards.astro-am7g2yfn .s__award--fwa.astro-am7g2yfn .s__award__name.astro-am7g2yfn {
   font-size: clamp(2.2rem, 4.2vw, 4rem) !important;
-  line-height: 0.9 !important;
+  line-height: 0.92 !important;
   white-space: nowrap !important;
   letter-spacing: -0.02em !important;
 }
 
 .s-about.astro-am7g2yfn .s__awards.astro-am7g2yfn .s__award--cssda.astro-am7g2yfn .s__award__name.astro-am7g2yfn {
   font-size: clamp(2.2rem, 4.2vw, 4rem) !important;
-  line-height: 0.9 !important;
+  line-height: 0.92 !important;
   white-space: nowrap !important;
 }
 

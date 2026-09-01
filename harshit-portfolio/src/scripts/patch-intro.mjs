@@ -41,15 +41,16 @@ if (js.includes(ORIGINAL_INIT)) {
   console.log("patch-intro: site init already gated behind startPortfolioIntro");
 }
 
-// 2. Patch intro() completion to refresh ScrollTrigger and Lenis when intro finishes
+// 2. Keep Wodniack's overlay teardown at t=5. An earlier cut (3.2s) ran
+//    while the home intro still had .js-border at scaleY .025 and a-waves
+//    at y 100%, which froze the hero in the collapsed 3-band frame.
 const ORIGINAL_INTRO_END =
   'l.call(()=>{i.style.opacity="1",e.remove(),document.documentElement.classList.remove("is-scroll-blocked"),xe.nextTick(()=>{$.emit("updateViewport")})},null,5)';
-const ENHANCED_INTRO_END =
-  'l.call(()=>{i.style.opacity="1",e.remove(),document.documentElement.classList.remove("is-scroll-blocked"),xe.nextTick(()=>{$.emit("updateViewport"),j.refresh(),window.lenis&&window.lenis.resize()})},null,3.2)';
 
 if (js.includes(ORIGINAL_INTRO_END)) {
-  js = js.replace(ORIGINAL_INTRO_END, ENHANCED_INTRO_END);
-  console.log("patch-intro: ScrollTrigger & Lenis refresh attached to authentic intro transition");
+  console.log("patch-intro: leaving intro() teardown at 5s (Wodniack)");
+} else if (js.includes("null,3.2)")) {
+  console.warn("patch-intro: unexpected 3.2s intro teardown still in bundle");
 }
 
 // 3. Patch Work section controller (vc): listen to updateViewport and always recalculate on resize
@@ -84,5 +85,37 @@ if (js.includes(ORIGINAL_QR_ANIM)) {
   console.log("patch-intro: QR code null check applied to silence GSAP warnings");
 }
 
+// 5. Do not rebuild a-waves mid-intro. Wodniack's home intro animates
+//    .js-border (scaleY .025) and a-waves (y 100% → 0). Recreating SVG
+//    paths on introend/updateViewport samples those transforms and freezes
+//    the collapsed hero. Geometry already refreshes via the site's resize bus.
+
 fs.writeFileSync(enginePath, js, "utf8");
 console.log("patch-intro: hoisted.BvNyQ0G_.js updated successfully.");
+
+// build.mjs copies public/ → dist/ *before* this patch and clean-adrien run.
+// Refresh the patched engines so Cloudflare/Pages dist matches local public/.
+const copyIfPresent = (from, to) => {
+  if (!fs.existsSync(from)) return;
+  fs.mkdirSync(path.dirname(to), { recursive: true });
+  fs.copyFileSync(from, to);
+};
+
+const distCopies = [
+  path.resolve(appRoot, "dist"),
+  path.resolve(repoRoot, "dist"),
+];
+const patchedFiles = [
+  ["public/_astro/hoisted.BvNyQ0G_.js", "_astro/hoisted.BvNyQ0G_.js"],
+  ["public/assets/index-wQJ6Ws5X.js", "assets/index-wQJ6Ws5X.js"],
+  ["src/scripts/bridge.js", "scripts/bridge.js"],
+  ["src/scripts/pwa.js", "scripts/pwa.js"],
+  ["src/styles/integration.css", "styles/integration.css"],
+];
+
+for (const distDir of distCopies) {
+  for (const [fromRel, toRel] of patchedFiles) {
+    copyIfPresent(path.resolve(appRoot, fromRel), path.join(distDir, toRel));
+  }
+}
+console.log("patch-intro: patched engines copied into dist/");
