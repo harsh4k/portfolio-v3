@@ -144,6 +144,15 @@ if (fs.existsSync(referenceWodniackPath)) {
     '<a href="https://www.linkedin.com/in/harshit-chauhan-17a898364/" target="_blank" rel="noopener noreferrer" class="astro-5qrshpxv" aria-label="LinkedIn">'
   );
 
+  html = html.replace(
+    '<span class="sb__text astro-5qrshpxv">Contact</span> </a> </li> </ul> </nav>',
+    '<span class="sb__text astro-5qrshpxv">Contact</span> </a> </li><li class="sb__item js-menu-item astro-5qrshpxv"> <a href="/resume.pdf" target="_blank" rel="noopener noreferrer" class="js-menu-link astro-5qrshpxv"> <span class="sb__text astro-5qrshpxv">Resume</span> </a> </li> </ul> </nav>'
+  );
+  html = html.replace(
+    'class="sb__link astro-5qrshpxv">Hire me</a>',
+    'class="sb__link astro-5qrshpxv">Hire me</a> <a href="/resume.pdf" target="_blank" rel="noopener noreferrer" class="sb__link sb__link--resume astro-5qrshpxv">Resume</a>'
+  );
+
   // 7. Bio & About
   const oldAbout1 = "I collaborate with agencies and designers to craft memorable user experiences, bringing their vision to life with a nice touch of animation.";
   const newAbout1 = "I design and build production web applications, motion-led studio sites, and local-first AI tools — balancing performance, interaction, and clean systems.";
