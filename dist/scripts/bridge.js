@@ -90,20 +90,10 @@
     return;
   }
 
-  const showFullPageUnderlay = () => {
-    document.documentElement.classList.add("intro-started", "intro-page-ready");
-    const wrap = document.querySelector(".js-site-wrapper");
-    if (wrap) wrap.style.opacity = "1";
-    const overlay = document.querySelector(".js-intro");
-    if (overlay) overlay.style.display = "none";
-    document.querySelectorAll(".site-head").forEach((head) => {
-      head.style.opacity = "1";
-    });
-  };
-
   /**
-   * Hand pull → Wodniack loader, then drop the 3D layer.
-   * Swipe → slide the whole intro page off and land on Creative Developer.
+   * Hand pull or swipe → start the Wodniack loader, then drop the 3D layer.
+   * Swipe slides the whole 3D page off; the HC loader stays underneath.
+   * Do not uncover the site header until intro() has shown the page.
    */
   const revealPortfolio = (isFast = false, { fullPage = false } = {}) => {
     if (navigating) return;
@@ -112,9 +102,6 @@
     const introLayer = document.getElementById("intro-layer");
     document.documentElement.classList.add("intro-started");
     document.documentElement.classList.remove("intro-swipe");
-
-    if (fullPage) showFullPageUnderlay();
-
     window.dispatchEvent(new CustomEvent("startPortfolioIntro"));
     watchScrollUnblock();
 
@@ -141,10 +128,6 @@
           .forEach((link) => link.remove());
 
         document.documentElement.classList.add("intro-done");
-        if (fullPage) {
-          document.documentElement.classList.remove("is-scroll-blocked");
-          window.dispatchEvent(new Event("resize"));
-        }
 
         window.setTimeout(() => {
           introLayer?.remove();
@@ -201,7 +184,6 @@
     const follow = (dy) => {
       const pull = Math.max(0, dy);
       const t = Math.min(1, pull / commitAt());
-      showFullPageUnderlay();
       introLayer.style.transition = "none";
       introLayer.style.transform = `translate3d(0, ${pull}px, 0)`;
       introLayer.style.opacity = "1";
