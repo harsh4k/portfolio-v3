@@ -147,10 +147,21 @@ html:not(.intro-started):has(#intro-layer) .site-intro .js-border-right {
   overflow: hidden !important;
 }
 
-#intro-layer.is-leaving {
-  opacity: 0 !important;
-  visibility: hidden !important;
+#intro-layer.intro-layer--exit-down {
   pointer-events: none !important;
+}
+
+html.intro-page-ready .js-site-wrapper {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html.intro-page-ready .js-intro {
+  display: none !important;
+}
+
+html.intro-page-ready .site-head.astro-5qrshpxv {
+  opacity: 1 !important;
 }
 
 #intro-layer .webgl-container {
