@@ -337,3 +337,14 @@ html.intro-swipe {
   line-height: 1.25 !important;
 }
 
+.sb-availability .sb__link--resume {
+  margin-left: 0.55em;
+  white-space: nowrap;
+}
+
+@media only screen and (max-width: 576px) {
+  .sb-availability .sb__link--resume {
+    margin-left: 0.4em;
+  }
+}
+
