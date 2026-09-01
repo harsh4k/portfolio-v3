@@ -18,10 +18,8 @@
     window.matchMedia("(max-width: 768px)").matches ||
     (navigator.maxTouchPoints > 0 && window.innerWidth <= 900);
 
-  /** Time for the 3D scene to fade after GSAP has painted the loader's first frame */
-  const DEFAULT_EXIT_MS = 520;
-  const TOUCH_EXIT_MS = 120;
-  const CROSSFADE_MS = 450;
+  /** Match #intro-layer opacity transition — do not stack extra waits on top */
+  const LAYER_FADE_MS = 450;
 
   let navigating = false;
 
@@ -91,9 +89,8 @@
   }
 
   /**
-   * Hand pull or swipe → start the Wodniack loader, then drop the 3D layer.
-   * Swipe slides the whole 3D page off; the HC loader stays underneath.
-   * Do not uncover the site header until intro() has shown the page.
+   * Hand pull or swipe → start the Wodniack loader immediately, fade the 3D
+   * cover, then drop it. Navbar timing is owned by Wodniack's header intro().
    */
   const revealPortfolio = (isFast = false, { fullPage = false } = {}) => {
     if (navigating) return;
@@ -105,38 +102,37 @@
     window.dispatchEvent(new CustomEvent("startPortfolioIntro"));
     watchScrollUnblock();
 
-    const fadeIntroLayer = () => {
-      if (introLayer) {
-        if (fullPage) {
-          introLayer.style.transition =
-            "transform 0.48s cubic-bezier(0.16, 1, 0.3, 1)";
-          introLayer.style.opacity = "1";
-          introLayer.style.transform = `translate3d(0, ${Math.max(window.innerHeight, 1)}px, 0)`;
-          introLayer.classList.add("intro-layer--exit-down");
-        } else {
-          introLayer.classList.add("is-leaving");
-        }
-      }
-
-      const exitDelay = fullPage ? 480 : isFast ? TOUCH_EXIT_MS : DEFAULT_EXIT_MS;
-
-      window.setTimeout(() => {
-        stopIntroEngine(introLayer);
-
-        document
-          .querySelectorAll("link[data-intro-style]")
-          .forEach((link) => link.remove());
-
-        document.documentElement.classList.add("intro-done");
-
-        window.setTimeout(() => {
-          introLayer?.remove();
-          window.dispatchEvent(new CustomEvent("portfolio:entered"));
-        }, fullPage ? 40 : CROSSFADE_MS);
-      }, exitDelay);
+    const dropIntroLayer = () => {
+      stopIntroEngine(introLayer);
+      document
+        .querySelectorAll("link[data-intro-style]")
+        .forEach((link) => link.remove());
+      introLayer?.remove();
+      window.dispatchEvent(new CustomEvent("portfolio:entered"));
     };
 
-    requestAnimationFrame(() => requestAnimationFrame(fadeIntroLayer));
+    if (!introLayer) {
+      dropIntroLayer();
+      return;
+    }
+
+    introLayer.querySelectorAll("canvas").forEach((canvas) => {
+      canvas.style.opacity = "0";
+      canvas.style.visibility = "hidden";
+    });
+
+    if (fullPage) {
+      introLayer.style.transition =
+        "transform 0.48s cubic-bezier(0.16, 1, 0.3, 1)";
+      introLayer.style.opacity = "1";
+      introLayer.style.transform = `translate3d(0, ${Math.max(window.innerHeight, 1)}px, 0)`;
+      introLayer.classList.add("intro-layer--exit-down");
+      window.setTimeout(dropIntroLayer, isFast ? 80 : 480);
+      return;
+    }
+
+    introLayer.classList.add("is-leaving");
+    window.setTimeout(dropIntroLayer, isFast ? 80 : LAYER_FADE_MS);
   };
 
   const bindSwipeToEnter = (introLayer) => {

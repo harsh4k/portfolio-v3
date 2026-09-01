@@ -51,6 +51,12 @@ if (js.includes(ORIGINAL_INTRO_END)) {
   console.log("patch-intro: leaving intro() teardown at 5s (Wodniack)");
 } else if (js.includes("null,3.2)")) {
   console.warn("patch-intro: unexpected 3.2s intro teardown still in bundle");
+} else if (js.includes('classList.add("intro-done")')) {
+  js = js.replace(
+    'document.documentElement.classList.remove("is-scroll-blocked"),document.documentElement.classList.add("intro-done"),xe.nextTick(()=>{$.emit("updateViewport")})},null,5)',
+    'document.documentElement.classList.remove("is-scroll-blocked"),xe.nextTick(()=>{$.emit("updateViewport")})},null,5)',
+  );
+  console.log("patch-intro: removed extra intro-done from overlay teardown");
 }
 
 // 3. Patch Work section controller (vc): listen to updateViewport and always recalculate on resize
@@ -110,7 +116,9 @@ const patchedFiles = [
   ["public/assets/index-wQJ6Ws5X.js", "assets/index-wQJ6Ws5X.js"],
   ["src/scripts/bridge.js", "scripts/bridge.js"],
   ["src/scripts/pwa.js", "scripts/pwa.js"],
+  ["src/scripts/resume-dock.js", "scripts/resume-dock.js"],
   ["src/styles/integration.css", "styles/integration.css"],
+  ["public/sw.js", "sw.js"],
 ];
 
 for (const distDir of distCopies) {
