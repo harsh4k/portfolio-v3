@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Harshit</string>
+    <string name="widget_label">Harshit portfolio</string>
+    <string name="widget_description">Opens the portfolio. On Nothing OS 3+, try adding this from Customize lock screen → widgets if it appears in the third-party list.</string>
+    <string name="widget_title">Harshit Chauhan</string>
+    <string name="widget_subtitle">Open portfolio</string>
+    <string name="shortcut_about">About</string>
+    <string name="shortcut_work">Work</string>
+    <string name="shortcut_contact">Contact</string>
+</resources>

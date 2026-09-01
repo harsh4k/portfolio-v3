@@ -313,11 +313,26 @@ if (fs.existsSync(referenceWodniackPath)) {
   );
   html = html.replace(
     /<meta name="viewport"[^>]*>/,
-    '<meta name="viewport" content="width=device-width, initial-scale=1">'
+    '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">'
   );
   html = html.replace(
     /<meta name="apple-mobile-web-app-title"[^>]*>/,
     '<meta name="apple-mobile-web-app-title" content="Harshit">'
+  );
+  html = html.replace(
+    /<meta name="theme-color"[^>]*>/,
+    '<meta name="theme-color" content="#F40C3F">'
+  );
+  html = html.replace(
+    /<link rel="icon" type="image\/png" href="\/icons\/favicon-48x48.png" sizes="48x48"><link rel="icon" type="image\/svg\+xml" href="\/icons\/favicon.svg"><link rel="shortcut icon" href="\/icons\/favicon.ico"><link rel="apple-touch-icon" sizes="180x180" href="\/icons\/apple-touch-icon.png">/,
+    [
+      '<link rel="icon" type="image/svg+xml" href="/icons/favicon.svg">',
+      '<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">',
+      '<link rel="icon" type="image/png" sizes="48x48" href="/icons/favicon-48x48.png">',
+      '<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">',
+      '<link rel="shortcut icon" href="/icons/favicon.ico">',
+      '<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">',
+    ].join("")
   );
 
   // Replace OpenGraph & Twitter tags
@@ -364,25 +379,13 @@ if (fs.existsSync(referenceWodniackPath)) {
   <link rel="stylesheet" crossorigin href="/assets/index-DG8As337.css" data-intro-style>
   <link rel="canonical" href="https://harshitchauhan.dev/">
   <link rel="manifest" href="/site.webmanifest">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <script type="application/ld+json">
 ${JSON.stringify(jsonLd, null, 2)}
   </script>
   <link rel="stylesheet" href="/styles/integration.css">
   <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(function(registrations) {
-        for (var i = 0; i < registrations.length; i++) {
-          registrations[i].unregister();
-        }
-      });
-    }
-    if ('caches' in window) {
-      caches.keys().then(function(names) {
-        for (var i = 0; i < names.length; i++) {
-          caches.delete(names[i]);
-        }
-      });
-    }
     if (!HTMLImageElement.prototype.play) {
       HTMLImageElement.prototype.play = function() { return Promise.resolve(); };
       HTMLImageElement.prototype.pause = function() {};
@@ -394,7 +397,7 @@ ${JSON.stringify(jsonLd, null, 2)}
   // 16. Inject bridge script before </body>
   const bodyEnd = html.indexOf("</body>");
   if (bodyEnd !== -1) {
-    const bridgeScript = `  <script type="module" src="/scripts/bridge.js"></script>\n`;
+    const bridgeScript = `  <script type="module" src="/scripts/bridge.js"></script>\n  <script type="module" src="/scripts/pwa.js"></script>\n`;
     html = html.substring(0, bodyEnd) + bridgeScript + html.substring(bodyEnd);
   }
 
@@ -429,6 +432,11 @@ if (fs.existsSync(wodniackRef)) {
   syncDir(path.join(wodniackRef, "icons"), path.join(publicDir, "icons"));
 }
 
+const pwaIconsDir = path.resolve(appRoot, "public", "pwa-icons");
+if (fs.existsSync(pwaIconsDir)) {
+  syncDir(pwaIconsDir, path.join(publicDir, "icons"));
+}
+
 // 18. ALWAYS assemble dist/ folder for static deployment (Cloudflare Pages, Vercel, Netlify)
 const distDir = path.resolve(appRoot, "dist");
 fs.rmSync(distDir, { recursive: true, force: true });
@@ -452,6 +460,10 @@ fs.mkdirSync(path.join(distDir, "scripts"), { recursive: true });
 fs.copyFileSync(
   path.resolve(appRoot, "src", "scripts", "bridge.js"),
   path.join(distDir, "scripts", "bridge.js")
+);
+fs.copyFileSync(
+  path.resolve(appRoot, "src", "scripts", "pwa.js"),
+  path.join(distDir, "scripts", "pwa.js")
 );
 
 // Mirror dist to repository root dist/ if different

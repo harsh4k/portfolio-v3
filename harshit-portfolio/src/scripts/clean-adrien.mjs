@@ -102,7 +102,26 @@ if (js.includes(HAND_DRIFT)) {
   fail("hand drift term not found");
 }
 
-// 5. Replace all references to Adrien / Adrien Lamy with Harshit / Harshit Chauhan
+// 5. Expose hand reset function for runtime initialization
+//    The hand may initialize in a 'loaded' state; reset dragIntensity to 0 so it starts fresh.
+//    Capture hand controller instance (this) for correct context when called from window
+const HAND_RESET_FN = 
+  'window.__introHandController=this,window.__resetIntroHand=function(){try{const a=window.__introHandController?.dragFinger;a&&(a.dragIntensity=0)}catch{}}';
+
+if (js.includes('window.__resetIntroHand')) {
+  console.log('clean-adrien: hand reset function already exposed');
+} else {
+  // Inject after dragFinger initialization: this.dragFinger=new GL({...})
+  const injectPattern = /(this\.dragFinger=new GL\([^)]+\))/;
+  if (injectPattern.test(js)) {
+    js = js.replace(injectPattern, '$1,' + HAND_RESET_FN);
+    console.log('clean-adrien: hand reset function exposed');
+  } else {
+    console.warn('clean-adrien: could not find dragFinger init to inject reset');
+  }
+}
+
+// 6. Replace all references to Adrien / Adrien Lamy with Harshit / Harshit Chauhan
 const TITLES = [
   ["Adrien Lamy :D", "Harshit Chauhan :D"],
   ["Adrien Lamy :o", "Harshit Chauhan :o"],

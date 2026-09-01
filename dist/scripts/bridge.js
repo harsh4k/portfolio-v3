@@ -16,10 +16,9 @@
   const isTouchDevice = window.matchMedia("(hover: none), (pointer: coarse)").matches;
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  /** Time for the 3D scene to animate itself empty after the pull (or snappy on touch) */
+  /** Time for the 3D scene to fade after GSAP has painted the loader's first frame */
   const DEFAULT_EXIT_MS = 520;
   const TOUCH_EXIT_MS = 120;
-  /** Cross-fade of the leftover red panel into the site intro */
   const CROSSFADE_MS = 450;
 
   let navigating = false;
@@ -57,9 +56,10 @@
     const observer = new MutationObserver(() => {
       if (html.classList.contains("is-scroll-blocked")) return;
       observer.disconnect();
-      triggerRefresh();
-      setTimeout(triggerRefresh, 150);
-      setTimeout(triggerRefresh, 500);
+      // Wait until the home intro has restored .js-border / a-waves transforms
+      // before measuring. Immediate resize here was freezing the collapsed hero.
+      setTimeout(triggerRefresh, 400);
+      setTimeout(triggerRefresh, 900);
     });
 
     observer.observe(html, { attributes: true, attributeFilter: ["class"] });
@@ -69,7 +69,7 @@
         html.classList.remove("is-scroll-blocked");
         triggerRefresh();
       }
-    }, 4500);
+    }, 8000);
   };
 
   /** Immediate bypass for prefers-reduced-motion */
@@ -80,7 +80,7 @@
       .querySelectorAll("link[data-intro-style]")
       .forEach((link) => link.remove());
     introLayer?.remove();
-    document.documentElement.classList.add("intro-done");
+    document.documentElement.classList.add("intro-started", "intro-done");
     document.documentElement.classList.remove("is-scroll-blocked");
     window.dispatchEvent(new Event("resize"));
     window.dispatchEvent(new CustomEvent("startPortfolioIntro"));
@@ -88,49 +88,57 @@
     return;
   }
 
-  /** Tear down the intro layer, then reveal the portfolio */
+  /**
+   * Hand pull → Wodniack loader, then drop the 3D layer.
+   *
+   * intro() must run *before* the canvas fades. The loader overlay sits in its
+   * CSS rest state (assembled HC). If that overlay is uncovered first, that
+   * end-frame flashes, then GSAP rewinds to scale 0 and plays — the jitter.
+   * Scroll stays locked until intro() removes the overlay, same as Wodniack.
+   */
   const revealPortfolio = (isFast = false) => {
     if (navigating) return;
     navigating = true;
 
     const introLayer = document.getElementById("intro-layer");
-    if (introLayer) introLayer.classList.add("is-leaving");
+    document.documentElement.classList.add("intro-started");
+    window.dispatchEvent(new CustomEvent("startPortfolioIntro"));
+    watchScrollUnblock();
 
-    const exitDelay = isFast || isTouchDevice ? TOUCH_EXIT_MS : DEFAULT_EXIT_MS;
+    const fadeIntroLayer = () => {
+      if (introLayer) introLayer.classList.add("is-leaving");
 
-    window.setTimeout(() => {
-      stopIntroEngine(introLayer);
-
-      document
-        .querySelectorAll("link[data-intro-style]")
-        .forEach((link) => link.remove());
-
-      window.dispatchEvent(new CustomEvent("startPortfolioIntro"));
-      document.documentElement.classList.remove("is-scroll-blocked");
-      document.documentElement.classList.add("intro-done");
-
-      const triggerRefresh = () => {
-        window.dispatchEvent(new Event("resize"));
-        if (window.lenis) window.lenis.resize();
-        if (window.ScrollTrigger) window.ScrollTrigger.refresh();
-      };
-      triggerRefresh();
-      setTimeout(triggerRefresh, 100);
-      setTimeout(triggerRefresh, 300);
+      const exitDelay = isFast || isTouchDevice ? TOUCH_EXIT_MS : DEFAULT_EXIT_MS;
 
       window.setTimeout(() => {
-        introLayer?.remove();
-        window.dispatchEvent(new CustomEvent("portfolio:entered"));
-      }, CROSSFADE_MS);
-    }, exitDelay);
+        stopIntroEngine(introLayer);
+
+        document
+          .querySelectorAll("link[data-intro-style]")
+          .forEach((link) => link.remove());
+
+        document.documentElement.classList.add("intro-done");
+
+        window.setTimeout(() => {
+          introLayer?.remove();
+          window.dispatchEvent(new CustomEvent("portfolio:entered"));
+        }, CROSSFADE_MS);
+      }, exitDelay);
+    };
+
+    requestAnimationFrame(() => requestAnimationFrame(fadeIntroLayer));
   };
 
   // --- Dynamic 3D Bundle Loading (Desktop Only) ---
   if (!isTouchDevice) {
-    import("/assets/index-wQJ6Ws5X.js").catch((err) => {
-      console.warn("Could not load 3D intro bundle, falling back to direct entry", err);
-      revealPortfolio(true);
-    });
+    import("/assets/index-wQJ6Ws5X.js")
+      .then(() => {
+        window.__resetIntroHand?.();
+      })
+      .catch((err) => {
+        console.warn("Could not load 3D intro bundle, falling back to direct entry", err);
+        revealPortfolio(true);
+      });
   } else {
     // Mobile / Touch: Render brutalist tap affordance
     const introLayer = document.getElementById("intro-layer");

@@ -12,6 +12,12 @@ harshit-portfolio/dist/
 .playwright-mcp/
 .wrangler/
 *.log
+android/.gradle/
+android/**/build/
+android/local.properties
+android/*.apk
+android/*.aab
+android/app/release/
 
 # OS / editor
 .DS_Store
