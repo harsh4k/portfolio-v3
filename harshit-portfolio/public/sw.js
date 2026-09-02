@@ -1,4 +1,4 @@
-const VERSION = "hc-pwa-v8";
+const VERSION = "hc-pwa-v9";
 const PRECACHE = `${VERSION}-shell`;
 const RUNTIME = `${VERSION}-runtime`;
 
@@ -6,7 +6,7 @@ const PRECACHE_URLS = [
   "/",
   "/offline.html",
   "/site.webmanifest",
-  "/icons/logo.svg",
+  "/icons/logo.png",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
   "/styles/integration.css",
