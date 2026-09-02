@@ -9,7 +9,7 @@ const copies = [
   ["fraunces/files/fraunces-latin-200-normal.woff2", "Fraunces-Light.woff2"],
   ["ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2", "IBMPlexMono-Regular.woff2"],
   ["ibm-plex-mono/files/ibm-plex-mono-latin-700-normal.woff2", "IBMPlexMono-Bold.woff2"],
-  ["syne/files/syne-latin-700-normal.woff2", "Syne-Bold.woff2"],
+  ["big-shoulders-display/files/big-shoulders-display-latin-800-normal.woff2", "BigShouldersDisplay-Bold.woff2"],
 ];
 
 const paidFiles = [
@@ -18,6 +18,7 @@ const paidFiles = [
   "PPFraktionMono-Regular.woff2",
   "PPFraktionMono-Bold.woff2",
   "Bigger-Display.woff2",
+  "Syne-Bold.woff2",
   "Comic_CAT.woff2",
   "Comic_CAT.woff",
   "Comic_CAT.ttf",
@@ -28,7 +29,8 @@ const rewrites = [
   ["/fonts/PPEditorialNew-Ultralight.woff2", "/fonts/Fraunces-Light.woff2"],
   ["/fonts/PPFraktionMono-Regular.woff2", "/fonts/IBMPlexMono-Regular.woff2"],
   ["/fonts/PPFraktionMono-Bold.woff2", "/fonts/IBMPlexMono-Bold.woff2"],
-  ["/fonts/Bigger-Display.woff2", "/fonts/Syne-Bold.woff2"],
+  ["/fonts/Bigger-Display.woff2", "/fonts/BigShouldersDisplay-Bold.woff2"],
+  ["/fonts/Syne-Bold.woff2", "/fonts/BigShouldersDisplay-Bold.woff2"],
 ];
 
 function rewriteText(filePath) {

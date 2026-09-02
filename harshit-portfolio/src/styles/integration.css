@@ -315,7 +315,12 @@ html.intro-started {
   max-width: 90vw !important;
 }
 
-/* ---------- Bento Grid Typography Fixes (Prevent Word Splitting) ---------- */
+/* Display titles were sized for a condensed face; keep them on one line. */
+.s__title.astro-7dteeuzc {
+  font-size: min(12.5vw, 18.5rem) !important;
+  letter-spacing: -0.04em;
+}
+
 .s-about.astro-am7g2yfn .s__awards.astro-am7g2yfn .s__award--counter.astro-am7g2yfn .s__award__inner.astro-am7g2yfn {
   gap: 0.35rem;
   padding: 0.15rem 0.15rem 0.35rem;
@@ -336,23 +341,24 @@ html.intro-started {
 }
 
 .s-about.astro-am7g2yfn .s__awards.astro-am7g2yfn .s__award--awwwards.astro-am7g2yfn .s__award__name.astro-am7g2yfn {
-  font-size: clamp(2.4rem, 4.8vw, 4.5rem) !important;
-  line-height: 0.92 !important;
+  font-size: clamp(2.1rem, 7.2vw, 6.5625rem) !important;
+  line-height: 0.82 !important;
   white-space: nowrap !important;
-  letter-spacing: -0.02em !important;
+  letter-spacing: -0.04em !important;
 }
 
 .s-about.astro-am7g2yfn .s__awards.astro-am7g2yfn .s__award--fwa.astro-am7g2yfn .s__award__name.astro-am7g2yfn {
-  font-size: clamp(2.2rem, 4.2vw, 4rem) !important;
-  line-height: 0.92 !important;
+  font-size: clamp(2rem, 6.4vw, 6.5625rem) !important;
+  line-height: 0.82 !important;
   white-space: nowrap !important;
-  letter-spacing: -0.02em !important;
+  letter-spacing: -0.04em !important;
 }
 
 .s-about.astro-am7g2yfn .s__awards.astro-am7g2yfn .s__award--cssda.astro-am7g2yfn .s__award__name.astro-am7g2yfn {
-  font-size: clamp(2.2rem, 4.2vw, 4rem) !important;
-  line-height: 0.92 !important;
+  font-size: clamp(2rem, 6.4vw, 6.5625rem) !important;
+  line-height: 0.82 !important;
   white-space: nowrap !important;
+  letter-spacing: -0.04em !important;
 }
 
 .s-about.astro-am7g2yfn .s__awards.astro-am7g2yfn .s__award--commArt2017.astro-am7g2yfn .s__award__text.astro-am7g2yfn {
