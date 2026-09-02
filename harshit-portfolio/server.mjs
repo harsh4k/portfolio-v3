@@ -3,8 +3,10 @@ import { createServer } from "node:http";
 import { extname, normalize, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const root = resolve(fileURLToPath(new URL(".", import.meta.url)));
+const appRoot = resolve(fileURLToPath(new URL(".", import.meta.url)));
+const root = resolve(appRoot, "..", "dist");
 const port = Number(process.env.PORT || 4175);
+const host = process.env.HOST || "127.0.0.1";
 
 const types = {
   ".css": "text/css; charset=utf-8",
@@ -31,8 +33,12 @@ function sendFile(request, response, filePath) {
   const baseHeaders = {
     "Accept-Ranges": "bytes",
     "Cache-Control": "no-store, no-cache, must-revalidate",
-    "Access-Control-Allow-Origin": "*",
     "Content-Type": type,
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "X-Frame-Options": "SAMEORIGIN",
+    "Content-Security-Policy":
+      "default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self'; worker-src 'self' blob:; frame-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'",
   };
   const range = request.headers.range;
 
@@ -64,32 +70,23 @@ function sendFile(request, response, filePath) {
   return createReadStream(filePath, { start, end }).pipe(response);
 }
 
-/** Resolve a URL pathname against public/, src/, and root directories */
 function resolveFile(pathname) {
   const relative = pathname === "/" ? "index.html" : normalize(pathname).replace(/^[/\\]+/, "");
-  
-  // Search candidates in order: public/, src/, root
-  const candidates = [
-    resolve(root, "public", relative),
-    resolve(root, "src", relative),
-    resolve(root, relative),
-  ];
-
-  for (const candidate of candidates) {
-    // Security check: Must reside within root directory
-    if (!candidate.startsWith(root + sep) && candidate !== resolve(root, "index.html")) {
-      continue;
-    }
-    try {
-      if (existsSync(candidate) && statSync(candidate).isFile()) {
-        return candidate;
-      }
-    } catch {
-      // Continue to next candidate
-    }
+  const candidate = resolve(root, relative);
+  if (!candidate.startsWith(root + sep) && candidate !== resolve(root, "index.html")) {
+    return null;
   }
-
+  try {
+    if (existsSync(candidate) && statSync(candidate).isFile()) return candidate;
+  } catch {
+    return null;
+  }
   return null;
+}
+
+if (!existsSync(root)) {
+  console.error(`Missing ${root}. Run npm run build first.`);
+  process.exit(1);
 }
 
 const server = createServer((request, response) => {
@@ -111,13 +108,13 @@ const server = createServer((request, response) => {
   const filePath = resolveFile(pathname);
   if (!filePath) {
     response.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
-    response.end(`404 Not Found: ${pathname}`);
+    response.end("404 Not Found");
     return;
   }
 
   sendFile(request, response, filePath);
 });
 
-server.listen(port, "0.0.0.0", () => {
-  console.log(`Server running on http://127.0.0.1:${port}/ (root: ${root})`);
+server.listen(port, host, () => {
+  console.log(`Server running on http://${host}:${port}/ (root: ${root})`);
 });

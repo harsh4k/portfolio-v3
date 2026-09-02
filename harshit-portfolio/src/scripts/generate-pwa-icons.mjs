@@ -1,7 +1,7 @@
 /**
  * Brand icons from the site HC monogram (header SVG paths, 280×280).
- * Writes browser favicons + PWA/Android PNGs. The Wodniack icon sync copies
- * the old AW mark; build.mjs overlays this folder afterward.
+ * Writes browser favicons + PWA/Android PNGs into public/icons.
+ * The Wodniack icon sync copies the old AW mark; run this after that sync.
  */
 import fs from "fs";
 import path from "path";
@@ -10,7 +10,7 @@ import sharp from "sharp";
 import pngToIco from "png-to-ico";
 
 const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
-const outDir = path.join(appRoot, "public", "pwa-icons");
+const outDir = path.join(appRoot, "public", "icons");
 
 const hcMark = `
   <path d="M0 0v280h39.755V158.4h59.65V280h39.756V0H99.411v118.8H39.755V0H0Z"/>

@@ -19,7 +19,7 @@ It does **not**:
 1. Install Android Studio (Koala or newer) and a JDK 17.
 2. Open this `android/` folder.
 3. Let Gradle sync.
-4. Copy `../harshit-portfolio/public/pwa-icons/icon-192.png` to `app/src/main/res/mipmap-xxhdpi/ic_launcher.png` if the mipmap is missing.
+4. Copy `../harshit-portfolio/public/icons/icon-192.png` to `app/src/main/res/mipmap-xxhdpi/ic_launcher.png` if the mipmap is missing.
 5. Run on the Phone (4b) or `Build > Build Bundle(s) / APK(s) > Build APK(s)`.
 
 Debug install:

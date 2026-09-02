@@ -19,7 +19,7 @@
           </div>
         </header>
         <div class="resume-dock__frame">
-          <iframe title="Harshit Chauhan resume" src="${PDF_URL}"></iframe>
+          <iframe title="Harshit Chauhan resume" src="${PDF_URL}" sandbox="allow-same-origin allow-scripts" referrerpolicy="no-referrer"></iframe>
         </div>
       </section>
     </div>

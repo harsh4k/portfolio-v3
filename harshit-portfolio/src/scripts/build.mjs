@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "url";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
@@ -390,12 +391,7 @@ if (fs.existsSync(referenceWodniackPath)) {
 ${JSON.stringify(jsonLd, null, 2)}
   </script>
   <link rel="stylesheet" href="/styles/integration.css">
-  <script>
-    if (!HTMLImageElement.prototype.play) {
-      HTMLImageElement.prototype.play = function() { return Promise.resolve(); };
-      HTMLImageElement.prototype.pause = function() {};
-    }
-  </script>
+  <script src="/scripts/img-media.js"></script>
 `;
   html = html.substring(0, headEnd) + extraHeadTags + html.substring(headEnd);
 
@@ -443,43 +439,50 @@ if (fs.existsSync(wodniackRef)) {
   syncDir(path.join(wodniackRef, "icons"), path.join(publicDir, "icons"));
 }
 
-const pwaIconsDir = path.resolve(appRoot, "public", "pwa-icons");
-if (fs.existsSync(pwaIconsDir)) {
-  syncDir(pwaIconsDir, path.join(publicDir, "icons"));
-}
+const runScript = (name) => {
+  const result = spawnSync(process.execPath, [path.resolve(root, name)], { stdio: "inherit" });
+  if (result.status !== 0) console.warn(`build: ${name} skipped or failed`);
+};
+runScript("generate-pwa-icons.mjs");
+runScript("generate-og.mjs");
 
-// 18. ALWAYS assemble dist/ folder for static deployment (Cloudflare Pages, Vercel, Netlify)
-const distDir = path.resolve(appRoot, "dist");
+const dropIfPresent = (target) => {
+  try {
+    fs.rmSync(target, { recursive: true, force: true });
+  } catch (error) {
+    console.warn("build: could not remove", target, error.message);
+  }
+};
+const pruneJunk = (dir) => {
+  dropIfPresent(path.join(dir, "pwa-icons"));
+  dropIfPresent(path.join(dir, "service-worker.js"));
+  dropIfPresent(path.join(dir, "images", "images"));
+  dropIfPresent(path.join(dir, "icons", "icons"));
+  dropIfPresent(path.join(dir, "cdn-cgi"));
+};
+pruneJunk(publicDir);
+
+// 18. Assemble repo dist/ for static hosting (Cloudflare Pages, Vercel, Netlify)
+const distDir = path.resolve(repoRoot, "dist");
 fs.rmSync(distDir, { recursive: true, force: true });
 fs.mkdirSync(distDir, { recursive: true });
 
-// Copy index.html
 fs.copyFileSync(path.resolve(appRoot, "index.html"), path.join(distDir, "index.html"));
+fs.cpSync(publicDir, distDir, { recursive: true });
 
-// Copy public/
-fs.cpSync(path.resolve(appRoot, "public"), distDir, { recursive: true });
-
-// Copy src/styles/integration.css
 fs.mkdirSync(path.join(distDir, "styles"), { recursive: true });
 fs.copyFileSync(
   path.resolve(appRoot, "src", "styles", "integration.css"),
   path.join(distDir, "styles", "integration.css")
 );
 
-// Copy src/scripts/bridge.js
 fs.mkdirSync(path.join(distDir, "scripts"), { recursive: true });
-fs.copyFileSync(
-  path.resolve(appRoot, "src", "scripts", "bridge.js"),
-  path.join(distDir, "scripts", "bridge.js")
-);
-fs.copyFileSync(
-  path.resolve(appRoot, "src", "scripts", "pwa.js"),
-  path.join(distDir, "scripts", "pwa.js")
-);
-fs.copyFileSync(
-  path.resolve(appRoot, "src", "scripts", "resume-dock.js"),
-  path.join(distDir, "scripts", "resume-dock.js")
-);
+for (const script of ["bridge.js", "pwa.js", "resume-dock.js", "img-media.js"]) {
+  fs.copyFileSync(
+    path.resolve(appRoot, "src", "scripts", script),
+    path.join(distDir, "scripts", script)
+  );
+}
 
 const resumeDocx = path.resolve(repoRoot, "docs", "Harshit_Resume.docx");
 const resumePdf = path.resolve(repoRoot, "docs", "Harshit_resume.pdf");
@@ -494,11 +497,6 @@ if (fs.existsSync(path.join(publicDir, "resume.pdf"))) {
   fs.copyFileSync(resumePdf, path.join(publicDir, "resume.pdf"));
 }
 
-// Mirror dist to repository root dist/ if different
-if (repoRoot !== appRoot && fs.existsSync(repoRoot)) {
-  const repoDist = path.resolve(repoRoot, "dist");
-  fs.rmSync(repoDist, { recursive: true, force: true });
-  fs.cpSync(distDir, repoDist, { recursive: true });
-}
+pruneJunk(distDir);
 
-console.log("build: dist/ directory assembled for production deployment!");
+console.log("build: dist/ assembled at", distDir);

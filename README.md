@@ -33,7 +33,7 @@ ProtypH/
 │
 ├── docs/                          # Architectural documentation and design specifications
 │   └── NOTHING-PHONE-4B.md        # PWA + Phone (4b) lock screen / Glyph reality check
-├── web/                           # Pointer only — PWA lives in harshit-portfolio/
+├── dist/                          # Production static output (deploy this folder)
 ├── android/                       # Optional Trusted Web Activity + home-screen widget
 └── README.md                      # Workspace documentation
 ```
@@ -42,12 +42,18 @@ ProtypH/
 
 ## Quick Start
 
-### 1. Run Development Server
+### 1. Build, then run the local static server
 ```bash
+npm run build
 cd harshit-portfolio
 npm run dev
-# Server starts at http://127.0.0.1:4175/
+# Server starts at http://127.0.0.1:4175/ from repo dist/
+# Phone on LAN: HOST=0.0.0.0 npm run dev
 ```
+
+Deploy **only** `dist/` (Cloudflare Pages output directory). Do not run `server.mjs` in production.
+
+PP Editorial / Fraktion / Bigger Display are self-hosted from the Wodniack reference. Confirm you have a license to serve them on harshitchauhan.dev.
 
 ### 2. Compile / Rebuild Portfolio
 ```bash

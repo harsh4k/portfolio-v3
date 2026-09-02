@@ -1,4 +1,4 @@
-const VERSION = "hc-pwa-v4";
+const VERSION = "hc-pwa-v5";
 const PRECACHE = `${VERSION}-shell`;
 const RUNTIME = `${VERSION}-runtime`;
 
@@ -46,8 +46,10 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          const copy = response.clone();
-          caches.open(RUNTIME).then((cache) => cache.put("/", copy));
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(RUNTIME).then((cache) => cache.put("/", copy));
+          }
           return response;
         })
         .catch(async () => {
@@ -64,8 +66,10 @@ self.addEventListener("fetch", (event) => {
         (cached) =>
           cached ||
           fetch(request).then((response) => {
-            const copy = response.clone();
-            caches.open(RUNTIME).then((cache) => cache.put(request, copy));
+            if (response.ok) {
+              const copy = response.clone();
+              caches.open(RUNTIME).then((cache) => cache.put(request, copy));
+            }
             return response;
           })
       )
@@ -76,8 +80,10 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(
     fetch(request)
       .then((response) => {
-        const copy = response.clone();
-        caches.open(RUNTIME).then((cache) => cache.put(request, copy));
+        if (response.ok) {
+          const copy = response.clone();
+          caches.open(RUNTIME).then((cache) => cache.put(request, copy));
+        }
         return response;
       })
       .catch(() => caches.match(request))

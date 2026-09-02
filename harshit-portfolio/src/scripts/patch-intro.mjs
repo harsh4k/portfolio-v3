@@ -107,18 +107,17 @@ const copyIfPresent = (from, to) => {
   fs.copyFileSync(from, to);
 };
 
-const distCopies = [
-  path.resolve(appRoot, "dist"),
-  path.resolve(repoRoot, "dist"),
-];
+const distCopies = [path.resolve(repoRoot, "dist")];
 const patchedFiles = [
   ["public/_astro/hoisted.BvNyQ0G_.js", "_astro/hoisted.BvNyQ0G_.js"],
   ["public/assets/index-wQJ6Ws5X.js", "assets/index-wQJ6Ws5X.js"],
   ["src/scripts/bridge.js", "scripts/bridge.js"],
   ["src/scripts/pwa.js", "scripts/pwa.js"],
   ["src/scripts/resume-dock.js", "scripts/resume-dock.js"],
+  ["src/scripts/img-media.js", "scripts/img-media.js"],
   ["src/styles/integration.css", "styles/integration.css"],
   ["public/sw.js", "sw.js"],
+  ["public/_headers", "_headers"],
 ];
 
 for (const distDir of distCopies) {
