@@ -1,4 +1,4 @@
-const VERSION = "hc-pwa-v6";
+const VERSION = "hc-pwa-v7";
 const PRECACHE = `${VERSION}-shell`;
 const RUNTIME = `${VERSION}-runtime`;
 

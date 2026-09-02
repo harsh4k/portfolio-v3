@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "url";
+import { applyFreeFonts } from "./copy-free-fonts.mjs";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const appRoot = path.resolve(root, "..", "..");
@@ -345,11 +346,11 @@ if (fs.existsSync(referenceWodniackPath)) {
   html = html.replace(/<meta property="og:locale"[^>]*>/, '<meta property="og:locale" content="en_US">');
   html = html.replace(/<meta property="og:title"[^>]*>/, '<meta property="og:title" content="Harshit Chauhan — Creative Developer &amp; Student">');
   html = html.replace(/<meta property="og:description"[^>]*>/, '<meta property="og:description" content="Harshit Chauhan — Computer Engineering student at NMIMS Mumbai &amp; Creative Developer crafting considered web applications, motion systems, and local AI tools.">');
-  html = html.replace(/<meta property="og:url"[^>]*>/, '<meta property="og:url" content="https://harshitchauhan.dev/">');
+  html = html.replace(/<meta property="og:url"[^>]*>/, '<meta property="og:url" content="https://harshh.pages.dev/">');
   html = html.replace(/<meta property="og:site_name"[^>]*>/, '<meta property="og:site_name" content="Harshit Chauhan Portfolio">');
-  html = html.replace(/<meta property="og:image"[^>]*>/, '<meta property="og:image" content="https://harshitchauhan.dev/images/og-image.png">');
+  html = html.replace(/<meta property="og:image"[^>]*>/, '<meta property="og:image" content="https://harshh.pages.dev/images/og-image.png">');
   html = html.replace(/<meta property="og:image:height"[^>]*>/, '<meta property="og:image:height" content="630">');
-  html = html.replace(/<meta name="twitter:image"[^>]*>/, '<meta name="twitter:image" content="https://harshitchauhan.dev/images/og-image.png">');
+  html = html.replace(/<meta name="twitter:image"[^>]*>/, '<meta name="twitter:image" content="https://harshh.pages.dev/images/og-image.png">');
 
   // 14. Inject SEO links, Manifest, JSON-LD, Stylesheets & image play/pause polyfill into <head>
   const headEnd = html.indexOf("</head>");
@@ -358,7 +359,7 @@ if (fs.existsSync(referenceWodniackPath)) {
     "@type": "Person",
     "name": "Harshit Chauhan",
     "jobTitle": "Creative Developer & Computer Engineering Student",
-    "url": "https://harshitchauhan.dev/",
+    "url": "https://harshh.pages.dev/",
     "email": "harshitsinhchauhan250@gmail.com",
     "alumniOf": {
       "@type": "CollegeOrUniversity",
@@ -383,7 +384,7 @@ if (fs.existsSync(referenceWodniackPath)) {
 
   const extraHeadTags = `
   <link rel="stylesheet" crossorigin href="/assets/index-DG8As337.css" data-intro-style>
-  <link rel="canonical" href="https://harshitchauhan.dev/">
+  <link rel="canonical" href="https://harshh.pages.dev/">
   <link rel="manifest" href="/site.webmanifest">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -445,6 +446,7 @@ const runScript = (name) => {
 };
 runScript("generate-pwa-icons.mjs");
 runScript("generate-og.mjs");
+applyFreeFonts();
 
 const dropIfPresent = (target) => {
   try {
