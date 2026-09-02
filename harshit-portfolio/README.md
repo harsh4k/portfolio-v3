@@ -60,14 +60,9 @@ harshit-portfolio/
 
 ---
 
-## Important: Font Licensing Notice
+## Fonts
 
-> [!WARNING]
-> The `public/fonts/` directory contains commercial typography faces (**PP Editorial New**, **PP Fraktion Mono**, **Bigger Display**, **Comic CAT**). 
-> For public deployment and commercial distribution, please ensure you hold valid web licenses for these typefaces, or swap them to comparable open-source / libre alternatives:
-> - **Serif Display**: *Fraunces*, *Playfair Display*, or *Cinzel* (Google Fonts)
-> - **Monospace**: *Space Mono*, *JetBrains Mono*, or *IBM Plex Mono* (Google Fonts)
-> - **Bold Display**: *Syne*, *Bebas Neue*, or *Anton* (Google Fonts)
+The site self-hosts OFL-licensed **Fraunces**, **IBM Plex Mono**, and **Syne** (via `@fontsource` at build time). Paid PP Editorial / Fraktion / Bigger Display files are not shipped.
 
 ---
 
