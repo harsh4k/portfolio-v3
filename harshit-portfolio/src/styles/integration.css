@@ -199,6 +199,13 @@ html.intro-swipe {
   touch-action: none;
 }
 
+/* After handover, never keep the swipe lock. A resize while DevTools
+   is in a phone width used to re-add intro-swipe and freeze scrolling. */
+html.intro-started {
+  touch-action: auto !important;
+  overscroll-behavior: auto;
+}
+
 .intro-layer--swipe {
   touch-action: none;
   overscroll-behavior: none;

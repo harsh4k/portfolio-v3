@@ -22,6 +22,7 @@
   const LAYER_FADE_MS = 450;
 
   let navigating = false;
+  let unbindSwipe = () => {};
 
   /**
    * Stop the intro engine and release WebGL contexts.
@@ -95,6 +96,7 @@
   const revealPortfolio = (isFast = false, { fullPage = false } = {}) => {
     if (navigating) return;
     navigating = true;
+    unbindSwipe();
 
     const introLayer = document.getElementById("intro-layer");
     document.documentElement.classList.add("intro-started");
@@ -139,6 +141,7 @@
     if (!introLayer) return;
 
     const ensureHint = () => {
+      if (navigating) return introLayer.querySelector(".intro-swipe-catch");
       introLayer.classList.add("intro-layer--swipe");
       document.documentElement.classList.add("intro-swipe");
       if (introLayer.querySelector(".intro-swipe-catch")) {
@@ -269,9 +272,24 @@
       window.addEventListener("touchend", onEnd, opts);
     }
     window.addEventListener("wheel", onWheel, opts);
-    window.addEventListener("resize", () => {
+    const onResize = () => {
+      if (navigating) return;
       if (isSwipeMode()) catcher = ensureHint();
-    });
+    };
+    window.addEventListener("resize", onResize);
+
+    unbindSwipe = () => {
+      window.removeEventListener("pointerdown", onStart, opts);
+      window.removeEventListener("pointermove", onMove, opts);
+      window.removeEventListener("pointerup", onEnd, opts);
+      window.removeEventListener("pointercancel", onEnd, opts);
+      window.removeEventListener("touchstart", onStart, opts);
+      window.removeEventListener("touchmove", onMove, opts);
+      window.removeEventListener("touchend", onEnd, opts);
+      window.removeEventListener("wheel", onWheel, opts);
+      window.removeEventListener("resize", onResize);
+      document.documentElement.classList.remove("intro-swipe");
+    };
   };
 
   bindSwipeToEnter(document.getElementById("intro-layer"));
