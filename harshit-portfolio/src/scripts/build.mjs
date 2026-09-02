@@ -333,7 +333,7 @@ if (fs.existsSync(referenceWodniackPath)) {
   html = html.replace(
     /(<link rel="icon"[^>]*>)+<link rel="shortcut icon"[^>]*><link rel="apple-touch-icon"[^>]*>/,
     [
-      '<link rel="icon" type="image/svg+xml" href="/icons/logo.svg">',
+      '<link rel="icon" type="image/png" href="/icons/logo.png">',
       '<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">',
       '<link rel="icon" type="image/png" sizes="48x48" href="/icons/favicon-48x48.png">',
       '<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">',
@@ -434,8 +434,10 @@ if (!fs.existsSync(path.join(publicDir, "images", "ctas", "tex-ui-switch-fe-on.w
   syncDir(repoCtas, path.join(publicDir, "images", "ctas"));
 }
 
-const logoSrc = path.join(publicDir, "icons", "logo.svg");
-const logoBackup = fs.existsSync(logoSrc) ? fs.readFileSync(logoSrc) : null;
+const logoFiles = ["logo.png", "logo.svg"].map((name) => {
+  const filePath = path.join(publicDir, "icons", name);
+  return fs.existsSync(filePath) ? { filePath, bytes: fs.readFileSync(filePath) } : null;
+}).filter(Boolean);
 
 if (fs.existsSync(wodniackRef)) {
   syncDir(path.join(wodniackRef, "_astro"), path.join(publicDir, "_astro"));
@@ -443,9 +445,9 @@ if (fs.existsSync(wodniackRef)) {
   syncDir(path.join(wodniackRef, "icons"), path.join(publicDir, "icons"));
 }
 
-if (logoBackup) {
+if (logoFiles.length) {
   fs.mkdirSync(path.join(publicDir, "icons"), { recursive: true });
-  fs.writeFileSync(logoSrc, logoBackup);
+  for (const { filePath, bytes } of logoFiles) fs.writeFileSync(filePath, bytes);
 }
 
 const runScript = (name) => {
