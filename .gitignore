@@ -2,6 +2,10 @@
 node_modules/
 harshit-portfolio/dist/
 
+# Unpacked Word scratch from resume edits
+.tmp-docx/
+.tmp-docx*/
+
 # Environment / secrets
 .env
 .env.*
@@ -36,4 +40,4 @@ references/
 # Byte-identical nested duplicates of directories that already exist one level
 # up. Nothing references these paths.
 harshit-portfolio/public/_astro/_astro/
-harshit-portfolio/public/cdn-cgi/cdn-cgi/
+harshit-portfolio/public/cdn-cgi/

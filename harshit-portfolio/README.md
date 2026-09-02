@@ -74,11 +74,11 @@ harshit-portfolio/
 ## Development & Build Commands
 
 ```bash
-# 1. Start local dev server (Port 4175)
-npm run dev
+# 1. Compile assets into repo dist/
+npm run build   # from repo root, or from this folder
 
-# 2. Re-compile index.html and run bundle patches
-npm run build
+# 2. Serve dist/ locally (Port 4175)
+npm run dev
 ```
 
 Both bundle patchers (`src/scripts/clean-adrien.mjs` and `src/scripts/patch-intro.mjs`) are idempotent and safe to re-run.
