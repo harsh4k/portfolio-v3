@@ -391,6 +391,7 @@ if (fs.existsSync(referenceWodniackPath)) {
   <script type="application/ld+json">
 ${JSON.stringify(jsonLd, null, 2)}
   </script>
+  <link rel="preload" href="/fonts/BigShouldersDisplay-Bold.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/styles/integration.css">
   <script src="/scripts/img-media.js"></script>
 `;
