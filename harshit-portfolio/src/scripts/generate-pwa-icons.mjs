@@ -1,7 +1,6 @@
 /**
- * Brand icons from the site HC monogram (header SVG paths, 280×280).
- * Writes browser favicons + PWA/Android PNGs into public/icons.
- * The Wodniack icon sync copies the old AW mark; run this after that sync.
+ * Rasterize public/icons/logo.svg into favicons + PWA PNGs.
+ * Browser favicon uses the SVG itself.
  */
 import fs from "fs";
 import path from "path";
@@ -11,44 +10,50 @@ import pngToIco from "png-to-ico";
 
 const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const outDir = path.join(appRoot, "public", "icons");
+const logoPath = path.join(outDir, "logo.svg");
 
-const hcMark = `
-  <path d="M0 0v280h39.755V158.4h59.65V280h39.756V0H99.411v118.8H39.755V0H0Z"/>
-  <path d="M160.734 0v280H280V240.245h-79.51V39.755H280V0H160.734Z"/>
-`;
+fs.mkdirSync(outDir, { recursive: true });
 
-function iconSvg({ size, pad, fill = "#160000", background = "#F40C3F" }) {
-  const inner = size * (1 - pad * 2);
-  const scale = inner / 280;
-  const x = (size - 280 * scale) / 2;
-  const y = x;
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-  <rect width="${size}" height="${size}" fill="${background}"/>
-  <g transform="translate(${x} ${y}) scale(${scale})" fill="${fill}">${hcMark}</g>
-</svg>`;
+if (!fs.existsSync(logoPath)) {
+  console.error("generate-pwa-icons: missing", logoPath);
+  process.exit(1);
 }
 
-async function writePng(dir, name, svg) {
-  const dest = path.join(dir, name);
-  await sharp(Buffer.from(svg)).png().toFile(dest);
+const logo = fs.readFileSync(logoPath);
+fs.copyFileSync(logoPath, path.join(outDir, "favicon.svg"));
+
+/** Figma SVG uses foreignObject; Sharp may fail, so keep a matching red square fallback. */
+const rasterFallback = Buffer.from(
+  `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+<rect width="120" height="120" fill="#FF0606"/>
+<rect x="0.5" y="0.5" width="119" height="119" fill="none" stroke="#000"/>
+</svg>`
+);
+
+async function raster(size) {
+  try {
+    return await sharp(logo, { density: 384 }).resize(size, size).png().toBuffer();
+  } catch (error) {
+    console.warn("generate-pwa-icons: Sharp could not rasterize logo.svg, using square fallback:", error.message);
+    return sharp(rasterFallback, { density: 384 }).resize(size, size).png().toBuffer();
+  }
+}
+
+async function writePng(name, size) {
+  const dest = path.join(outDir, name);
+  fs.writeFileSync(dest, await raster(size));
   console.log("wrote", dest);
   return dest;
 }
 
-fs.mkdirSync(outDir, { recursive: true });
-
-const faviconSvg = iconSvg({ size: 512, pad: 0.1 });
-fs.writeFileSync(path.join(outDir, "favicon.svg"), faviconSvg);
-
-await writePng(outDir, "favicon-32x32.png", iconSvg({ size: 32, pad: 0.08 }));
-await writePng(outDir, "favicon-48x48.png", iconSvg({ size: 48, pad: 0.08 }));
-await writePng(outDir, "apple-touch-icon.png", iconSvg({ size: 180, pad: 0.12 }));
-await writePng(outDir, "icon-192.png", iconSvg({ size: 192, pad: 0.08 }));
-await writePng(outDir, "icon-512.png", iconSvg({ size: 512, pad: 0.08 }));
-await writePng(outDir, "icon-maskable-192.png", iconSvg({ size: 192, pad: 0.2 }));
-await writePng(outDir, "icon-maskable-512.png", iconSvg({ size: 512, pad: 0.2 }));
-await writePng(outDir, "shortcut-192.png", iconSvg({ size: 192, pad: 0.12 }));
+await writePng("favicon-32x32.png", 32);
+await writePng("favicon-48x48.png", 48);
+await writePng("apple-touch-icon.png", 180);
+await writePng("icon-192.png", 192);
+await writePng("icon-512.png", 512);
+await writePng("icon-maskable-192.png", 192);
+await writePng("icon-maskable-512.png", 512);
+await writePng("shortcut-192.png", 192);
 
 const ico = await pngToIco([
   path.join(outDir, "favicon-32x32.png"),
@@ -56,4 +61,4 @@ const ico = await pngToIco([
 ]);
 fs.writeFileSync(path.join(outDir, "favicon.ico"), ico);
 console.log("wrote", path.join(outDir, "favicon.ico"));
-console.log("HC brand icons generated.");
+console.log("icons generated from logo.svg");
