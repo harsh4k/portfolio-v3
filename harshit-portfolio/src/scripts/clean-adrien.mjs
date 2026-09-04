@@ -137,6 +137,56 @@ if (js.includes(DEVICE_NARROW)) {
   fail("device flags (class vL) not found");
 }
 
+// 6b. Scrub the intro app's hidden panels.
+//
+// integration.css hides .about, .projects and .media-layer, but the Vue app
+// still renders them into the DOM, so everything below is crawlable and shows
+// in view-source. It contained the reference author's client work, his city and
+// his job title under Harshit's name.
+const HIDDEN_PANEL_FIXES = [
+  // Outbound links to the reference author's client cases. The panels never
+  // open, so these are inert anchors — but they are real links to other
+  // studios' work sitting on this domain.
+  ["https://dogstudio.co/cases/virgin-galactic/", "#"],
+  ["https://dogstudio.co/cases/sprite-x-marvel/", "#"],
+  ["https://dogstudio.co/cases/dept-pioneer/", "#"],
+  ["https://cosmicshelter.com/work/lvmh-the-maison-of-all-victories", "#"],
+  ["https://www.melius.com/", "#"],
+  ["https://explore.blast.co.uk/", "#"],
+  ["https://www.myli.io/", "#"],
+  // harshitchauhan.dev is what the blanket adrienlamy.fr rename produced. The
+  // domain does not resolve, so these were broken links and a dead address.
+  ["https://crabelab.adrienlamy.fr/en/copie-double", "#"],
+  ["https://adrienlamy.fr", "https://github.com/harsh4k"],
+  ["hey@adrienlamy.fr", "harshitsinhchauhan250@gmail.com"],
+  // Biography inherited wholesale from the reference site.
+  ["Creative Dev Mercenary", "Creative Developer"],
+  ["Based in Paris (the french one)", "Based in Mumbai, India"],
+];
+
+for (const [from, to] of HIDDEN_PANEL_FIXES) {
+  if (js.includes(from)) {
+    js = js.replaceAll(from, to);
+  } else {
+    console.warn(`clean-adrien: hidden-panel string not found (already fixed?): ${from}`);
+  }
+}
+console.log("clean-adrien: hidden panels scrubbed of third-party links and inherited bio");
+
+// 6c. The intro scene ships its own sr-only <h1>, which collides with the
+//     portfolio's real <h1> — two h1 elements in one document. Demote it; the
+//     text still describes the scene for assistive tech.
+const SR_H1 = 'Ke("h1",{class:"sr-only"},"Who am I? Adrien Lamy"';
+const SR_P = 'Ke("p",{class:"sr-only"},"Who am I? Adrien Lamy"';
+if (js.includes(SR_P)) {
+  console.log("clean-adrien: intro sr-only heading already demoted");
+} else if (js.includes(SR_H1)) {
+  js = js.replace(SR_H1, SR_P);
+  console.log("clean-adrien: intro sr-only h1 demoted so the page has one h1");
+} else {
+  fail("intro sr-only h1 not found");
+}
+
 // 7. Replace all references to Adrien / Adrien Lamy with Harshit / Harshit Chauhan
 const TITLES = [
   ["Adrien Lamy :D", "Harshit Chauhan :D"],
@@ -146,7 +196,6 @@ const TITLES = [
   ["Sup, I'm Adrien Lamy,", "Sup, I'm Harshit Chauhan,"],
   ["Adrien Lamy", "Harshit Chauhan"],
   ["Adrien", "Harshit"],
-  ["adrienlamy.fr", "harshitchauhan.dev"],
   ["adrienlamy", "harshitchauhan"],
 ];
 

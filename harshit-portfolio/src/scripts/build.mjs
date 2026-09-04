@@ -538,6 +538,12 @@ const pruneJunk = (dir) => {
   dropIfPresent(path.join(dir, "fonts", "fonts"));
   dropIfPresent(path.join(dir, "assets", "fonts"));
 
+  // The intro app's project media — the reference author's client showreels.
+  // Its projects and media panels are hidden by integration.css and never open,
+  // so these are never requested; verified by loading the page, pulling the
+  // hand and scrolling the whole document with zero video requests made.
+  dropIfPresent(path.join(dir, "videos"));
+
   // Nothing on this site plays video out of _astro/ — the work section uses
   // still .webp — so every .mp4 in there is the reference site's client
   // showreels riding along. ~78 MB across public/ and dist/ combined.
