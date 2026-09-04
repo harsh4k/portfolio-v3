@@ -86,9 +86,23 @@ const ORIGINAL_QR_ANIM =
 const PATCHED_QR_ANIM =
   'i&&r.fromTo(i,{"--bg-p":"0%"},{"--bg-p":"100%",duration:1.5,ease:"expo.out"},1.75)';
 
-if (js.includes(ORIGINAL_QR_ANIM)) {
+// ORIGINAL_QR_ANIM is a substring of PATCHED_QR_ANIM — the patch only prepends
+// a guard — so testing for the original still matches an already-patched file.
+// Locally that went unnoticed because build.mjs re-syncs a pristine engine from
+// references/ first; without references/ (CI, or any clone) every run prepended
+// another `i&&`, so the engine grew and builds were not reproducible.
+if (js.includes(PATCHED_QR_ANIM)) {
+  console.log("patch-intro: QR null check already applied");
+} else if (js.includes(ORIGINAL_QR_ANIM)) {
   js = js.replace(ORIGINAL_QR_ANIM, PATCHED_QR_ANIM);
   console.log("patch-intro: QR code null check applied to silence GSAP warnings");
+}
+
+// Collapse any `i&&i&&...` left behind by earlier non-idempotent runs.
+const doubledQrGuard = "i&&" + PATCHED_QR_ANIM;
+while (js.includes(doubledQrGuard)) {
+  js = js.replace(doubledQrGuard, PATCHED_QR_ANIM);
+  console.log("patch-intro: collapsed a duplicated QR guard from a previous run");
 }
 
 // 5. Do not rebuild a-waves mid-intro. Wodniack's home intro animates
