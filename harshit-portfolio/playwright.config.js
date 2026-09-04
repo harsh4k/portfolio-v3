@@ -20,8 +20,25 @@ export default defineConfig({
     serviceWorkers: "block",
   },
   projects: [
-    { name: "desktop", use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } } },
-    { name: "mobile", use: { ...devices["iPhone 13"] } },
+    {
+      name: "desktop",
+      use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } },
+    },
+    {
+      // An iPhone-shaped Chromium rather than devices["iPhone 13"], which is
+      // WebKit. What is under test is our layout and touch handover, not Safari,
+      // and this keeps CI to a single browser download.
+      name: "mobile",
+      use: {
+        browserName: "chromium",
+        viewport: { width: 390, height: 844 },
+        deviceScaleFactor: 3,
+        isMobile: true,
+        hasTouch: true,
+        userAgent:
+          "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+      },
+    },
   ],
   webServer: {
     command: "node server.mjs",
