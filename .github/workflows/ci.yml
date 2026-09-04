@@ -1,4 +1,5 @@
 name: build
+
 on:
   push:
     branches: [main, master]
@@ -9,12 +10,53 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version-file: .node-version
           cache: npm
           cache-dependency-path: harshit-portfolio/package-lock.json
+
       - run: npm ci
         working-directory: harshit-portfolio
+
+      # Same command Cloudflare Pages runs. references/ is not in the repo, so
+      # this exercises the real deploy path rather than a local-only one.
       - run: npm run build
-        working-directory: .
+
+      # dist/ is not committed; server.mjs serves it, so the build must have run.
+      - name: Check the build produced a deployable dist/
+        run: |
+          test -f dist/index.html
+          test -f dist/_astro/hoisted.BvNyQ0G_.js
+          test -f dist/assets/index-wQJ6Ws5X.js
+          echo "dist/ files: $(find dist -type f | wc -l)"
+
+      # Re-running must be a no-op. The bundle patches are applied in place, and
+      # a non-idempotent guard previously grew the engine on every build.
+      - name: Check the build is idempotent
+        run: |
+          find dist -type f -exec sha256sum {} + | sort -k2 > /tmp/dist-first.txt
+          npm run build
+          find dist -type f -exec sha256sum {} + | sort -k2 > /tmp/dist-second.txt
+          diff /tmp/dist-first.txt /tmp/dist-second.txt \
+            || { echo "::error::build is not idempotent - a second run changed dist/"; exit 1; }
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+        working-directory: harshit-portfolio
+
+      - name: Smoke tests
+        run: npm test
+        working-directory: harshit-portfolio
+        env:
+          CI: "true"
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            harshit-portfolio/playwright-report/
+            harshit-portfolio/test-results/
+          retention-days: 7

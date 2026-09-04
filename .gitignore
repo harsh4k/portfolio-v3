@@ -20,6 +20,10 @@ harshit-portfolio/dist/
 
 # Tooling output
 .playwright-mcp/
+harshit-portfolio/test-results/
+harshit-portfolio/playwright-report/
+harshit-portfolio/blob-report/
+harshit-portfolio/.playwright/
 .wrangler/
 *.log
 android/.gradle/

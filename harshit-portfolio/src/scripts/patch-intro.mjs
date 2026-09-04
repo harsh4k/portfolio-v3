@@ -110,6 +110,33 @@ while (js.includes(doubledQrGuard)) {
 //    paths on introend/updateViewport samples those transforms and freezes
 //    the collapsed hero. Geometry already refreshes via the site's resize bus.
 
+// 6. Honour prefers-reduced-motion in the site intro.
+//
+//    bridge.js already bypasses the 3D layer for reduced-motion visitors, but it
+//    then hands over to this loader — a five second GSAP timeline that draws the
+//    monogram and sweeps a border across the whole viewport. GSAP animates JS
+//    values, not CSS transitions, so the `animation-duration: 0.001ms` override
+//    in integration.css cannot touch it. Measured: scroll unblocked at 196ms,
+//    but the animated curtain sat over the page until 5152ms.
+//
+//    timeScale rather than progress(1) or seek(): it drives the playhead
+//    normally, so both .call() callbacks still fire in order — the "intro" event
+//    the header and hero reveals are bound to, and the teardown that reveals
+//    .js-mount and unblocks scroll. Jumping the playhead risks suppressing them.
+const INTRO_TIMELINE_END = '$.emit("updateViewport")})},null,5)}';
+const INTRO_TIMELINE_REDUCED =
+  '$.emit("updateViewport")})},null,5),window.matchMedia("(prefers-reduced-motion: reduce)").matches&&l.timeScale(200)}';
+
+if (js.includes(INTRO_TIMELINE_REDUCED)) {
+  console.log("patch-intro: reduced-motion fast-forward already applied");
+} else if (js.includes(INTRO_TIMELINE_END)) {
+  js = js.replace(INTRO_TIMELINE_END, INTRO_TIMELINE_REDUCED);
+  console.log("patch-intro: site intro now fast-forwards under prefers-reduced-motion");
+} else {
+  console.error("patch-intro: FAILED — intro timeline end not found");
+  process.exitCode = 1;
+}
+
 fs.writeFileSync(enginePath, js, "utf8");
 console.log("patch-intro: hoisted.BvNyQ0G_.js updated successfully.");
 
