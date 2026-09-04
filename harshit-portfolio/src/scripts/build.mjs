@@ -479,12 +479,42 @@ const dropIfPresent = (target) => {
     console.warn("build: could not remove", target, error.message);
   }
 };
+// Filename prefixes of the reference author's own photographs. The visual
+// archive swaps in Harshit's images, so these are left over unreferenced.
+// Matched on the prefix because the suffix is a content hash that changes
+// whenever the reference site is re-synced.
+const REFERENCE_PHOTO_PREFIXES = [
+  "art-1987", "art-dtyw", "art-lines", "first-fwa", "gameboy", "legos",
+  "remote-2005", "roar", "setup-2006", "setup-2016", "setup-2020",
+];
+
 const pruneJunk = (dir) => {
   dropIfPresent(path.join(dir, "pwa-icons"));
   dropIfPresent(path.join(dir, "service-worker.js"));
   dropIfPresent(path.join(dir, "images", "images"));
   dropIfPresent(path.join(dir, "icons", "icons"));
   dropIfPresent(path.join(dir, "cdn-cgi"));
+
+  // Nested byte-identical copies of a directory that already exists one level
+  // up. .gitignore hides the ones under public/, but the dist/ copy is tracked,
+  // so they were being committed anyway.
+  dropIfPresent(path.join(dir, "_astro", "_astro"));
+  dropIfPresent(path.join(dir, "fonts", "fonts"));
+  dropIfPresent(path.join(dir, "assets", "fonts"));
+
+  // Nothing on this site plays video out of _astro/ — the work section uses
+  // still .webp — so every .mp4 in there is the reference site's client
+  // showreels riding along. ~78 MB across public/ and dist/ combined.
+  const astroDir = path.join(dir, "_astro");
+  if (fs.existsSync(astroDir)) {
+    for (const entry of fs.readdirSync(astroDir)) {
+      const isShowreel = entry.toLowerCase().endsWith(".mp4");
+      const isReferencePhoto = REFERENCE_PHOTO_PREFIXES.some(
+        (prefix) => entry.startsWith(`${prefix}.`)
+      );
+      if (isShowreel || isReferencePhoto) dropIfPresent(path.join(astroDir, entry));
+    }
+  }
 };
 pruneJunk(publicDir);
 
