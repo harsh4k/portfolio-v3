@@ -512,3 +512,28 @@ html.resume-dock-open body {
 #intro-layer {
   background-image: linear-gradient(#ff0b36, #ff0b36);
 }
+
+/* ---------- Touch target sizing (WCAG 2.5.8) ----------
+   The header and footer monogram links render at 30x19 and 30x30, under the
+   44px minimum. Both wrap an SVG whose size is part of the layout, so instead
+   of padding the anchor — which would move the logo — an invisible ::after
+   centred on the link extends the hit area. Nothing shifts visually.
+
+   The four inline project links in the About paragraph (Velsaro, Nexcart,
+   Synapical, Attendo) are deliberately left alone: WCAG exempts targets in a
+   sentence, and padding them would break the line box of the prose. */
+.sb-logo.astro-5qrshpxv a,
+.site-foot__logo.astro-75cegwoc a {
+  position: relative;
+}
+
+.sb-logo.astro-5qrshpxv a::after,
+.site-foot__logo.astro-75cegwoc a::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max(100%, 44px);
+  height: max(100%, 44px);
+  transform: translate(-50%, -50%);
+}

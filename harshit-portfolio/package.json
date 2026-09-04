@@ -8,7 +8,9 @@
     "dev": "node server.mjs",
     "start": "node server.mjs",
     "build": "node src/scripts/build.mjs && node src/scripts/clean-adrien.mjs && node src/scripts/patch-intro.mjs",
-    "icons": "node src/scripts/generate-pwa-icons.mjs"
+    "icons": "node src/scripts/generate-pwa-icons.mjs",
+    "test": "playwright test",
+    "test:desktop": "playwright test --project=desktop"
   },
   "keywords": [
     "portfolio",
@@ -23,6 +25,7 @@
     "pdfjs-dist": "^4.10.38"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "png-to-ico": "^3.0.2",
     "sharp": "^0.35.4"
   }
