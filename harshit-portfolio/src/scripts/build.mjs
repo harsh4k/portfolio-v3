@@ -293,16 +293,50 @@ if (fs.existsSync(referenceWodniackPath)) {
   html = html.replace(/_astro\/setup-2016\.[^"]+\.webp/g, "images/v11.webp");
   html = html.replace(/_astro\/setup-2020\.[^"]+\.webp/g, "images/2026.webp");
   html = html.replace(/_astro\/legos\.[^"]+\.webp/g, "images/pic1.webp");
+  // The reference author's studio shot and his four old portfolio screenshots.
+  // These were the last of his images still being served from this site.
+  html = html.replace(/_astro\/waaark\.[^"]+\.webp/g, "images/v8.webp");
+  html = html.replace(/_astro\/portfolio-2011\.[^"]+\.webp/g, "images/v3.webp");
+  html = html.replace(/_astro\/portfolio-2014\.[^"]+\.webp/g, "images/v4.webp");
+  html = html.replace(/_astro\/portfolio-2017\.[^"]+\.webp/g, "images/v5.webp");
+  html = html.replace(/_astro\/portfolio-2021\.[^"]+\.webp/g, "images/v12.webp");
 
   // Add loading="lazy" and decoding="async" to archive images
   html = html.replace(/<img class="a__img/g, '<img loading="lazy" decoding="async" class="a__img');
 
-  // Captions in s-my-way section
-  html = html.replace("Waaark Creative Robots", "Neural Workspace Studio");
-  html = html.replace("2011 portfolio", "Generative Poster 1");
-  html = html.replace("2014 portfolio", "Spatial Interface 2");
-  html = html.replace("2017 portfolio (never released)", "Design Archive 3");
-  html = html.replace("2021 portfolio", "Creative Systems Lab");
+  // Captions and alt text in the visual archive.
+  //
+  // Each archive item repeats the same string in its alt and in its caption, so
+  // these must be replaceAll — the previous .replace() rewrote only the alt and
+  // left the caption showing the reference author's biography. The result was a
+  // section headed "Building with intent since 2024" captioned with someone
+  // else's FWA award, his desk setups from 2006/2016/2020 and his 2011-2021
+  // portfolios, while the alt text beside them said something different again.
+  //
+  // Replacements describe what is actually in each photograph. They deliberately
+  // assert no date, place or authorship that cannot be seen in the image itself.
+  const archiveCaptions = [
+    ["Generative art poster concept", "Poster study"],
+    ["My first FOTD on FWA  ♥ (2012)", "Hackathon night"],
+    ["Young me discovering the beauty of <s>Grand Canyon</s> Tetris (1997)", "Clouds over the sea"],
+    ["Me abusing of remote work (2005)", "Somewhere colder"],
+    ["Roaaaar!", "Ferris wheel, night"],
+    ["Early age (2006) desk setup ", "Rock-cut cave, monsoon"],
+    ["2016 desk setup", "Road to the high passes"],
+    ["2020 desk setup", "First snow"],
+    ["Waaark Creative Robots", "Deodar forest"],
+    ["2011 portfolio", "Snowline"],
+    ["2014 portfolio", "Paper parasols"],
+    ["2017 portfolio (never released)", "Monsoon valley"],
+    ["2021 portfolio", "Mountain road"],
+    ["Legos ♥", "Desk at night"],
+  ];
+  for (const [from, to] of archiveCaptions) {
+    if (!html.includes(from)) {
+      throw new Error(`build: archive caption not found, reference markup changed: ${from}`);
+    }
+    html = html.replaceAll(from, to);
+  }
 
   // 11. 3D rotating text in Visual Archive section
   html = html.replaceAll(
@@ -486,6 +520,8 @@ const dropIfPresent = (target) => {
 const REFERENCE_PHOTO_PREFIXES = [
   "art-1987", "art-dtyw", "art-lines", "first-fwa", "gameboy", "legos",
   "remote-2005", "roar", "setup-2006", "setup-2016", "setup-2020",
+  // His studio shot and old portfolio screenshots, replaced in the archive above.
+  "waaark", "portfolio-2011", "portfolio-2014", "portfolio-2017", "portfolio-2021",
 ];
 
 const pruneJunk = (dir) => {
