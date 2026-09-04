@@ -1,0 +1,33 @@
+# Harshit Chauhan
+
+> Creative developer and Computer Engineering student at NMIMS Mumbai, building
+> production web applications, motion-led sites and local-first AI tools.
+
+This is a single-page portfolio. The landing page opens with an interactive 3D
+WebGL scene; the content below it covers an about section, selected work,
+a visual archive and contact details.
+
+## Work
+
+- [Velsaro](https://www.velsaro.in/)
+- [Nexcart](https://nexcart-v1.vercel.app/)
+- [Synapical](https://synapical-com.pages.dev/)
+- [Attendo](https://attendov1.vercel.app/)
+- [Coffee Digital](https://coffeedigital.vercel.app/)
+- [Coffee Rebuild](https://threedwebs.vercel.app/)
+- [Oysnk](https://oysnk.vercel.app/)
+- [Shipd](https://github.com/harsh4k/shipd)
+- [Rudo AI](https://github.com/harsh4k/rudo)
+- [Bunny OS](https://harsh4k.github.io/Bunny-OS/)
+- [GetCited](https://github.com/harsh4k/Getcited)
+
+## Contact
+
+- [GitHub](https://github.com/harsh4k)
+- [LinkedIn](https://www.linkedin.com/in/harshit-chauhan-17a898364/)
+- [Email](mailto:harshitsinhchauhan250@gmail.com)
+
+## Notes
+
+- Stack: React, TypeScript, Next.js, Three.js, GSAP, Tailwind, Supabase, Python
+- Resume: [resume.pdf](https://harshh.pages.dev/resume.pdf)
