@@ -2,7 +2,6 @@ import fs from "fs";
 import path from "path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "url";
-import { applyFreeFonts } from "./copy-free-fonts.mjs";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const appRoot = path.resolve(root, "..", "..");
@@ -94,6 +93,22 @@ if (fs.existsSync(referenceWodniackPath)) {
 
   // 1. Remove cloudflare email decode script
   html = html.replace(/<script[^>]*email-decode\.min\.js[^>]*><\/script>/g, "");
+
+  // 1b. Drop the reference markup's inline `opacity: 0` on .site-wrapper.
+  //
+  //     Upstream, the site intro runs at load and clears this on its first frame.
+  //     Here the intro is gated behind the hand pull, so the wrapper would stay
+  //     fully transparent until the visitor interacts — which hides every LCP
+  //     candidate on the page (the <h1> is ~170k px2) behind an effective
+  //     opacity of 0. Chrome then reports no LCP at all, and Lighthouse fails
+  //     the whole Performance category with NO_LCP.
+  //
+  //     Nothing changes visually: #intro-layer and .site-intro are both fixed,
+  //     full-viewport and fully opaque, so the wrapper is covered either way.
+  html = html.replace(
+    '<div class="site-wrapper js-site-wrapper astro-j7pv25f6" style="opacity: 0;">',
+    '<div class="site-wrapper js-site-wrapper astro-j7pv25f6">'
+  );
 
   // 2. Inject 3D intro layer at the top of body
   html = html.replace(
@@ -391,7 +406,6 @@ if (fs.existsSync(referenceWodniackPath)) {
   <script type="application/ld+json">
 ${JSON.stringify(jsonLd, null, 2)}
   </script>
-  <link rel="preload" href="/fonts/BigShouldersDisplay-Bold.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/styles/integration.css">
   <script src="/scripts/img-media.js"></script>
 `;
@@ -457,7 +471,6 @@ const runScript = (name) => {
 };
 runScript("generate-pwa-icons.mjs");
 runScript("generate-og.mjs");
-applyFreeFonts();
 
 const dropIfPresent = (target) => {
   try {
@@ -495,6 +508,20 @@ for (const script of ["bridge.js", "pwa.js", "resume-dock.js", "img-media.js"]) 
     path.resolve(appRoot, "src", "scripts", script),
     path.join(distDir, "scripts", script)
   );
+}
+
+const pdfjsBuild = path.resolve(appRoot, "node_modules", "pdfjs-dist", "build");
+const pdfjsRequired = ["pdf.min.mjs", "pdf.worker.min.mjs"];
+for (const file of pdfjsRequired) {
+  const from = path.join(pdfjsBuild, file);
+  if (!fs.existsSync(from)) {
+    throw new Error(`Missing ${from}. Run npm install in harshit-portfolio.`);
+  }
+  fs.copyFileSync(from, path.join(distDir, "scripts", file));
+}
+const pdfjsMap = path.join(pdfjsBuild, "pdf.mjs.map");
+if (fs.existsSync(pdfjsMap)) {
+  fs.copyFileSync(pdfjsMap, path.join(distDir, "scripts", "pdf.mjs.map"));
 }
 
 const resumeDocx = path.resolve(repoRoot, "docs", "Harshit_Resume.docx");

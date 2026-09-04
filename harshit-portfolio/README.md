@@ -62,7 +62,7 @@ harshit-portfolio/
 
 ## Fonts
 
-The site self-hosts OFL-licensed **Fraunces**, **IBM Plex Mono**, and **Syne** (via `@fontsource` at build time). Paid PP Editorial / Fraktion / Bigger Display files are not shipped.
+The site self-hosts **PP Editorial New**, **PP Fraktion Mono**, **Bigger Display**, and **Comic CAT** from the Wodniack reference. You need a valid web license to serve these on a public host.
 
 ---
 

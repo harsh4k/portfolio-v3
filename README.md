@@ -53,9 +53,7 @@ npm run dev
 
 Deploy **only** `dist/` (Cloudflare Pages output directory). Do not run `server.mjs` in production.
 
-## Fonts
-
-Self-hosted OFL faces (no purchase): **Fraunces**, **IBM Plex Mono**, **Syne**. They keep the Wodniack `Editorial New` / `Fraktion Mono` / `Bigger Display` CSS names. The live site is `https://harshh.pages.dev/` until you add a custom domain.
+PP Editorial / Fraktion / Bigger Display are self-hosted from the Wodniack reference. Confirm you have a license to serve them on https://harshh.pages.dev/.
 
 ### 2. Compile / Rebuild Portfolio
 ```bash
