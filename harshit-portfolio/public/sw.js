@@ -1,4 +1,4 @@
-const VERSION = "hc-pwa-v12";
+const VERSION = "hc-pwa-v13";
 const PRECACHE = `${VERSION}-shell`;
 const RUNTIME = `${VERSION}-runtime`;
 
@@ -61,7 +61,8 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  if (url.pathname.startsWith("/_astro/") || url.pathname.startsWith("/fonts/") || url.pathname.startsWith("/icons/")) {
+  // Fonts and icons are static binaries — cache-first is safe.
+  if (url.pathname.startsWith("/fonts/") || url.pathname.startsWith("/icons/")) {
     event.respondWith(
       caches.match(request).then(
         (cached) =>
@@ -74,6 +75,28 @@ self.addEventListener("fetch", (event) => {
             return response;
           })
       )
+    );
+    return;
+  }
+
+  // /_astro/ holds the engine bundles. Their filenames are fixed while their
+  // contents are patched on every build, so cache-first pinned returning
+  // visitors to an old engine forever. Stale-while-revalidate keeps the instant
+  // paint but refreshes the copy in the background.
+  if (url.pathname.startsWith("/_astro/")) {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        const fresh = fetch(request)
+          .then((response) => {
+            if (response.ok) {
+              const copy = response.clone();
+              caches.open(RUNTIME).then((cache) => cache.put(request, copy));
+            }
+            return response;
+          })
+          .catch(() => cached);
+        return cached || fresh;
+      })
     );
     return;
   }
