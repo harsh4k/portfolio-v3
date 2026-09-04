@@ -8,15 +8,15 @@ A static, zero-framework, high-performance personal portfolio for **Harshit Chau
 
 - **No Framework / Zero Bundler**: Pure vanilla HTML5 + CSS3 + modern ES modules.
 - **Intro Layer**: Interactive Three.js WebGL intro scene with hand-pull interaction and 3D character animation.
-  - Dynamically loaded on desktop (fine-pointer) devices only.
-  - Automatically skipped on mobile / touch devices (saving 819 KB on initial load) and replaced by an instant, brutalist tap-to-enter affordance.
-  - Bypassed cleanly when `prefers-reduced-motion: reduce` is enabled.
+  - Dynamically imported (`import()` in `bridge.js`), so the 819 KB bundle is not render-blocking.
+  - Desktop: grab the 3D hand and pull it. Touch and narrow viewports get the same scene with a visible "Swipe down" affordance, since the engine only builds the hand on desktop.
+  - `prefers-reduced-motion: reduce` bypasses the 3D layer *and* fast-forwards the site intro timeline, settling in ~150 ms instead of ~5.2 s. The timeline is GSAP-driven, so CSS `animation-duration` overrides alone do not shorten it.
 - **Portfolio Layer**: GSAP + Lenis smooth scrolling + ScrollTrigger animation pipeline.
 - **Handover (`src/scripts/bridge.js`)**: Manages seamless transition from WebGL intro scene to the GSAP portfolio with complete GPU resource release and style detachment.
 - **Mobile First Responsive Redesign**:
   - Clean vertical flex card stack for all 11 production projects below 900px.
   - Accessible touch buttons for contact and navigation.
-  - 44×44px minimum tap targets across all interactive elements.
+  - 44×44px tap targets, extended via an invisible `::after` on the header and footer monograms so nothing shifts visually. The four inline project links inside the About paragraph are deliberately left at text size — WCAG 2.5.8 exempts targets inline in a sentence, and padding them would break the line box.
   - Zero horizontal overflow (`document.scrollWidth === viewport width`).
 - **SEO & Performance**:
   - OpenGraph & Twitter Card metadata with 1200×630 preview image.
@@ -77,3 +77,44 @@ npm run dev
 ```
 
 Both bundle patchers (`src/scripts/clean-adrien.mjs` and `src/scripts/patch-intro.mjs`) are idempotent and safe to re-run.
+
+---
+
+## Testing
+
+```bash
+npm test              # full smoke suite (desktop + mobile projects)
+npm run test:desktop  # desktop only
+```
+
+`tests/smoke.spec.js` drives the real handover — no mocks. Every assertion maps
+to something that has actually regressed in this repo: the site intro playing
+unseen beneath the 3D layer, the hero bleeding into the next section, the engine
+rendering forever after teardown, `NO_LCP` making Lighthouse unable to score,
+the reference author's content shipping in the DOM, duplicate `<h1>`, and the
+reduced-motion loader.
+
+Two things worth knowing before editing tests:
+
+- **`server.mjs` serves `../dist`, not `src/`.** Edits to `src/` have no effect
+  until `npm run build` has run. Mutation-testing an assertion without
+  rebuilding will silently pass and tell you nothing.
+- Assertions avoid machine-dependent thresholds. The engine check verifies the
+  `__introTornDown` kill switch is in the shipped bundle and set at runtime,
+  rather than sampling a frame rate — measured, the rAF rate *rises* after
+  teardown (45/s → 125/s) because the portfolio's own loops start then.
+
+CI runs the same command Cloudflare Pages does, asserts a deployable `dist/` was
+produced, diffs a second build against the first to catch non-idempotent patch
+guards, then runs the suite.
+
+## Measured
+
+Live, on the deployed site (Chrome trace, no throttling):
+
+| Metric | Value |
+| --- | --- |
+| LCP | 127 ms |
+| CLS | 0.00 |
+| Render-blocking savings | 0 ms (FCP and LCP) |
+| Lighthouse Accessibility / Best Practices / SEO | 100 / 100 / 100 |
