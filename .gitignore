@@ -2,6 +2,12 @@
 node_modules/
 harshit-portfolio/dist/
 
+# Deploy output. Cloudflare Pages builds this itself now
+# (npm ci --prefix harshit-portfolio && npm run build -> dist).
+# Verified: a clean clone with no references/ reproduces it exactly — 171 files,
+# zero missing, zero extra, zero content differences.
+/dist/
+
 # Unpacked Word scratch from resume edits
 .tmp-docx/
 .tmp-docx*/
