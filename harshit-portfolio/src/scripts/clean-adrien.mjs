@@ -164,27 +164,36 @@ const HIDDEN_PANEL_FIXES = [
   ["Based in Paris (the french one)", "Based in Mumbai, India"],
 ];
 
+let alreadyClean = 0;
 for (const [from, to] of HIDDEN_PANEL_FIXES) {
   if (js.includes(from)) {
     js = js.replaceAll(from, to);
   } else {
-    console.warn(`clean-adrien: hidden-panel string not found (already fixed?): ${from}`);
+    alreadyClean += 1;
   }
 }
-console.log("clean-adrien: hidden panels scrubbed of third-party links and inherited bio");
+console.log(
+  `clean-adrien: hidden panels scrubbed (${HIDDEN_PANEL_FIXES.length - alreadyClean} applied, ${alreadyClean} already clean)`
+);
 
 // 6c. The intro scene ships its own sr-only <h1>, which collides with the
 //     portfolio's real <h1> — two h1 elements in one document. Demote it; the
 //     text still describes the scene for assistive tech.
-const SR_H1 = 'Ke("h1",{class:"sr-only"},"Who am I? Adrien Lamy"';
-const SR_P = 'Ke("p",{class:"sr-only"},"Who am I? Adrien Lamy"';
-if (js.includes(SR_P)) {
+// Matched by pattern, not literal, because the name in this string depends on
+// whether the rename below has already run. With references/ present the bundle
+// is re-synced pristine and still says "Adrien Lamy"; without it (CI, Cloudflare,
+// any clone) this runs against the committed bundle, already renamed and already
+// demoted. A literal check failed there and exited non-zero, which would have
+// failed every deploy.
+const SR_H1_RE = /Ke\("h1",\{class:"sr-only"\},"Who am I\? [^"]*"/;
+const SR_P_RE = /Ke\("p",\{class:"sr-only"\},"Who am I\? [^"]*"/;
+if (SR_P_RE.test(js)) {
   console.log("clean-adrien: intro sr-only heading already demoted");
-} else if (js.includes(SR_H1)) {
-  js = js.replace(SR_H1, SR_P);
+} else if (SR_H1_RE.test(js)) {
+  js = js.replace(SR_H1_RE, (m) => m.replace('Ke("h1"', 'Ke("p"'));
   console.log("clean-adrien: intro sr-only h1 demoted so the page has one h1");
 } else {
-  fail("intro sr-only h1 not found");
+  fail("intro sr-only heading not found");
 }
 
 // 7. Replace all references to Adrien / Adrien Lamy with Harshit / Harshit Chauhan
