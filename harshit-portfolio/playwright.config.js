@@ -22,13 +22,27 @@ export default defineConfig({
   projects: [
     {
       name: "desktop",
+      testIgnore: /offline\.spec\.js/,
       use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } },
+    },
+    {
+      // The one project that lets the worker run, because the worker is what it
+      // tests. Kept separate so the specs above keep asserting against the
+      // build on disk rather than whatever a previous run left in a cache.
+      name: "offline",
+      testMatch: /offline\.spec\.js/,
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 1440, height: 900 },
+        serviceWorkers: "allow",
+      },
     },
     {
       // An iPhone-shaped Chromium rather than devices["iPhone 13"], which is
       // WebKit. What is under test is our layout and touch handover, not Safari,
       // and this keeps CI to a single browser download.
       name: "mobile",
+      testIgnore: /offline\.spec\.js/,
       use: {
         browserName: "chromium",
         viewport: { width: 390, height: 844 },

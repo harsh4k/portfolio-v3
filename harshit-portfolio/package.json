@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "node server.mjs",
     "start": "node server.mjs",
-    "build": "node src/scripts/build.mjs && node src/scripts/clean-adrien.mjs && node src/scripts/patch-intro.mjs",
+    "build": "node src/scripts/build.mjs && node src/scripts/clean-adrien.mjs && node src/scripts/patch-intro.mjs && node src/scripts/generate-precache.mjs",
     "icons": "node src/scripts/generate-pwa-icons.mjs",
     "test": "playwright test",
     "test:desktop": "playwright test --project=desktop"

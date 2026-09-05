@@ -72,3 +72,45 @@ Phone (4b) install, lock-screen limits, and Glyph facts: [`docs/NOTHING-PHONE-4B
 2. **Work Showcase**: 11 flagship projects (Velsaro, Nexcart, Synapical, Attendo, Coffee Digital, Coffee Rebuild, Oysnk, Shipd, Rudo AI, Bunny OS, GetCited) with live links and poster covers.
 3. **Visual Archive**: 3D interactive floating cards orbiting the rotating text "Building with intent since 2024".
 4. **Clean Monorepo Organization**: Reference sources, raw ZIPs, and experimental scripts are isolated in `references/`, keeping the production app clean.
+5. **Fully Offline**: After one visit the site runs with no connection — see below.
+
+---
+
+## Offline Support
+
+The site is a complete offline application, not a shell with a fallback card. One
+visit is enough; after that the 3D intro, GSAP engine, fonts, images, WebGL
+textures, video and the resume viewer all run with the network unplugged.
+
+**How it is built.** `src/scripts/generate-precache.mjs` runs last in the build,
+walks the assembled `dist/`, and rewrites the manifest inside `dist/sw.js` with
+every shipped file and its content hash. The list is never maintained by hand, so
+it cannot drift from what actually deploys. Currently 111 files, 10.8 MB.
+
+**Two tiers**, because precaching 11 MB during first paint is hostile on mobile:
+
+| Tier | When | What |
+| --- | --- | --- |
+| `shell` | service worker install | HTML, CSS, engine bundles, fonts — enough to render offline |
+| `bulk` | after load, at idle | images, WebGL textures, video, resume + pdf.js viewer |
+
+`scripts/pwa.js` triggers the bulk warm and skips it entirely on a `saveData` or
+2G connection.
+
+**Updates are cheap.** The cache name carries a hash of the whole manifest, so any
+changed asset produces a new cache — but unchanged files are copied across from
+the previous one instead of being re-downloaded. A deploy that only touches
+`index.html` costs 3 requests, not 10.8 MB. Measured, not assumed.
+
+**What is deliberately excluded** (see the `EXCLUDED` list in the generator, each
+entry with a reason): source maps, `robots.txt` / `sitemap.xml` / `llms.txt`,
+social card images, and three stale duplicate trees left by the reference sync
+(`/assets/images/`, `/webgl/webgl/`, `/assets/resume.pdf`) that nothing
+references. Anything fetched at runtime but outside the manifest is still cached
+on first use, so an omission degrades rather than breaks.
+
+**Tests.** `tests/offline.spec.js` runs in its own Playwright project — the only
+one that allows service workers — and pulls the network out from under a warmed
+browser to check the manifest is fully cached, the 3D intro still becomes
+interactive, images and fonts still resolve, and a half-installed worker falls
+back to `/offline.html`.

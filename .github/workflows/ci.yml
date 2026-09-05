@@ -32,6 +32,15 @@ jobs:
           test -f dist/assets/index-wQJ6Ws5X.js
           echo "dist/ files: $(find dist -type f | wc -l)"
 
+      # public/sw.js ships a placeholder manifest that generate-precache.mjs
+      # replaces with the real file list. If the placeholder reaches dist/, the
+      # worker caches nothing and the site silently stops working offline.
+      - name: Check the service worker carries a real precache manifest
+        run: |
+          grep -q 'precache:end' dist/sw.js
+          grep -q '"shell":' dist/sw.js
+          ! grep -q 'version: "dev"' dist/sw.js
+
       # Re-running must be a no-op. The bundle patches are applied in place, and
       # a non-idempotent guard previously grew the engine on every build.
       - name: Check the build is idempotent

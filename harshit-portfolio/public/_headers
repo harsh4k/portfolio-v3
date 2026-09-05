@@ -9,6 +9,12 @@
 /index.html
   Cache-Control: no-cache
 
+# The worker carries a hash of every precached asset, so this file is what tells
+# a returning visitor a new build exists. An HTTP-cached copy would strand them
+# on the previous cache.
+/sw.js
+  Cache-Control: no-cache
+
 # NOT immutable. The hashes in these filenames come from the upstream builds
 # they were vendored from; our build patches the file contents in place and the
 # names never change. Marking them immutable told browsers to keep a year-old
