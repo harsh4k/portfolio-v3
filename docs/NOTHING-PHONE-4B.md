@@ -141,7 +141,7 @@ The old service worker **unregistered itself** and cleared caches. That is gone.
 
 ## 10. Limitations
 
-- 3D intro and GSAP need a network the first time; `/offline.html` is a branded fallback, not a full clone of the site.
+- The first visit needs a network. After it, the worker holds the whole site — 3D intro, GSAP engine, fonts, images, WebGL textures, video and the resume — so later launches run with no connection at all. `/offline.html` is now only the fallback for an install interrupted before the document was stored.
 - Hash routes (`/#work`) work after the document loads; the existing intro still runs first.
 - TWA without asset links looks almost like Chrome Custom Tabs.
 - Widget on lock screen is **OS-dependent**, not guaranteed.
