@@ -67,6 +67,25 @@ async function adoptUnchanged(cache) {
 }
 
 /**
+ * Strip the redirect off a response before it goes in the cache.
+ *
+ * Cloudflare Pages 308-redirects /offline.html to /offline, so the fallback
+ * arrives with its redirected flag set. Navigations are made with redirect
+ * mode "manual", and handing one a redirected response fails the whole
+ * navigation with a network error — which broke the offline card in production
+ * while every local test passed, because server.mjs serves the file directly.
+ * Copying the body into a fresh Response drops the flag.
+ */
+async function cacheable(response) {
+  if (!response.redirected) return response;
+  return new Response(await response.blob(), {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+  });
+}
+
+/**
  * Fetch entries into the cache, a few at a time. `no-cache` forces a
  * revalidation so a stale HTTP-cached copy cannot be promoted into the
  * precache. Individual failures are swallowed: a warm interrupted halfway
@@ -82,7 +101,7 @@ async function fillCache(cache, urls, onProgress) {
       try {
         if (!(await cache.match(url))) {
           const response = await fetch(url, { cache: "no-cache" });
-          if (response.ok) await cache.put(url, response);
+          if (response.ok) await cache.put(url, await cacheable(response));
         }
       } catch {
         // Offline mid-fill. Nothing to do but leave the gap for next time.
@@ -224,7 +243,7 @@ async function handleNavigate(request, url) {
 
   try {
     const response = await fetch(request);
-    if (response.ok) await cache.put("/", response.clone());
+    if (response.ok) await cache.put("/", await cacheable(response.clone()));
     return response;
   } catch {
     const fallback = await cache.match("/offline.html");
@@ -245,7 +264,7 @@ async function handleAsset(request, url) {
     // Anything reachable but outside the manifest still gets kept, so an asset
     // the generator did not know about is available offline after one visit.
     if (response.ok && response.type === "basic" && !request.headers.has("range")) {
-      await cache.put(url.pathname, response.clone());
+      await cache.put(url.pathname, await cacheable(response.clone()));
     }
     return response;
   } catch {

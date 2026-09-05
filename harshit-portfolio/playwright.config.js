@@ -54,10 +54,21 @@ export default defineConfig({
       },
     },
   ],
-  webServer: {
-    command: "node server.mjs",
-    url: "http://127.0.0.1:4175/",
-    reuseExistingServer: !process.env.CI,
-    timeout: 30_000,
-  },
+  webServer: [
+    {
+      command: "node server.mjs",
+      url: "http://127.0.0.1:4175/",
+      reuseExistingServer: !process.env.CI,
+      timeout: 30_000,
+    },
+    {
+      // dist/ served the way Cloudflare Pages serves it, ".html" redirects and
+      // all. One offline test uses it directly; see tests/pages-server.mjs for
+      // why it has to exist.
+      command: "node tests/pages-server.mjs",
+      url: "http://127.0.0.1:4177/",
+      reuseExistingServer: !process.env.CI,
+      timeout: 30_000,
+    },
+  ],
 });

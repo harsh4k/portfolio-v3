@@ -15,6 +15,9 @@ import { readFileSync } from "node:fs";
 
 const CACHE_PREFIX = "hc-precache-";
 
+// dist/ served the way Cloudflare Pages serves it. See tests/pages-server.mjs.
+const PAGES_ORIGIN = "http://127.0.0.1:4177";
+
 /** Read the precache manifest the build wrote into dist/sw.js. */
 async function readManifest(request) {
   const response = await request.get("/sw.js");
@@ -171,6 +174,37 @@ test.describe("offline", () => {
         .toString("latin1");
       expect(head, `${path} should come back as itself, not the document`).toBe(signature);
     }
+  });
+
+  test("the offline card survives Cloudflare's .html redirect", async ({ page, context }) => {
+    // Pages 308-redirects /offline.html to /offline. A response fetched through
+    // a redirect carries a redirected flag, and handing one to a navigation —
+    // which uses redirect mode "manual" — fails it with net::ERR_FAILED. So the
+    // fallback was cached but unusable in production while this whole suite
+    // passed, because server.mjs returns the file directly. Hence PAGES_ORIGIN.
+    await page.goto(`${PAGES_ORIGIN}/`);
+    await page.waitForFunction(() => window.__precacheComplete, null, { timeout: 120_000 });
+
+    const entry = await page.evaluate(async (prefix) => {
+      const name = (await caches.keys()).find((key) => key.startsWith(prefix));
+      const cache = await caches.open(name);
+      const hit = await cache.match("/offline.html");
+      return hit && { redirected: hit.redirected, status: hit.status };
+    }, CACHE_PREFIX);
+
+    expect(entry, "the fallback should be cached").not.toBeNull();
+    expect(entry.redirected, "a redirected response cannot be served to a navigation").toBe(false);
+
+    // And prove it end to end: evict the document so the fallback is what a
+    // navigation actually gets.
+    await page.evaluate(async (prefix) => {
+      const name = (await caches.keys()).find((key) => key.startsWith(prefix));
+      await (await caches.open(name)).delete("/");
+    }, CACHE_PREFIX);
+
+    await context.setOffline(true);
+    await page.reload();
+    await expect(page.locator("body")).toContainText(/offline/i);
   });
 
   test("a half-installed worker falls back to the offline card", async ({ page, context }) => {
