@@ -3,57 +3,115 @@
   stay byte-for-byte as on the live site; anything new goes here.
 */
 
-/* Shown on the red intro cover until the 3D scene has drawn its first frame. */
+/*
+  Shown on the red intro cover until the 3D scene has drawn its first frame.
+  Built from the design's own parts: the hero's display type, the console's
+  mono captions and the binary separator strips.
+*/
 .intro-loader {
   position: absolute;
   inset: 0;
+  z-index: 1;
   display: grid;
   place-content: center;
-  justify-items: center;
-  gap: 0.9rem;
-  color: #fff0f2;
-  font-family: "PPFraktionMono", ui-monospace, monospace;
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
+  gap: 0.75rem;
+  width: min(30rem, 80vw);
+  margin: auto;
+  color: var(--color-secondary, #160000);
+  font-family: var(--font-family-fraktion, monospace);
+  font-size: 0.625rem;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   pointer-events: none;
   transition: opacity 0.4s ease;
 }
 
-.intro-loader__bar {
-  position: relative;
-  width: 7.5rem;
-  height: 1px;
-  overflow: hidden;
-  background: rgb(255 240 242 / 30%);
+.intro-loader p {
+  margin: 0;
 }
 
-.intro-loader__bar::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  width: 40%;
-  background: currentcolor;
-  animation: intro-loader-slide 1.1s ease-in-out infinite;
+.intro-loader__meta {
+  display: flex;
+  justify-content: space-between;
+}
+
+.intro-loader__cursor {
+  animation: intro-loader-blink 1s steps(1) infinite;
+}
+
+/* Outlined name that fills with ink from left to right, on a loop. */
+.intro-loader__name {
+  color: transparent;
+  font-family: var(--font-family-bigger, sans-serif);
+  font-size: clamp(3.5rem, 18vw, 8rem);
+  line-height: 0.85;
+  letter-spacing: 0;
+  text-align: center;
+  background-repeat: no-repeat;
+  background-image: linear-gradient(var(--color-secondary, #160000), var(--color-secondary, #160000));
+  background-size: 0% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-stroke: 1px var(--color-secondary, #160000);
+  animation: intro-loader-fill 2.4s cubic-bezier(0.86, 0, 0.07, 1) infinite;
+}
+
+.intro-loader__strip {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.45rem 0;
+  border-block: 1px solid var(--color-secondary, #160000);
+  white-space: nowrap;
+}
+
+.intro-loader__slashes {
+  flex: 1;
+  height: 0.6rem;
+  background: repeating-linear-gradient(115deg, var(--color-secondary, #160000) 0 1px, transparent 1px 4px) no-repeat;
+  background-size: 0% 100%;
+  animation: intro-loader-fill 2.4s cubic-bezier(0.86, 0, 0.07, 1) infinite;
 }
 
 .intro-loader.is-done {
   opacity: 0;
 }
 
-@keyframes intro-loader-slide {
-  from {
-    transform: translateX(-100%);
+/* The swipe hint only makes sense once there is something to swipe. */
+html:not(.intro-ready) .intro-swipe-hint {
+  visibility: hidden;
+}
+
+@keyframes intro-loader-fill {
+  0% {
+    background-position: 0 0;
+    background-size: 0% 100%;
   }
-  to {
-    transform: translateX(250%);
+  50% {
+    background-position: 0 0;
+    background-size: 100% 100%;
+  }
+  50.01% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 100% 0;
+    background-size: 0% 100%;
+  }
+}
+
+@keyframes intro-loader-blink {
+  50% {
+    opacity: 0;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .intro-loader__bar::after {
+  .intro-loader__name,
+  .intro-loader__slashes,
+  .intro-loader__cursor {
     animation: none;
-    width: 100%;
+    background-size: 100% 100%;
   }
 }
 

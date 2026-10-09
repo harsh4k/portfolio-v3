@@ -90,8 +90,27 @@ const fonts = [
   <body class="astro-j7pv25f6">
     <div id="intro-layer" class="intro-layer">
       <div class="intro-loader js-intro-loader" role="status">
-        <span>Loading</span>
-        <span class="intro-loader__bar" aria-hidden="true"></span>
+        <p class="intro-loader__meta">
+          <span>whoami?</span>
+          <span>
+            Loading
+            <span class="intro-loader__cursor" aria-hidden="true">
+              _
+            </span>
+          </span>
+        </p>
+        <p class="intro-loader__name" aria-hidden="true">
+          Harshit
+        </p>
+        <p class="intro-loader__strip" aria-hidden="true">
+          <span>►</span>
+          <span class="intro-loader__bits js-intro-loader-bits">0110100</span>
+          <span class="intro-loader__slashes"></span>
+          <span>◄</span>
+        </p>
+        <p class="intro-loader__meta" aria-hidden="true">
+          <span>Simulating something, probably</span>
+        </p>
       </div>
       <div id="app"></div>
     </div>

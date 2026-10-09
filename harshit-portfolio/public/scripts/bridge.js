@@ -322,8 +322,16 @@
   // --- Loader on the red cover until the 3D scene draws its first frame ---
   const INTRO_TIMEOUT_MS = 20000;
   const introLoader = document.querySelector(".js-intro-loader");
+  const loaderBits = document.querySelector(".js-intro-loader-bits");
+  // Flip the separator's binary digits while waiting, like the site's strips.
+  const bitsTimer = window.setInterval(() => {
+    if (!loaderBits) return;
+    loaderBits.textContent = Array.from({ length: 7 }, () => (Math.random() < 0.5 ? "0" : "1")).join("");
+  }, 90);
   const hideIntroLoader = () => {
     window.clearTimeout(introTimeout);
+    window.clearInterval(bitsTimer);
+    document.documentElement.classList.add("intro-ready");
     if (!introLoader) return;
     introLoader.classList.add("is-done");
     window.setTimeout(() => introLoader.remove(), 450);

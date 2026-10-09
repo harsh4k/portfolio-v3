@@ -180,10 +180,13 @@ test.describe("intro", () => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
     const loader = page.locator(".js-intro-loader");
     await expect(loader).toBeVisible();
+    // Nothing to swipe yet, so the phone swipe hint waits for the scene too.
+    await expect(page.locator("html")).not.toHaveClass(/intro-ready/);
     release();
     // The bundle fires intro:ready on its first rendered frame (patched in, see README).
     await page.evaluate(() => window.dispatchEvent(new Event("intro:ready")));
     await expect(loader).toHaveCount(0);
+    await expect(page.locator("html")).toHaveClass(/intro-ready/);
   });
 
   test("Enter skips the intro, shows the site and restores the tab title", async ({ page }) => {
