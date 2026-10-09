@@ -85,6 +85,8 @@ Both bundle patchers (`src/scripts/clean-adrien.mjs` and `src/scripts/patch-intr
 ```bash
 npm test              # full smoke suite (desktop + mobile projects)
 npm run test:desktop  # desktop only
+npm run lint          # ESLint over src/scripts, server.mjs, tests and public/sw.js
+npm run check:refs    # fail if dist/ HTML, manifest or CSS points at a missing file
 ```
 
 `tests/smoke.spec.js` drives the real handover — no mocks. Every assertion maps
@@ -104,9 +106,10 @@ Two things worth knowing before editing tests:
   rather than sampling a frame rate — measured, the rAF rate *rises* after
   teardown (45/s → 125/s) because the portfolio's own loops start then.
 
-CI runs the same command Cloudflare Pages does, asserts a deployable `dist/` was
-produced, diffs a second build against the first to catch non-idempotent patch
-guards, then runs the suite.
+CI lints, runs the same command Cloudflare Pages does, asserts a deployable
+`dist/` was produced and that every file it references exists, diffs a second
+build against the first to catch non-idempotent patch guards, then runs the
+suite.
 
 ## Measured
 

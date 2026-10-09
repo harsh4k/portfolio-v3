@@ -20,6 +20,10 @@ jobs:
       - run: npm ci
         working-directory: harshit-portfolio
 
+      - name: Lint
+        run: npm run lint
+        working-directory: harshit-portfolio
+
       # Same command Cloudflare Pages runs. references/ is not in the repo, so
       # this exercises the real deploy path rather than a local-only one.
       - run: npm run build
@@ -31,6 +35,11 @@ jobs:
           test -f dist/_astro/hoisted.BvNyQ0G_.js
           test -f dist/assets/index-wQJ6Ws5X.js
           echo "dist/ files: $(find dist -type f | wc -l)"
+
+      # A renamed image or a path typo still builds; the page just ships a 404.
+      - name: Check every reference in the built site resolves
+        run: npm run check:refs
+        working-directory: harshit-portfolio
 
       # public/sw.js ships a placeholder manifest that generate-precache.mjs
       # replaces with the real file list. If the placeholder reaches dist/, the
