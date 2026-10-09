@@ -1,0 +1,71 @@
+---
+import { hireMe, profile } from "../data/profile";
+---
+
+<section aria-labelledby="hero-title">
+  <div>
+    <p>Available for projects & roles</p>
+
+    <h1 id="hero-title">{profile.name}</h1>
+    <p>{profile.role}</p>
+
+    <div>
+      <p>
+        Computer Engineering student in Mumbai. I design and build production web applications, motion-led studio sites
+        and local-first AI tools, balancing performance, interaction and clean systems.
+      </p>
+
+      <ul>
+        <li>
+          <a href="#work">See the work</a>
+        </li>
+        <li>
+          <a href={hireMe}>Hire me</a>
+        </li>
+        <li>
+          <a href={profile.resume.pdf} target="_blank" rel="noopener">
+            Resume<span class="visually-hidden"> (PDF, opens in a new tab)</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <dl>
+      <div>
+        <dt>Based in</dt>
+        <dd>{profile.location}</dd>
+      </div>
+      <div>
+        <dt>Local time</dt>
+        <dd>
+          <time data-clock data-time-zone={profile.timeZone}>
+            IST, UTC+5:30
+          </time>
+        </dd>
+      </div>
+      <div>
+        <dt>Building since</dt>
+        <dd>{profile.since}</dd>
+      </div>
+    </dl>
+  </div>
+</section>
+
+<script>
+  const clock = document.querySelector<HTMLTimeElement>("[data-clock]");
+  const timeZone = clock?.dataset.timeZone;
+
+  if (clock && timeZone) {
+    const format = new Intl.DateTimeFormat("en-IN", {
+      timeZone,
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+    const tick = () => {
+      clock.textContent = `${format.format(new Date())} IST`;
+    };
+    tick();
+    window.setInterval(tick, 30_000);
+  }
+</script>
