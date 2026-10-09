@@ -3,96 +3,128 @@
     "id": "01-p1",
     "order": 1,
     "caption": "Poster study",
-    "image": "../assets/archive/p1.webp"
+    "image": "/images/p1.webp",
+    "width": 1024,
+    "height": 1024
   },
   {
     "id": "02-p2",
     "order": 2,
     "caption": "Poster study",
-    "image": "../assets/archive/p2.webp"
+    "image": "/images/p2.webp",
+    "width": 760,
+    "height": 1024
   },
   {
     "id": "03-p3",
     "order": 3,
     "caption": "Poster study",
-    "image": "../assets/archive/p3.webp"
+    "image": "/images/p3.webp",
+    "width": 802,
+    "height": 1024
   },
   {
     "id": "04-hackathon",
     "order": 4,
     "caption": "Hackathon night",
-    "image": "../assets/archive/hackathon.webp"
+    "image": "/images/Hackathon.webp",
+    "width": 768,
+    "height": 1024
   },
   {
     "id": "05-2024",
     "order": 5,
     "caption": "Clouds over the sea",
-    "image": "../assets/archive/2024.webp"
+    "image": "/images/2024.webp",
+    "width": 600,
+    "height": 600
   },
   {
     "id": "06-profile",
     "order": 6,
     "caption": "Somewhere colder",
-    "image": "../assets/archive/profile.webp"
+    "image": "/images/profile.webp",
+    "width": 768,
+    "height": 1024
   },
   {
     "id": "07-t3",
     "order": 7,
     "caption": "Ferris wheel, night",
-    "image": "../assets/archive/t3.webp"
+    "image": "/images/t3.webp",
+    "width": 576,
+    "height": 1024
   },
   {
     "id": "08-v6",
     "order": 8,
     "caption": "Rock-cut cave, monsoon",
-    "image": "../assets/archive/v6.webp"
+    "image": "/images/v6.webp",
+    "width": 640,
+    "height": 480
   },
   {
     "id": "09-v11",
     "order": 9,
     "caption": "Road to the high passes",
-    "image": "../assets/archive/v11.webp"
+    "image": "/images/v11.webp",
+    "width": 1024,
+    "height": 576
   },
   {
     "id": "10-2026",
     "order": 10,
     "caption": "First snow",
-    "image": "../assets/archive/2026.webp"
+    "image": "/images/2026.webp",
+    "width": 1024,
+    "height": 576
   },
   {
     "id": "11-v8",
     "order": 11,
     "caption": "Deodar forest",
-    "image": "../assets/archive/v8.webp"
+    "image": "/images/v8.webp",
+    "width": 1440,
+    "height": 1440
   },
   {
     "id": "12-v3",
     "order": 12,
     "caption": "Snowline",
-    "image": "../assets/archive/v3.webp"
+    "image": "/images/v3.webp",
+    "width": 1024,
+    "height": 768
   },
   {
     "id": "13-v4",
     "order": 13,
     "caption": "Paper parasols",
-    "image": "../assets/archive/v4.webp"
+    "image": "/images/v4.webp",
+    "width": 1024,
+    "height": 767
   },
   {
     "id": "14-v5",
     "order": 14,
     "caption": "Monsoon valley",
-    "image": "../assets/archive/v5.webp"
+    "image": "/images/v5.webp",
+    "width": 1024,
+    "height": 768
   },
   {
     "id": "15-v12",
     "order": 15,
     "caption": "Mountain road",
-    "image": "../assets/archive/v12.webp"
+    "image": "/images/v12.webp",
+    "width": 1024,
+    "height": 768
   },
   {
     "id": "16-pic1",
     "order": 16,
     "caption": "Desk at night",
-    "image": "../assets/archive/pic1.webp"
+    "image": "/images/pic1.webp",
+    "width": 768,
+    "height": 1024
   }
 ]

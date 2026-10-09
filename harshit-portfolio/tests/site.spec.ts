@@ -1,8 +1,10 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
+import { readFileSync } from "node:fs";
+
 /** Sections the Android app shortcuts and the header nav link to. */
-const SECTIONS = ["about", "work", "archive", "contact"];
+const SECTIONS = ["about", "work", "contact"];
 
 /** Fails the test on any console error, uncaught exception or failed local request. */
 function watchForErrors(page: Page) {
@@ -21,10 +23,9 @@ test.describe("page contract", () => {
 
     await expect(page).toHaveTitle(/Harshit Chauhan/);
     await expect(page.locator("h1")).toHaveCount(1);
-    await expect(page.locator("main#main")).toHaveCount(1);
     await expect(page.locator("header nav")).toHaveCount(1);
     await expect(page.locator("footer")).toHaveCount(1);
-    for (const id of SECTIONS) await expect(page.locator(`section#${id}`)).toHaveCount(1);
+    for (const id of SECTIONS) await expect(page.locator(`#${id}`)).toHaveCount(1);
 
     expect(errors).toEqual([]);
   });
@@ -32,7 +33,8 @@ test.describe("page contract", () => {
   test("every in-page anchor points at an element that exists", async ({ page }) => {
     await page.goto("/");
     const missing = await page.evaluate(() =>
-      [...document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]')]
+      // .js-resume-open links open the resume dock rather than scrolling.
+      [...document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]:not(.js-resume-open)')]
         .map((a) => (a.getAttribute("href") ?? "").slice(1))
         .filter((id) => id && !document.getElementById(id)),
     );
@@ -73,17 +75,19 @@ test.describe("page contract", () => {
 
   test("lists all eleven projects, each with a screenshot", async ({ page }) => {
     await page.goto("/");
-    const cards = page.locator("#work li");
-    await expect(cards).toHaveCount(11);
-    await expect(page.locator("#work li img")).toHaveCount(11);
+    await expect(page.locator("#work a-work")).toHaveCount(11);
+    await expect(page.locator("#work a-work img")).toHaveCount(11);
   });
 
-  test("ships a strict CSP with no unsafe-inline or unsafe-eval", async ({ page }) => {
-    await page.goto("/");
-    const csp = await page.locator('meta[http-equiv="content-security-policy"]').getAttribute("content");
-    expect(csp).toContain("script-src 'self' 'sha256-");
-    expect(csp).not.toContain("unsafe-inline");
-    expect(csp).not.toContain("unsafe-eval");
+  test("the CSP header never allows inline scripts", () => {
+    // astro preview doesn't apply _headers, so this reads the file Cloudflare serves from.
+    const headers = readFileSync(new URL("../public/_headers", import.meta.url), "utf8");
+    const csp = headers.match(/Content-Security-Policy: (.+)/)?.[1] ?? "";
+    const scriptSrc = csp.split(";").find((part) => part.trim().startsWith("script-src")) ?? "";
+    expect(scriptSrc.trim()).toMatch(/^script-src 'self'/);
+    expect(scriptSrc).not.toContain("unsafe-inline");
+    expect(csp).toContain("object-src 'none'");
+    expect(csp).toContain("frame-ancestors 'none'");
   });
 
   test("unknown paths get the 404 page", async ({ page }) => {
@@ -113,84 +117,75 @@ test.describe("layout and accessibility", () => {
     expect(missingAlt).toBe(0);
   });
 
-  test("content is fully visible without JavaScript", async ({ browser }) => {
+  test("all content is in the HTML, readable without JavaScript", async ({ browser }) => {
     const context = await browser.newContext({ javaScriptEnabled: false });
     const page = await context.newPage();
     await page.goto("/");
-    for (const id of ["about", "work", "archive", "contact"]) await expect(page.locator(`#${id} h2`)).toBeVisible();
-    await expect(page.getByRole("link", { name: "harshitsinhchauhan250@gmail.com" })).toBeVisible();
+    await expect(page.locator("h1")).toContainText("Developer");
+    await expect(page.locator("#about h2").first()).toHaveText("About");
+    await expect(page.locator("#work a-work")).toHaveCount(11);
+    await expect(page.locator("#contact a[href^='mailto:']")).toContainText("harshitsinhchauhan250@gmail.com");
     await context.close();
   });
 });
 
-test.describe("interactions", () => {
-  test("copy email puts the address on the clipboard and announces it", async ({ page, context }) => {
-    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
-    await page.goto("/");
-    await page.getByRole("button", { name: "Copy email" }).click();
-    await expect(page.getByRole("status")).toHaveText("Copied to clipboard");
-    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe("harshitsinhchauhan250@gmail.com");
-  });
-
-  test("header nav scrolls to its section", async ({ page }) => {
-    await page.goto("/");
-    await page.locator("header nav").getByRole("link", { name: "Work" }).click();
-    await expect(page).toHaveURL(/#work$/);
-    await expect(page.locator("#work h2")).toBeInViewport();
-  });
-
-  test("skip link moves focus to the main content", async ({ page }) => {
-    await page.goto("/");
-    await page.keyboard.press("Tab");
-    const skip = page.getByRole("link", { name: "Skip to content" });
-    await expect(skip).toBeFocused();
-    await skip.press("Enter");
-    await expect(page).toHaveURL(/#main$/);
-  });
-});
-
 test.describe("personal links", () => {
-  test("the hero names the role", async ({ page }) => {
-    await page.goto("/");
-    await expect(page.locator("section[aria-labelledby='hero-title']")).toContainText("Software Developer");
-  });
-
   test("every Hire me link is a well-formed mailto with an encoded subject", async ({ page }) => {
     await page.goto("/");
-    await expect(
-      page.locator("section[aria-labelledby='hero-title']").getByRole("link", { name: "Hire me" }),
-    ).toBeVisible();
     const hrefs = await page
-      .locator('a[href^="mailto:"][href*="?subject="]')
+      .locator('a[href^="mailto:"]')
       .evaluateAll((links) => links.map((a) => a.getAttribute("href")));
     expect(hrefs.length).toBeGreaterThanOrEqual(2);
     for (const href of hrefs) expect(href).toBe("mailto:harshitsinhchauhan250@gmail.com?subject=Hello%20Harshit");
   });
 
-  test("every resume PDF link opens /resume.pdf in a new tab", async ({ page }) => {
+  test("the header links GitHub and LinkedIn", async ({ page }) => {
     await page.goto("/");
-    const links = await page.locator('a[href="/resume.pdf"]').all();
-    expect(links.length).toBeGreaterThan(0);
-    for (const link of links) await expect(link).toHaveAttribute("target", "_blank");
+    await expect(page.locator(".sb-socials a[aria-label='GitHub']")).toHaveAttribute(
+      "href",
+      "https://github.com/harsh4k",
+    );
+    await expect(page.locator(".sb-socials a[aria-label='LinkedIn']")).toHaveAttribute(
+      "href",
+      "https://www.linkedin.com/in/harshit-chauhan-17a898364/",
+    );
   });
 
-  test("middle clicks and wheel scrolling are never cancelled", async ({ page }) => {
+  test("the resume opens in the dock with PDF and DOCX downloads", async ({ page }) => {
     await page.goto("/");
+    const dock = page.locator("#resume-dock");
+    await expect(dock).toBeAttached();
+    await expect(dock.locator('a[href="/resume.pdf"]')).toHaveAttribute("download", /\.pdf$/);
+    await expect(dock.locator('a[href="/Harshit_Resume.docx"]')).toHaveAttribute("download", /\.docx$/);
+  });
+});
+
+test.describe("input", () => {
+  test.use({ reducedMotion: "reduce" });
+
+  test("middle clicks are never cancelled, so links still open in a new tab", async ({ page }) => {
+    await page.goto("/", { waitUntil: "networkidle" });
     const cancelled = await page.evaluate(() => {
       const results: string[] = [];
       for (const target of [document.querySelector("#work a"), document.body]) {
         if (!target) continue;
-        const events = [
-          new MouseEvent("mousedown", { button: 1, bubbles: true, cancelable: true }),
-          new MouseEvent("auxclick", { button: 1, bubbles: true, cancelable: true }),
-          new WheelEvent("wheel", { deltaY: 100, bubbles: true, cancelable: true }),
-        ];
-        for (const event of events)
-          if (!target.dispatchEvent(event)) results.push(`${event.type} on ${target.nodeName}`);
+        for (const type of ["mousedown", "auxclick"]) {
+          const event = new MouseEvent(type, { button: 1, bubbles: true, cancelable: true });
+          if (!target.dispatchEvent(event)) results.push(`${type} on ${target.nodeName}`);
+        }
       }
       return results;
     });
     expect(cancelled).toEqual([]);
+  });
+
+  test("the wheel scrolls the page once the intro is done", async ({ page, isMobile }) => {
+    test.skip(isMobile, "phones scroll by touch");
+    await page.goto("/", { waitUntil: "networkidle" });
+    await expect(page.locator("html")).toHaveClass(/intro-done/);
+    await page.mouse.move(400, 400);
+    await page.mouse.wheel(0, 1200);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(600);
   });
 });
 

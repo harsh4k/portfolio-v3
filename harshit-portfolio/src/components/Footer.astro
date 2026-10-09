@@ -1,50 +1,26 @@
 ---
 import { profile } from "../data/profile";
-
-const year = new Date().getFullYear();
 ---
 
-<footer class="footer">
-  <p class="footer__mark" aria-hidden="true">
-    HC
-  </p>
-  <div class="footer__row mono">
-    <p>
-      © {year} {profile.name}
-    </p>
-    <a href="#top">
-      Back to top <span aria-hidden="true">↑</span>
+<footer class="site-foot astro-75cegwoc">
+  <div class="site-foot__logo astro-75cegwoc">
+    <a href="/" class="astro-75cegwoc">
+      <svg
+        width="280"
+        height="280"
+        viewBox="0 0 280 280"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        class="astro-75cegwoc"
+      >
+        <path
+          d="M0 0v280h39.755V158.4h59.65V280h39.756V0H99.411v118.8H39.755V0H0Z"
+          fill="#160000"
+          class="astro-75cegwoc"
+        ></path>
+        <path d="M160.734 0v280H280V240.245h-79.51V39.755H280V0H160.734Z" fill="#160000" class="astro-75cegwoc"></path>
+      </svg>
+      <span class="u-sr-only astro-75cegwoc">{profile.name}</span>
     </a>
   </div>
 </footer>
-
-<style>
-  .footer {
-    display: grid;
-    justify-items: center;
-    gap: 1rem;
-    padding: 2rem var(--gutter) 1.5rem;
-    border-top: 1px solid var(--ink);
-  }
-
-  .footer__mark {
-    font-family: var(--display);
-    font-size: 2.5rem;
-    font-weight: 700;
-    line-height: 1;
-  }
-
-  .footer__row {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 1rem;
-    width: 100%;
-  }
-
-  .footer__row a {
-    display: inline-flex;
-    align-items: center;
-    min-height: 2.75rem;
-  }
-</style>

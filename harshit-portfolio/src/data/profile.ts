@@ -1,7 +1,13 @@
 export const profile = {
   name: "Harshit Chauhan",
   role: "Software Developer",
+  /**
+   * The two giant words in the hero. The design's type size is tuned to these
+   * exact words: "Software" is about 16% wider than "Creative" and wraps.
+   */
+  heroTitle: ["Creative", "Developer"],
   location: "Mumbai, India",
+  availability: "Available for projects & roles",
   timeZone: "Asia/Kolkata",
   email: "harshitsinhchauhan250@gmail.com",
   since: 2024,
@@ -24,16 +30,28 @@ export const profile = {
  */
 export const hireMe = `mailto:${profile.email}?subject=${encodeURIComponent("Hello Harshit")}`;
 
+/**
+ * The Highlights grid. Each `slot` is the modifier class the design's
+ * stylesheet uses to place that cell, so the order and slots must stay paired.
+ */
 export const highlights = [
-  { word: "Shipped", value: "11", label: "Projects shipped", detail: "In production" },
-  { word: "Winner", value: "2026", label: "Hackathon winner", detail: "NamasteDev, with GetCited" },
-  { word: "Intern", value: "2025", label: "Junior dev intern", detail: "Synapical, summer" },
-  { word: "Degree", value: "B.Tech", label: "Computer Engineering", detail: "NMIMS Mumbai" },
-] as const;
-
-export const focus = [
-  { title: "Web applications", detail: "React, TypeScript, Next.js, Supabase" },
-  { title: "3D & motion", detail: "Three.js, WebGL, GSAP, interactive canvas" },
-  { title: "Local AI & voice tools", detail: "Tauri, Rust and Node pipelines, Python" },
-  { title: "Open source", detail: "github.com/harsh4k" },
+  {
+    slot: "webby2025",
+    kind: "text",
+    lines: ["NamasteDev Hackathon 2026 Winner", "GetCited AEO & GEO Website Platform"],
+  },
+  { slot: "awwwards", kind: "counter", name: "SHIPPED", counters: ["11 Projects", "Production"] },
+  { slot: "netMag2016", kind: "text", lines: ["Synapical Junior Dev Intern", "Summer 2025"] },
+  { slot: "fwa", kind: "counter", name: "INTERN", counters: ["Synapical", "Junior Dev"] },
+  {
+    slot: "commArt2017",
+    kind: "text",
+    lines: ["Stack: React · TypeScript · Next.js · Three.js · GSAP · Tailwind · Supabase · Python"],
+  },
+  { kind: "blank" },
+  { slot: "cssda", kind: "counter", name: "DEGREE", counters: ["NMIMS Mumbai", "B.Tech CE"] },
+  { slot: "gsapOct2024", kind: "text", lines: ["3D & WebGL Experiences", "Interactive Canvas Motion"] },
+  { slot: "gsapNov2024", kind: "text", lines: ["Local AI & Voice Tools", "Tauri, Rust & Node Pipelines"] },
+  { slot: "CSSDA2016", kind: "text", lines: ["Open Source Contributor", "github.com/harsh4k"] },
+  { slot: "CSSDA2015", kind: "text", lines: ["Building Considered Digital Products", `Since ${profile.since}`] },
 ] as const;

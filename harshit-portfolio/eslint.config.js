@@ -5,7 +5,22 @@ import tseslint from "typescript-eslint";
 import { defineConfig } from "eslint/config";
 
 export default defineConfig(
-  { ignores: ["dist/", "../dist/", ".astro/", "node_modules/", "test-results/", "playwright-report/"] },
+  {
+    ignores: [
+      "dist/",
+      "../dist/",
+      ".astro/",
+      "node_modules/",
+      "test-results/",
+      "playwright-report/",
+      // The design, copied unchanged from the live site. Kept byte-for-byte so
+      // the page renders exactly as it does today, so it is not linted or reformatted.
+      "public/_astro/",
+      "public/assets/",
+      "public/scripts/",
+      "public/styles/",
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.strict,
   ...astro.configs.recommended,

@@ -5,11 +5,12 @@
   Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   Cross-Origin-Opener-Policy: same-origin
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; media-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
 
-# The header CSP above is the outer bound. Every page also carries a stricter
-# CSP <meta> from Astro with a hash for each inline script and style, and the
-# browser enforces both, so no unhashed inline code can run.
+# The same policy the live site sends. No inline script can run (script-src has
+# no 'unsafe-inline'). The copied design sets inline style attributes and uses
+# blob: workers and images; 'unsafe-eval' is kept as live has it until the
+# engine is confirmed not to need it.
 
 /
   Cache-Control: no-cache
@@ -22,9 +23,16 @@
 /sw.js
   Cache-Control: no-cache
 
-# Content-hashed by Astro: a changed file always gets a new name.
+# Not immutable: _astro/ also holds the copied design's engine, whose file
+# names never change when its contents do. Unchanged files still cost only a 304.
 /_astro/*
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=0, must-revalidate
+
+/assets/*
+  Cache-Control: public, max-age=0, must-revalidate
+
+/scripts/*
+  Cache-Control: public, max-age=0, must-revalidate
 
 /fonts/*
   Cache-Control: public, max-age=31536000, immutable

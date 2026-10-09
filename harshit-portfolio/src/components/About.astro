@@ -1,185 +1,144 @@
 ---
-import { getEntry } from "astro:content";
-import { focus, highlights } from "../data/profile";
+import ProjectLink from "./ProjectLink.astro";
+import { getOrdered } from "../data/collections";
+import { highlights } from "../data/profile";
 
-// Inline links in the bio resolve from the projects collection, so a renamed
-// or removed project fails the build here instead of leaving a dead link.
-const linkTo = async (id: string) => {
-  const entry = await getEntry("projects", id);
-  if (!entry) throw new Error(`About links to unknown project "${id}"`);
-  return entry.data;
+// The bio links these projects by name; the build fails if one is removed.
+const projects = await getOrdered("projects");
+const linked = (id: string) => {
+  const project = projects.find((entry) => entry.id === id);
+  if (!project) throw new Error(`About links to project "${id}", which is not in projects.json`);
+  return project.data;
 };
-const [velsaro, nexcart, synapical, attendo] = await Promise.all(
-  ["velsaro", "nexcart", "synapical", "attendo"].map(linkTo),
-);
+const velsaro = linked("velsaro");
+const nexcart = linked("nexcart");
+const synapical = linked("synapical");
+const attendo = linked("attendo");
 ---
 
-<section class="about grid-bg" id="about" aria-labelledby="about-title">
-  <div class="about__panel" data-reveal>
-    <h2 class="about__bar mono" id="about-title">
-      About
-    </h2>
-
-    <div class="about__bio">
-      <p>
-        I design and build production web applications, motion-led studio sites and local-first AI tools, balancing
-        performance, interaction and clean systems.
-      </p>
-      <p>
-        I'm a Computer Engineering student at NMIMS Mumbai and a software developer crafting considered digital
-        experiences. I learn quickest by taking things apart, building from scratch and shipping: from e-commerce
-        platforms like{" "}
-        <a href={velsaro?.url} target="_blank" rel="noopener">
-          {velsaro?.title}
-        </a>{" "}
-        and{" "}
-        <a href={nexcart?.url} target="_blank" rel="noopener">
-          {nexcart?.title}
-        </a>{" "}
-        to studio sites like{" "}
-        <a href={synapical?.url} target="_blank" rel="noopener">
-          {synapical?.title}
-        </a>{" "}
-        and college systems like{" "}
-        <a href={attendo?.url} target="_blank" rel="noopener">
-          {attendo?.title}
-        </a>
-        .
-      </p>
+<section id="about" class="s-about astro-am7g2yfn" data-intersect>
+  <div class="s__inner js-inner astro-am7g2yfn">
+    <div class="s__block s__block--about astro-am7g2yfn">
+      <h2 class="s__title astro-am7g2yfn">About</h2>
+      <div class="s__content astro-am7g2yfn">
+        <p class="astro-am7g2yfn">
+          I design and build production web applications, motion-led studio sites, and local-first AI tools — balancing
+          performance, interaction, and clean systems.
+        </p>
+        <p class="astro-am7g2yfn">
+          I'm a Computer Engineering student at NMIMS Mumbai and frontend developer crafting considered digital
+          experiences. I learn quickest by taking things apart, building from scratch, and shipping — from e-commerce
+          platforms like <ProjectLink project={velsaro} /> and <ProjectLink project={nexcart} /> to studio sites like
+          <ProjectLink project={synapical} /> and college systems like <ProjectLink project={attendo} />.
+        </p>
+      </div>
     </div>
-
-    <h3 class="about__bar mono">Highlights</h3>
-    <dl class="about__stats">
-      {highlights.map((item, index) => (
-        <div class="about__stat">
-          <dt class="about__word">{item.word}</dt>
-          <dd class="about__value">{item.value}</dd>
-          <dd class="about__detail mono">
-            ({item.label})<br />({item.detail})
-          </dd>
-          {index % 2 === 0 && <span class="about__hatch hatch" aria-hidden="true" />}
-        </div>
-      ))}
-    </dl>
-
-    <h3 class="about__bar mono">What I work on</h3>
-    <ul class="about__focus">
-      {focus.map((item) => (
-        <li>
-          <span class="about__focus-title">{item.title}</span>
-          <span class="about__focus-detail mono">{item.detail}</span>
-        </li>
-      ))}
-    </ul>
+    <div class="s__block s__block--awards astro-am7g2yfn">
+      <h2 class="s__title astro-am7g2yfn">Highlights</h2>
+      <ul class="s__awards astro-am7g2yfn">
+        {highlights.map((item) =>
+          item.kind === "blank" ? (
+            <li class="s__award s__award--blank astro-am7g2yfn">
+              <svg
+                width="101"
+                height="113"
+                viewBox="0 0 101 113"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                class="astro-am7g2yfn"
+              >
+                <path
+                  d="M80.05 107.398c-21.944 12.67-52.875.18-69.085-27.896m69.086 27.896c21.945-12.67 26.594-45.702 10.384-73.778M80.05 107.398c-19.686 11.366-48.786-2.181-64.996-30.258C-1.155 49.063 1.663 17.09 21.35 5.723m58.702 101.675c19.686-11.366 22.504-43.34 6.293-71.417C70.134 7.904 41.034-5.642 21.35 5.723"
+                  class="astro-am7g2yfn"
+                ></path>
+              </svg>
+              <svg
+                width="49"
+                height="49"
+                viewBox="0 0 49 49"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                class="astro-am7g2yfn"
+              >
+                <path
+                  fill="#160000"
+                  d="m24.5 0 3.3 21.2L49 24.5l-21.2 3.3L24.5 49l-3.3-21.2L0 24.5l21.2-3.3L24.5 0z"
+                  class="astro-am7g2yfn"
+                ></path>
+              </svg>
+              <svg
+                width="49"
+                height="49"
+                viewBox="0 0 49 49"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                class="astro-am7g2yfn"
+              >
+                <path
+                  fill="#160000"
+                  d="m24.5 0 3.3 21.2L49 24.5l-21.2 3.3L24.5 49l-3.3-21.2L0 24.5l21.2-3.3L24.5 0z"
+                  class="astro-am7g2yfn"
+                ></path>
+              </svg>
+              <svg
+                width="49"
+                height="49"
+                viewBox="0 0 49 49"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                class="astro-am7g2yfn"
+              >
+                <path
+                  fill="#160000"
+                  d="m24.5 0 3.3 21.2L49 24.5l-21.2 3.3L24.5 49l-3.3-21.2L0 24.5l21.2-3.3L24.5 0z"
+                  class="astro-am7g2yfn"
+                ></path>
+              </svg>
+              <svg
+                width="49"
+                height="49"
+                viewBox="0 0 49 49"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                class="astro-am7g2yfn"
+              >
+                <path
+                  fill="#160000"
+                  d="m24.5 0 3.3 21.2L49 24.5l-21.2 3.3L24.5 49l-3.3-21.2L0 24.5l21.2-3.3L24.5 0z"
+                  class="astro-am7g2yfn"
+                ></path>
+              </svg>
+            </li>
+          ) : (
+            <li class={`s__award s__award--${item.kind} s__award--${item.slot} js-award astro-am7g2yfn`}>
+              <span class="s__award__inner astro-am7g2yfn">
+                {item.kind === "text" ? (
+                  <span class="s__award__text astro-am7g2yfn">
+                    {item.lines.map((line, index) => (
+                      <>
+                        {index > 0 && <br />}
+                        {line}
+                      </>
+                    ))}
+                  </span>
+                ) : (
+                  <>
+                    <span class="s__award__name astro-am7g2yfn">{item.name}</span>
+                    {item.counters.map((counter) => (
+                      <span class="s__award__counter astro-am7g2yfn">({counter})</span>
+                    ))}
+                  </>
+                )}
+              </span>
+              <span class="s__award__mask astro-am7g2yfn"></span>
+            </li>
+          ),
+        )}
+      </ul>
+    </div>
   </div>
+  <svg class="s__grid js-grid astro-am7g2yfn">
+    <path class="js-path astro-am7g2yfn" d=""></path>
+  </svg>
+  <canvas class="s__canvas js-canvas astro-am7g2yfn"></canvas>
 </section>
-
-<style>
-  .about {
-    padding: clamp(3rem, 8vw, 6rem) var(--gutter);
-    border-bottom: 1px solid var(--ink);
-  }
-
-  .about__panel {
-    width: min(100%, 38rem);
-    margin-inline: auto;
-    border: 1px solid var(--ink);
-    background: var(--red);
-  }
-
-  .about__bar {
-    padding: 0.3rem 1rem;
-    background: var(--ink);
-    color: var(--red);
-    font-family: var(--mono);
-    font-size: 0.625rem;
-    line-height: 1.4;
-    letter-spacing: 0.2em;
-    text-align: center;
-  }
-
-  .about__bio {
-    display: grid;
-    gap: 1.25rem;
-    padding: clamp(1.5rem, 5vw, 2.5rem);
-    font-size: clamp(1.125rem, 0.6vw + 1rem, 1.375rem);
-  }
-
-  .about__stats {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .about__stat {
-    position: relative;
-    display: grid;
-    align-content: end;
-    gap: 0.25rem;
-    min-height: 11rem;
-    padding: 1rem;
-    border-bottom: 1px solid var(--ink);
-    overflow: hidden;
-  }
-
-  .about__stat:nth-child(odd) {
-    border-right: 1px solid var(--ink);
-  }
-
-  .about__word {
-    font-family: var(--display);
-    font-size: clamp(2rem, 5vw, 2.75rem);
-    line-height: 0.85;
-    text-transform: uppercase;
-  }
-
-  .about__value {
-    position: absolute;
-    top: 0.75rem;
-    right: 1rem;
-    font-size: 1.25rem;
-  }
-
-  .about__detail {
-    font-size: 0.6875rem;
-    letter-spacing: 0.02em;
-    text-transform: none;
-  }
-
-  .about__hatch {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 30%;
-    height: 40%;
-    border-right: 1px solid var(--ink);
-    border-bottom: 1px solid var(--ink);
-  }
-
-  .about__focus {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .about__focus li {
-    display: grid;
-    gap: 0.25rem;
-    padding: 1rem;
-    border-top: 1px solid var(--ink);
-    text-align: center;
-  }
-
-  .about__focus li:first-child {
-    border-top: 0;
-  }
-
-  .about__focus-title {
-    font-size: clamp(1.25rem, 1vw + 1rem, 1.6rem);
-    line-height: 1.1;
-  }
-
-  .about__focus-detail {
-    font-size: 0.6875rem;
-    text-transform: none;
-  }
-</style>

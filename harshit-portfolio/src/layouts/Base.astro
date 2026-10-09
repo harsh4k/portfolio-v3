@@ -1,5 +1,4 @@
 ---
-import "../styles/global.css";
 import { profile } from "../data/profile";
 
 interface Props {
@@ -9,6 +8,7 @@ interface Props {
 
 const { title, description } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL("/images/og-image.png", Astro.site);
 
 const personSchema = {
   "@context": "https://schema.org",
@@ -16,47 +16,83 @@ const personSchema = {
   name: profile.name,
   jobTitle: profile.role,
   url: Astro.site?.href,
-  email: `mailto:${profile.email}`,
-  address: { "@type": "PostalAddress", addressLocality: "Mumbai", addressCountry: "IN" },
+  email: profile.email,
   alumniOf: { "@type": "CollegeOrUniversity", name: "NMIMS Mumbai" },
   sameAs: profile.socials.map((social) => social.url),
 };
+
+// The design's fonts, preloaded because the intro and hero render with them first.
+const fonts = [
+  "PPEditorialNew-Regular",
+  "PPEditorialNew-Ultralight",
+  "PPFraktionMono-Regular",
+  "PPFraktionMono-Bold",
+  "Bigger-Display",
+];
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" class="is-scroll-blocked astro-j7pv25f6">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <link rel="canonical" href={canonical} />
 
-    <link rel="icon" href="/icons/favicon.ico" sizes="48x48" />
-    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" href="/icons/logo.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/icons/favicon-48x48.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
+    <link rel="shortcut icon" href="/icons/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
-    <meta name="theme-color" content="#f40c3f" />
+    <meta name="apple-mobile-web-app-title" content="Harshit" />
+    <meta name="theme-color" content="#F40C3F" />
+    <meta name="msapplication-navbutton-color" content="#160000" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="#160000" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
 
-    <link rel="preload" href="/fonts/BigShouldersDisplay-Bold.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/Fraunces-Light.woff2" as="font" type="font/woff2" crossorigin />
-
+    <meta property="og:locale" content="en_US" />
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content={profile.name} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:site_name" content={`${profile.name} Portfolio`} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={ogImage} />
 
+    {fonts.map((font) => (
+      <link rel="preload" href={`/fonts/${font}.woff2`} as="font" type="font/woff2" crossorigin />
+    ))}
+
+    <!--
+      The design, copied unchanged from the live site:
+      _astro/ is the section styles and GSAP motion engine,
+      assets/ is the 3D intro scene's styles (its script loads from bridge.js),
+      styles/integration.css joins the two.
+    -->
+    <link rel="stylesheet" href="/_astro/index.MJ9FiCyD.css" />
+    <script is:inline type="module" src="/_astro/hoisted.BvNyQ0G_.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DG8As337.css" data-intro-style />
+    <link rel="stylesheet" href="/styles/integration.css" />
+    <!-- Must run before the engine: it calls play()/pause() on the card images. -->
+    <script is:inline src="/scripts/img-media.js"></script>
     <script type="application/ld+json" set:html={JSON.stringify(personSchema)} />
-    <!-- Marks JS as running, so the scroll reveals never hide content without it. -->
-    <script is:inline>
-      document.documentElement.classList.add("js");
-    </script>
   </head>
-  <body>
-    <a class="skip-link" href="#main">
-      Skip to content
-    </a>
-    <slot />
+  <body class="astro-j7pv25f6">
+    <div id="intro-layer" class="intro-layer">
+      <div id="app"></div>
+    </div>
+    <div class="site-wrapper js-site-wrapper astro-j7pv25f6">
+      <slot />
+    </div>
+    <slot name="after" />
+    <script is:inline type="module" src="/scripts/bridge.js"></script>
+    <script is:inline type="module" src="/scripts/resume-dock.js"></script>
   </body>
 </html>
