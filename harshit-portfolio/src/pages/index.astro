@@ -1,0 +1,24 @@
+---
+import Base from "../layouts/Base.astro";
+import Header from "../components/Header.astro";
+import Hero from "../components/Hero.astro";
+import About from "../components/About.astro";
+import Work from "../components/Work.astro";
+import Archive from "../components/Archive.astro";
+import Contact from "../components/Contact.astro";
+import Footer from "../components/Footer.astro";
+import { profile } from "../data/profile";
+---
+
+<Base title={`${profile.name} — ${profile.role}`} description={profile.description}>
+  <div id="top"></div>
+  <Header />
+  <main id="main" tabindex="-1">
+    <Hero />
+    <About />
+    <Work />
+    <Archive />
+    <Contact />
+  </main>
+  <Footer />
+</Base>

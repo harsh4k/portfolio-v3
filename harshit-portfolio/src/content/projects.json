@@ -1,0 +1,84 @@
+[
+  {
+    "id": "velsaro",
+    "order": 1,
+    "title": "Velsaro",
+    "url": "https://www.velsaro.in/",
+    "image": "../assets/projects/velsaro.webp",
+    "summary": "E-commerce platform"
+  },
+  {
+    "id": "nexcart",
+    "order": 2,
+    "title": "Nexcart",
+    "url": "https://nexcart-v1.vercel.app/",
+    "image": "../assets/projects/nexcart.webp",
+    "summary": "E-commerce platform"
+  },
+  {
+    "id": "synapical",
+    "order": 3,
+    "title": "Synapical",
+    "url": "https://synapical-com.pages.dev/",
+    "image": "../assets/projects/synapical.webp",
+    "summary": "Studio site"
+  },
+  {
+    "id": "attendo",
+    "order": 4,
+    "title": "Attendo",
+    "url": "https://attendov1.vercel.app/",
+    "image": "../assets/projects/attendo.webp",
+    "summary": "College attendance system"
+  },
+  {
+    "id": "coffee-digital",
+    "order": 5,
+    "title": "Coffee Digital",
+    "url": "https://coffeedigital.vercel.app/",
+    "image": "../assets/projects/coffee-digital.webp"
+  },
+  {
+    "id": "coffee-rebuild",
+    "order": 6,
+    "title": "Coffee Rebuild",
+    "url": "https://threedwebs.vercel.app/",
+    "image": "../assets/projects/coffee-rebuild.webp"
+  },
+  {
+    "id": "oysnk",
+    "order": 7,
+    "title": "Oysnk",
+    "url": "https://oysnk.vercel.app/",
+    "image": "../assets/projects/oysnk.webp"
+  },
+  {
+    "id": "shipd",
+    "order": 8,
+    "title": "Shipd",
+    "url": "https://github.com/harsh4k/shipd",
+    "image": "../assets/projects/shipd.webp"
+  },
+  {
+    "id": "rudo",
+    "order": 9,
+    "title": "Rudo AI",
+    "url": "https://github.com/harsh4k/rudo",
+    "image": "../assets/projects/rudo.webp"
+  },
+  {
+    "id": "bunny-os",
+    "order": 10,
+    "title": "Bunny OS",
+    "url": "https://harsh4k.github.io/Bunny-OS/",
+    "image": "../assets/projects/bunny-os.webp"
+  },
+  {
+    "id": "getcited",
+    "order": 11,
+    "title": "GetCited",
+    "url": "https://github.com/harsh4k/Getcited",
+    "image": "../assets/projects/getcited.webp",
+    "summary": "AEO & GEO website platform · NamasteDev Hackathon 2026 winner"
+  }
+]

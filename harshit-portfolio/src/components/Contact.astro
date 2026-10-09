@@ -1,0 +1,75 @@
+---
+import { profile } from "../data/profile";
+---
+
+<section id="contact" aria-labelledby="contact-title">
+  <div>
+    <div>
+      <h2 id="contact-title">Contact</h2>
+    </div>
+
+    <p>Have a project, a role or an idea? Let's build it.</p>
+
+    <div>
+      <a href={`mailto:${profile.email}`}>{profile.email}</a>
+      <button type="button" data-copy={profile.email} hidden>
+        Copy email
+      </button>
+      <p role="status" aria-live="polite" data-copy-status></p>
+    </div>
+
+    <div>
+      <div>
+        <h3>Elsewhere</h3>
+        <ul>
+          {profile.socials.map((social) => (
+            <li>
+              <a href={social.url} target="_blank" rel="noopener me">
+                {social.label}
+                <span class="visually-hidden">(opens in a new tab)</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div>
+        <h3>Resume</h3>
+        <ul>
+          <li>
+            <a href={profile.resume.pdf} target="_blank" rel="noopener">
+              View PDF
+            </a>
+          </li>
+          <li>
+            <a href={profile.resume.docx} download="Harshit_Chauhan_Resume.docx">
+              Download DOCX
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const button = document.querySelector<HTMLButtonElement>("[data-copy]");
+  const status = document.querySelector<HTMLElement>("[data-copy-status]");
+
+  // Only offered where the Clipboard API exists; the mailto link always works.
+  if (button && status && navigator.clipboard) {
+    button.hidden = false;
+    let reset = 0;
+    button.addEventListener("click", async () => {
+      window.clearTimeout(reset);
+      try {
+        await navigator.clipboard.writeText(button.dataset.copy ?? "");
+        status.textContent = "Copied to clipboard";
+      } catch {
+        status.textContent = "Couldn't copy. Select the address above instead.";
+      }
+      reset = window.setTimeout(() => {
+        status.textContent = "";
+      }, 4000);
+    });
+  }
+</script>

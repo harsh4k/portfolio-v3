@@ -1,0 +1,49 @@
+---
+import { Image } from "astro:assets";
+import { getOrdered } from "../data/collections";
+
+const projects = await getOrdered("projects");
+
+const hostOf = (url: string) => {
+  const { hostname, pathname } = new URL(url);
+  const host = hostname.replace(/^www\./, "");
+  return host === "github.com" ? `github.com${pathname.replace(/\/$/, "")}` : host;
+};
+---
+
+<section id="work" aria-labelledby="work-title">
+  <div>
+    <div>
+      <h2 id="work-title">Work</h2>
+      <p>{projects.length} projects</p>
+    </div>
+
+    <ol>
+      {projects.map((project, index) => (
+        <li>
+          <a href={project.data.url} target="_blank" rel="noopener">
+            <div>
+              <Image
+                src={project.data.image}
+                alt=""
+                widths={[480, 800, 1200]}
+                sizes="(min-width: 70rem) 30vw, (min-width: 45rem) 45vw, 92vw"
+                loading={index < 2 ? "eager" : "lazy"}
+              />
+            </div>
+            <div>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <h3>{project.data.title}</h3>
+              {project.data.summary && <p>{project.data.summary}</p>}
+              <p>
+                {hostOf(project.data.url)}
+                <span aria-hidden="true">↗</span>
+                <span class="visually-hidden">(opens in a new tab)</span>
+              </p>
+            </div>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>

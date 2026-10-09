@@ -1,0 +1,28 @@
+---
+import { Image } from "astro:assets";
+import { getOrdered } from "../data/collections";
+
+const photos = await getOrdered("archive");
+---
+
+<section id="archive" aria-labelledby="archive-title">
+  <div>
+    <div>
+      <h2 id="archive-title">Archive</h2>
+      <p>Off-screen, {photos.length} frames</p>
+    </div>
+  </div>
+
+  <div>
+    <ul>
+      {photos.map((photo) => (
+        <li>
+          <figure>
+            <Image src={photo.data.image} alt={photo.data.caption} height={480} densities={[1, 2]} loading="lazy" />
+            <figcaption>{photo.data.caption}</figcaption>
+          </figure>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>

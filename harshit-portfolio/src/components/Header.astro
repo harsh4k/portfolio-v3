@@ -1,0 +1,33 @@
+---
+import { profile } from "../data/profile";
+
+const links = [
+  { href: "#about", label: "About" },
+  { href: "#work", label: "Work" },
+  { href: "#archive", label: "Archive" },
+  { href: "#contact", label: "Contact" },
+];
+---
+
+<header>
+  <div>
+    <a href="#top" aria-label={`${profile.name}, back to top`}>
+      {profile.name}
+    </a>
+
+    <nav aria-label="Sections">
+      <ul>
+        {links.map((link) => (
+          <li>
+            <a href={link.href}>{link.label}</a>
+          </li>
+        ))}
+        <li>
+          <a href={profile.resume.pdf} target="_blank" rel="noopener">
+            Resume<span class="visually-hidden"> (PDF, opens in a new tab)</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>

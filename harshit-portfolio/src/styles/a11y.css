@@ -1,0 +1,40 @@
+/*
+ * Accessibility utilities only. The site ships unstyled on purpose: the visual
+ * design is added later, separately. Keep this file free of colours, fonts,
+ * spacing and layout.
+ */
+
+/* Responsive images, so screenshots never force the page to scroll sideways. */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Read by screen readers, not shown on screen. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* The skip link stays hidden until a keyboard user tabs to it. */
+.skip-link:not(:focus) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* WCAG 2.2 target size: links stacked in a list need at least 24px of height. */
+li > a {
+  display: inline-block;
+  min-height: 24px;
+}
