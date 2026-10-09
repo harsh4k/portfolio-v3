@@ -3,9 +3,8 @@
 > Creative developer and Computer Engineering student at NMIMS Mumbai, building
 > production web applications, motion-led sites and local-first AI tools.
 
-This is a single-page portfolio. The landing page opens with an interactive 3D
-WebGL scene; the content below it covers an about section, selected work,
-a visual archive and contact details.
+This is a single-page portfolio with an about section, selected work,
+a photo archive and contact details.
 
 ## Work
 

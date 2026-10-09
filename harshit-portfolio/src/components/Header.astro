@@ -1,0 +1,164 @@
+---
+import { profile } from "../data/profile";
+
+const links = [
+  { href: "#about", label: "About" },
+  { href: "#work", label: "Work" },
+  { href: "#archive", label: "Archive" },
+  { href: "#contact", label: "Contact" },
+];
+---
+
+<header class="header">
+  <div class="header__inner wrap">
+    <a class="header__brand label" href="#top" aria-label={`${profile.name}, back to top`}>
+      <span class="header__mark" aria-hidden="true">
+        HC
+      </span>
+      <span class="header__name">{profile.name}</span>
+    </a>
+
+    <nav class="header__nav" aria-label="Sections">
+      <ul>
+        {links.map((link) => (
+          <li>
+            <a class="label" href={link.href}>
+              {link.label}
+            </a>
+          </li>
+        ))}
+        <li>
+          <a class="label" href={profile.resume.pdf} target="_blank" rel="noopener">
+            Resume<span class="visually-hidden"> (PDF, opens in a new tab)</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <button class="header__theme" type="button" data-theme-toggle aria-pressed="false">
+      <span class="visually-hidden">Dark theme</span>
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5"></circle>
+        <path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"></path>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<script>
+  const button = document.querySelector<HTMLButtonElement>("[data-theme-toggle]");
+  const root = document.documentElement;
+  const media = window.matchMedia("(prefers-color-scheme: dark)");
+
+  const isDark = () => (root.dataset.theme ?? (media.matches ? "dark" : "light")) === "dark";
+  const sync = () => button?.setAttribute("aria-pressed", String(isDark()));
+
+  button?.addEventListener("click", () => {
+    const next = isDark() ? "light" : "dark";
+    root.dataset.theme = next;
+    try {
+      localStorage.setItem("theme", next);
+    } catch {
+      // Storage blocked: the choice lasts for this page view only.
+    }
+    sync();
+  });
+  media.addEventListener("change", sync);
+  sync();
+</script>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: color-mix(in srgb, var(--paper) 86%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .header__inner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-height: var(--header-h);
+  }
+
+  .header__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 2.75rem;
+    text-decoration: none;
+  }
+
+  .header__mark {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+
+  .header__nav {
+    margin-left: auto;
+  }
+
+  .header__nav ul {
+    display: flex;
+    gap: clamp(0.25rem, 2vw, 1.5rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .header__nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding-inline: 0.25rem;
+    text-decoration: none;
+  }
+
+  .header__nav a:hover {
+    color: var(--accent);
+  }
+
+  .header__theme {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .header__theme:hover {
+    border-color: var(--ink);
+  }
+
+  /* On phones the brand shrinks to the mark and the nav keeps its four anchors. */
+  @media (max-width: 47.99rem) {
+    .header__name,
+    .header__nav li:nth-child(3) {
+      display: none;
+    }
+
+    .header__nav ul {
+      gap: 0.25rem;
+    }
+
+    .header__nav .label {
+      font-size: 0.6875rem;
+      letter-spacing: 0.04em;
+    }
+  }
+</style>

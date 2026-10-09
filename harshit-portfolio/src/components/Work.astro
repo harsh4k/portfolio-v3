@@ -1,0 +1,139 @@
+---
+import { Image } from "astro:assets";
+import { getOrdered } from "../data/collections";
+
+const projects = await getOrdered("projects");
+
+const hostOf = (url: string) => {
+  const { hostname, pathname } = new URL(url);
+  const host = hostname.replace(/^www\./, "");
+  return host === "github.com" ? `github.com${pathname.replace(/\/$/, "")}` : host;
+};
+---
+
+<section class="section" id="work" aria-labelledby="work-title">
+  <div class="wrap">
+    <div class="section__head">
+      <h2 class="section__title" id="work-title">
+        Work
+      </h2>
+      <p class="label">
+        <span class="section__index">02</span> <span class="muted">· {projects.length} projects</span>
+      </p>
+    </div>
+
+    <ol class="work">
+      {projects.map((project, index) => (
+        <li class="card" data-reveal>
+          <a class="card__link" href={project.data.url} target="_blank" rel="noopener">
+            <div class="card__media">
+              <Image
+                src={project.data.image}
+                alt=""
+                widths={[480, 800, 1200]}
+                sizes="(min-width: 70rem) 30vw, (min-width: 45rem) 45vw, 92vw"
+                loading={index < 2 ? "eager" : "lazy"}
+                class="card__image"
+              />
+            </div>
+            <div class="card__body">
+              <span class="label section__index">{String(index + 1).padStart(2, "0")}</span>
+              <h3 class="card__title">{project.data.title}</h3>
+              {project.data.summary && <p class="card__summary">{project.data.summary}</p>}
+              <p class="card__host label muted">
+                {hostOf(project.data.url)}
+                <span aria-hidden="true">↗</span>
+                <span class="visually-hidden">(opens in a new tab)</span>
+              </p>
+            </div>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style>
+  .work {
+    display: grid;
+    gap: clamp(1.5rem, 3vw, 2.5rem) clamp(1rem, 2.5vw, 2rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .card__link {
+    display: grid;
+    gap: 1rem;
+    height: 100%;
+    text-decoration: none;
+  }
+
+  .card__media {
+    overflow: hidden;
+    aspect-ratio: 16 / 10;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--paper-raised);
+  }
+
+  .card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+    transition: transform 0.6s var(--ease-out);
+  }
+
+  .card__body {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.25rem 0.75rem;
+    align-items: baseline;
+  }
+
+  .card__title {
+    font-size: clamp(1.75rem, 2.5vw, 2.25rem);
+  }
+
+  .card__summary,
+  .card__host {
+    grid-column: 2;
+  }
+
+  .card__summary {
+    font-size: 1rem;
+  }
+
+  .card__host {
+    display: inline-flex;
+    gap: 0.4rem;
+    overflow-wrap: anywhere;
+  }
+
+  .card__link:hover .card__title {
+    color: var(--accent);
+  }
+
+  .card__link:hover .card__image {
+    transform: scale(1.03);
+  }
+
+  @media (min-width: 45rem) {
+    .work {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 70rem) {
+    .work {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card__link:hover .card__image {
+      transform: none;
+    }
+  }
+</style>

@@ -1,0 +1,38 @@
+---
+import { profile } from "../data/profile";
+
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="footer__inner wrap label muted">
+    <p>
+      © {year} {profile.name}
+    </p>
+    <p>Built with Astro, set in Fraunces and IBM Plex Mono</p>
+    <a href="#top">
+      Back to top <span aria-hidden="true">↑</span>
+    </a>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    border-top: 1px solid var(--line);
+  }
+
+  .footer__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 2rem;
+    padding-block: 1.5rem;
+  }
+
+  .footer a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+  }
+</style>

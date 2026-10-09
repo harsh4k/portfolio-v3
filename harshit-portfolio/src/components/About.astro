@@ -1,0 +1,166 @@
+---
+import { getEntry } from "astro:content";
+import { focus, highlights } from "../data/profile";
+
+// Inline links in the bio resolve from the projects collection, so a renamed
+// or removed project fails the build here instead of leaving a dead link.
+const linkTo = async (id: string) => {
+  const entry = await getEntry("projects", id);
+  if (!entry) throw new Error(`About links to unknown project "${id}"`);
+  return entry.data;
+};
+const [velsaro, nexcart, synapical, attendo] = await Promise.all(
+  ["velsaro", "nexcart", "synapical", "attendo"].map(linkTo),
+);
+---
+
+<section class="section" id="about" aria-labelledby="about-title">
+  <div class="wrap">
+    <div class="section__head">
+      <h2 class="section__title" id="about-title">
+        About
+      </h2>
+      <span class="section__index label" aria-hidden="true">
+        01
+      </span>
+    </div>
+
+    <div class="about">
+      <div class="about__bio" data-reveal>
+        <p class="about__intro">
+          I'm a Computer Engineering student at NMIMS Mumbai and a frontend developer crafting considered digital
+          experiences.
+        </p>
+        <p>
+          I learn quickest by taking things apart, building from scratch and shipping: from e-commerce platforms like{" "}
+          <a href={velsaro?.url} target="_blank" rel="noopener">
+            {velsaro?.title}
+          </a>{" "}
+          and{" "}
+          <a href={nexcart?.url} target="_blank" rel="noopener">
+            {nexcart?.title}
+          </a>{" "}
+          to studio sites like{" "}
+          <a href={synapical?.url} target="_blank" rel="noopener">
+            {synapical?.title}
+          </a>{" "}
+          and college systems like{" "}
+          <a href={attendo?.url} target="_blank" rel="noopener">
+            {attendo?.title}
+          </a>
+          .
+        </p>
+      </div>
+
+      <dl class="stats" data-reveal>
+        {highlights.map((item) => (
+          <div class="stats__item">
+            <dt class="label muted">{item.label}</dt>
+            <dd class="stats__value">{item.value}</dd>
+            <dd class="stats__detail">{item.detail}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+
+    <ul class="focus" aria-label="What I work on">
+      {focus.map((item, index) => (
+        <li class="focus__item" data-reveal>
+          <span class="label section__index">{String(index + 1).padStart(2, "0")}</span>
+          <h3 class="focus__title">{item.title}</h3>
+          <p class="focus__detail muted">{item.detail}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .about {
+    display: grid;
+    gap: clamp(2.5rem, 6vw, 5rem);
+  }
+
+  .about__bio {
+    display: grid;
+    gap: 1.25rem;
+    max-width: 40rem;
+  }
+
+  .about__intro {
+    font-size: clamp(1.5rem, 2vw + 0.9rem, 2.25rem);
+    font-weight: 300;
+    line-height: 1.2;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin: 0;
+    border-top: 1px solid var(--line);
+    border-left: 1px solid var(--line);
+  }
+
+  .stats__item {
+    display: grid;
+    align-content: start;
+    gap: 0.35rem;
+    padding: clamp(1rem, 2.5vw, 1.75rem);
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .stats dd {
+    margin: 0;
+  }
+
+  .stats__value {
+    font-size: clamp(2.25rem, 4vw, 3.5rem);
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+
+  .stats__detail {
+    font-size: 0.95rem;
+    color: var(--muted);
+  }
+
+  .focus {
+    display: grid;
+    margin: clamp(3rem, 7vw, 5rem) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .focus__item {
+    display: grid;
+    grid-template-columns: 2.5rem 1fr;
+    gap: 0.25rem 1rem;
+    padding-block: 1.25rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .focus__title {
+    font-size: clamp(1.5rem, 2.5vw, 2.25rem);
+  }
+
+  .focus__detail {
+    grid-column: 2;
+  }
+
+  @media (min-width: 60rem) {
+    .about {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .focus__item {
+      grid-template-columns: 4rem minmax(0, 1fr) minmax(0, 1fr);
+      align-items: baseline;
+    }
+
+    .focus__detail {
+      grid-column: auto;
+    }
+  }
+</style>

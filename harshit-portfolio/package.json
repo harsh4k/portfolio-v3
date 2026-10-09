@@ -1,32 +1,37 @@
 {
   "name": "harshit-portfolio",
-  "version": "2.0.0",
-  "description": "Harshit Chauhan — Interactive 3D WebGL Portfolio",
+  "version": "3.0.0",
+  "private": true,
+  "description": "Harshit Chauhan — portfolio",
   "type": "module",
-  "main": "server.mjs",
-  "scripts": {
-    "dev": "node server.mjs",
-    "start": "node server.mjs",
-    "build": "node src/scripts/build.mjs && node src/scripts/clean-adrien.mjs && node src/scripts/patch-intro.mjs && node src/scripts/generate-precache.mjs",
-    "icons": "node src/scripts/generate-pwa-icons.mjs",
-    "test": "playwright test",
-    "test:desktop": "playwright test --project=desktop"
+  "engines": {
+    "node": ">=22.12.0"
   },
-  "keywords": [
-    "portfolio",
-    "threejs",
-    "webgl",
-    "gsap",
-    "creative-developer"
-  ],
-  "author": "Harshit Chauhan",
-  "license": "MIT",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "playwright test",
+    "verify": "npm run lint && npm run format:check && npm run check && npm run build && npm test"
+  },
   "dependencies": {
-    "pdfjs-dist": "^4.10.38"
+    "astro": "^7.3.8"
   },
   "devDependencies": {
-    "@playwright/test": "^1.62.1",
-    "png-to-ico": "^3.0.2",
-    "sharp": "^0.35.4"
+    "@astrojs/check": "^0.9.10",
+    "@axe-core/playwright": "^4.13.0",
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.64.0",
+    "eslint": "^10.12.0",
+    "eslint-plugin-astro": "^1.7.0",
+    "globals": "^17.13.0",
+    "prettier": "^3.9.9",
+    "prettier-plugin-astro": "^1.1.1",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.71.1"
   }
 }

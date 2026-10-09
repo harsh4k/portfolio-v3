@@ -1,0 +1,193 @@
+---
+import { profile } from "../data/profile";
+
+const [first, last] = profile.name.split(" ");
+---
+
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero__inner wrap">
+    <p class="hero__eyebrow label">
+      <span class="hero__status">
+        <span class="hero__dot" aria-hidden="true"></span>Available for projects & roles
+      </span>
+    </p>
+
+    <h1 class="hero__title" id="hero-title">
+      <span class="hero__line">{first}</span>
+      <span class="hero__line hero__line--indent">
+        {last}
+        <span class="hero__stop" aria-hidden="true">
+          .
+        </span>
+      </span>
+      <span class="visually-hidden">, {profile.role}</span>
+    </h1>
+
+    <div class="hero__foot">
+      <p class="hero__lead">
+        {profile.role} and Computer Engineering student in Mumbai. I design and build production web applications,
+        motion-led studio sites and local-first AI tools, balancing performance, interaction and clean systems.
+      </p>
+
+      <div class="hero__actions">
+        <a class="button button--solid" href="#work">
+          See the work
+        </a>
+        <a class="button" href={`mailto:${profile.email}`}>
+          Email me
+        </a>
+      </div>
+    </div>
+
+    <dl class="hero__meta label">
+      <div>
+        <dt class="muted">Based in</dt>
+        <dd>{profile.location}</dd>
+      </div>
+      <div>
+        <dt class="muted">Local time</dt>
+        <dd>
+          <time data-clock data-time-zone={profile.timeZone}>
+            IST, UTC+5:30
+          </time>
+        </dd>
+      </div>
+      <div>
+        <dt class="muted">Building since</dt>
+        <dd>{profile.since}</dd>
+      </div>
+    </dl>
+  </div>
+</section>
+
+<script>
+  const clock = document.querySelector<HTMLTimeElement>("[data-clock]");
+  const timeZone = clock?.dataset.timeZone;
+
+  if (clock && timeZone) {
+    const format = new Intl.DateTimeFormat("en-IN", {
+      timeZone,
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+    const tick = () => {
+      clock.textContent = `${format.format(new Date())} IST`;
+    };
+    tick();
+    window.setInterval(tick, 30_000);
+  }
+</script>
+
+<style>
+  .hero {
+    padding-block: clamp(3rem, 9vw, 7rem) clamp(3rem, 6vw, 5rem);
+  }
+
+  .hero__inner {
+    display: grid;
+    gap: clamp(2rem, 4vw, 3.5rem);
+  }
+
+  .hero__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.45rem 0.85rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+  }
+
+  .hero__dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: #1f9d55;
+    box-shadow: 0 0 0 0 color-mix(in srgb, #1f9d55 50%, transparent);
+  }
+
+  .hero__title {
+    display: grid;
+    font-size: clamp(4.25rem, 16vw, 15rem);
+    line-height: 0.86;
+    letter-spacing: -0.045em;
+  }
+
+  .hero__line--indent {
+    padding-left: 0.5em;
+  }
+
+  .hero__stop {
+    color: var(--accent);
+  }
+
+  .hero__foot {
+    display: grid;
+    gap: 2rem;
+    align-items: end;
+  }
+
+  .hero__lead {
+    max-width: 38ch;
+    font-size: clamp(1.25rem, 1.4vw + 0.8rem, 1.75rem);
+    line-height: 1.35;
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .hero__meta {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    margin: 0;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .hero__meta dd {
+    margin: 0.35rem 0 0;
+  }
+
+  @media (min-width: 60rem) {
+    .hero__foot {
+      grid-template-columns: 1fr auto;
+    }
+  }
+
+  @media (max-width: 29.99rem) {
+    .hero__line--indent {
+      padding-left: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hero__dot {
+      animation: pulse 2.4s ease-out infinite;
+    }
+
+    .hero__line {
+      animation: rise 1s var(--ease-out) both;
+    }
+
+    .hero__line--indent {
+      animation-delay: 0.08s;
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(0.25em);
+      }
+    }
+
+    @keyframes pulse {
+      70% {
+        box-shadow: 0 0 0 0.5rem color-mix(in srgb, #1f9d55 0%, transparent);
+      }
+    }
+  }
+</style>

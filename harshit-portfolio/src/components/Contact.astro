@@ -1,0 +1,139 @@
+---
+import { profile } from "../data/profile";
+---
+
+<section class="section contact" id="contact" aria-labelledby="contact-title">
+  <div class="wrap">
+    <div class="section__head">
+      <h2 class="label muted" id="contact-title">
+        Contact
+      </h2>
+      <span class="section__index label" aria-hidden="true">
+        04
+      </span>
+    </div>
+
+    <p class="contact__lead" data-reveal>
+      Have a project, a role or an idea? Let's build it.
+    </p>
+
+    <div class="contact__email" data-reveal>
+      <a class="contact__address" href={`mailto:${profile.email}`}>
+        {profile.email}
+      </a>
+      <button class="button" type="button" data-copy={profile.email} hidden>
+        Copy email
+      </button>
+      <p class="contact__status label" role="status" aria-live="polite" data-copy-status></p>
+    </div>
+
+    <div class="contact__grid">
+      <div>
+        <h3 class="label muted">Elsewhere</h3>
+        <ul class="contact__list">
+          {profile.socials.map((social) => (
+            <li>
+              <a href={social.url} target="_blank" rel="noopener me">
+                {social.label}
+                <span class="visually-hidden">(opens in a new tab)</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div>
+        <h3 class="label muted">Resume</h3>
+        <ul class="contact__list">
+          <li>
+            <a href={profile.resume.pdf} target="_blank" rel="noopener">
+              View PDF
+            </a>
+          </li>
+          <li>
+            <a href={profile.resume.docx} download="Harshit_Chauhan_Resume.docx">
+              Download DOCX
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const button = document.querySelector<HTMLButtonElement>("[data-copy]");
+  const status = document.querySelector<HTMLElement>("[data-copy-status]");
+
+  // Only offered where the Clipboard API exists; the mailto link always works.
+  if (button && status && navigator.clipboard) {
+    button.hidden = false;
+    let reset = 0;
+    button.addEventListener("click", async () => {
+      window.clearTimeout(reset);
+      try {
+        await navigator.clipboard.writeText(button.dataset.copy ?? "");
+        status.textContent = "Copied to clipboard";
+      } catch {
+        status.textContent = "Couldn't copy. Select the address above instead.";
+      }
+      reset = window.setTimeout(() => {
+        status.textContent = "";
+      }, 4000);
+    });
+  }
+</script>
+
+<style>
+  .contact__lead {
+    max-width: 16ch;
+    font-size: clamp(3rem, 9vw, 8rem);
+    font-weight: 300;
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+  }
+
+  .contact__email {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.5rem;
+    margin-top: clamp(2rem, 5vw, 3.5rem);
+  }
+
+  .contact__address {
+    font-size: clamp(1.25rem, 3vw, 2.25rem);
+    overflow-wrap: anywhere;
+    text-decoration-color: var(--accent);
+    text-decoration-thickness: 2px;
+  }
+
+  .contact__status {
+    flex-basis: 100%;
+    min-height: 1.4em;
+    color: var(--accent);
+  }
+
+  .contact__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    gap: 2rem;
+    margin-top: clamp(3rem, 6vw, 5rem);
+    padding-top: 2rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .contact__list {
+    display: grid;
+    gap: 0.25rem;
+    margin: 0.75rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 1.25rem;
+  }
+
+  .contact__list a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+  }
+</style>

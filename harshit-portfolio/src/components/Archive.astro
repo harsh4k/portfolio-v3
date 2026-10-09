@@ -1,0 +1,77 @@
+---
+import { Image } from "astro:assets";
+import { getOrdered } from "../data/collections";
+
+const photos = await getOrdered("archive");
+---
+
+<section class="section" id="archive" aria-labelledby="archive-title">
+  <div class="wrap">
+    <div class="section__head">
+      <h2 class="section__title" id="archive-title">
+        Archive
+      </h2>
+      <p class="label">
+        <span class="section__index">03</span> <span class="muted">· Off-screen, {photos.length} frames</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- Focusable so keyboard users can scroll it with the arrow keys. -->
+  <div class="archive" tabindex="0" role="region" aria-label="Photo archive, scrolls sideways">
+    <ul class="archive__track">
+      {photos.map((photo) => (
+        <li class="archive__item">
+          <figure>
+            <Image
+              src={photo.data.image}
+              alt={photo.data.caption}
+              height={480}
+              densities={[1, 2]}
+              loading="lazy"
+              class="archive__image"
+            />
+            <figcaption class="label muted">{photo.data.caption}</figcaption>
+          </figure>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .archive {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: thin;
+    padding-bottom: 1rem;
+  }
+
+  .archive__track {
+    display: flex;
+    gap: clamp(0.75rem, 2vw, 1.5rem);
+    width: max-content;
+    margin: 0;
+    padding: 0 var(--gutter);
+    list-style: none;
+  }
+
+  .archive__item {
+    scroll-snap-align: start;
+  }
+
+  .archive figure {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0;
+  }
+
+  .archive__image {
+    width: auto;
+    height: clamp(16rem, 42vw, 30rem);
+    border-radius: var(--radius);
+    background: var(--paper-raised);
+  }
+</style>
