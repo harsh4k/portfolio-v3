@@ -168,6 +168,25 @@ test.describe("personal links", () => {
   });
 });
 
+test.describe("images", () => {
+  test("project and archive images load in the background, before they are scrolled to", async ({ page }) => {
+    await page.goto("/", { waitUntil: "load" });
+    // No scrolling: they should still all arrive.
+    await expect
+      .poll(
+        () =>
+          page.evaluate(
+            () =>
+              [...document.querySelectorAll<HTMLImageElement>("#work img, .s-my-way img")].filter(
+                (img) => !img.complete || img.naturalWidth === 0,
+              ).length,
+          ),
+        { timeout: 20_000 },
+      )
+      .toBe(0);
+  });
+});
+
 test.describe("intro", () => {
   test("shows a loader on the red cover until the 3D scene has rendered", async ({ page }) => {
     // Hold the 3D bundle back, as a slow phone network would.
