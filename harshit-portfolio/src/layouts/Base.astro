@@ -1,5 +1,6 @@
 ---
 import { profile } from "../data/profile";
+import "../styles/site.css";
 
 interface Props {
   title: string;
@@ -50,7 +51,7 @@ const fonts = [
     <meta name="apple-mobile-web-app-title" content="Harshit" />
     <meta name="theme-color" content="#F40C3F" />
     <meta name="msapplication-navbutton-color" content="#160000" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="#160000" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
 
@@ -79,6 +80,8 @@ const fonts = [
     <link rel="stylesheet" href="/_astro/index.MJ9FiCyD.css" />
     <script is:inline type="module" src="/_astro/hoisted.BvNyQ0G_.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-DG8As337.css" data-intro-style />
+    <!-- Start fetching the 3D intro with the page instead of after bridge.js runs. -->
+    <link rel="modulepreload" href="/assets/index-wQJ6Ws5X.js" media="(prefers-reduced-motion: no-preference)" />
     <link rel="stylesheet" href="/styles/integration.css" />
     <!-- Must run before the engine: it calls play()/pause() on the card images. -->
     <script is:inline src="/scripts/img-media.js"></script>
@@ -86,6 +89,10 @@ const fonts = [
   </head>
   <body class="astro-j7pv25f6">
     <div id="intro-layer" class="intro-layer">
+      <div class="intro-loader js-intro-loader" role="status">
+        <span>Loading</span>
+        <span class="intro-loader__bar" aria-hidden="true"></span>
+      </div>
       <div id="app"></div>
     </div>
     <div class="site-wrapper js-site-wrapper astro-j7pv25f6">

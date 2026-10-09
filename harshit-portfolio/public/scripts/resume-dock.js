@@ -9,12 +9,13 @@
   const PDF_WORKER_URL = "/scripts/pdf.worker.min.mjs";
 
   const markup = `
-    <div class="resume-dock" id="resume-dock" hidden>
+    <div class="resume-dock" id="resume-dock" data-lenis-prevent hidden>
       <button type="button" class="resume-dock__scrim" data-resume-close aria-label="Close resume"></button>
       <section class="resume-dock__panel" role="dialog" aria-modal="true" aria-labelledby="resume-dock-title">
         <header class="resume-dock__bar">
           <p class="resume-dock__title" id="resume-dock-title">Resume</p>
           <div class="resume-dock__actions">
+            <a class="resume-dock__link" href="${PDF_URL}" target="_blank" rel="noopener">Open</a>
             <a class="resume-dock__link" href="${PDF_URL}" download="Harshit_Chauhan_Resume.pdf">PDF</a>
             <a class="resume-dock__link" href="${DOCX_URL}" download="Harshit_Resume.docx">DOCX</a>
             <button type="button" class="resume-dock__close" data-resume-close>Close</button>
@@ -93,9 +94,23 @@
     return renderTask;
   };
 
+  // While open, everything behind the dock is inert so Tab stays inside it.
+  let inertEls = [];
+  const setBackgroundInert = (inert) => {
+    if (inert) {
+      inertEls = [...document.body.children].filter((el) => el !== dock && !el.inert);
+      inertEls.forEach((el) => (el.inert = true));
+    } else {
+      inertEls.forEach((el) => (el.inert = false));
+      inertEls = [];
+    }
+  };
+
   const setOpen = (open) => {
+    if (open === !dock.hidden) return;
     dock.hidden = !open;
     document.documentElement.classList.toggle("resume-dock-open", open);
+    setBackgroundInert(open);
     if (open) {
       lastFocus = document.activeElement;
       dock.querySelector("[data-resume-close]")?.focus();
@@ -117,7 +132,9 @@
 
   document.addEventListener("click", (event) => {
     const opener = event.target instanceof Element && event.target.closest(".js-resume-open");
-    if (opener) {
+    // Ctrl/Cmd/Shift-click keeps the browser's own "open in new tab/window".
+    const modified = event.ctrlKey || event.metaKey || event.shiftKey || event.altKey;
+    if (opener && !modified) {
       event.preventDefault();
       event.stopPropagation();
       open(event);
