@@ -5,19 +5,20 @@
 
 /*
   Shown on the red intro cover until the 3D scene has drawn its first frame.
-  Built from the design's own parts: the hero's display type, the console's
-  mono captions and the binary separator strips.
+  Built from the design's own parts: the header's HC logo, the hero's binary
+  rulers and the console's mono captions.
 */
 .intro-loader {
+  --ink: var(--color-secondary, #160000);
+
   position: absolute;
   inset: 0;
   z-index: 1;
   display: grid;
   place-content: center;
-  gap: 0.75rem;
-  width: min(30rem, 80vw);
-  margin: auto;
-  color: var(--color-secondary, #160000);
+  justify-items: center;
+  gap: 1.5rem;
+  color: var(--ink);
   font-family: var(--font-family-fraktion, monospace);
   font-size: 0.625rem;
   letter-spacing: 0.06em;
@@ -30,47 +31,55 @@
   margin: 0;
 }
 
-.intro-loader__meta {
-  display: flex;
-  justify-content: space-between;
+.intro-loader__logo {
+  width: clamp(4.5rem, 18vw, 6.5rem);
+  height: auto;
+  overflow: visible;
+  animation: intro-loader-logo 2.8s ease-in-out infinite;
 }
 
-.intro-loader__cursor {
-  animation: intro-loader-blink 1s steps(1) infinite;
-}
-
-/* Outlined name that fills with ink from left to right, on a loop. */
-.intro-loader__name {
-  color: transparent;
-  font-family: var(--font-family-bigger, sans-serif);
-  font-size: clamp(3.5rem, 18vw, 8rem);
-  line-height: 0.85;
-  letter-spacing: 0;
-  text-align: center;
-  background-repeat: no-repeat;
-  background-image: linear-gradient(var(--color-secondary, #160000), var(--color-secondary, #160000));
-  background-size: 0% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-stroke: 1px var(--color-secondary, #160000);
-  animation: intro-loader-fill 2.4s cubic-bezier(0.86, 0, 0.07, 1) infinite;
+.intro-loader__logo path {
+  fill: var(--ink);
+  fill-opacity: 0;
+  stroke: var(--ink);
+  stroke-width: 1.5px;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: intro-loader-draw 2.8s ease-in-out infinite;
 }
 
 .intro-loader__strip {
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  width: min(20rem, 78vw);
   padding: 0.45rem 0;
-  border-block: 1px solid var(--color-secondary, #160000);
+  border-block: 1px solid var(--ink);
   white-space: nowrap;
 }
 
-.intro-loader__slashes {
+.intro-loader__track {
+  display: flex;
   flex: 1;
-  height: 0.6rem;
-  background: repeating-linear-gradient(115deg, var(--color-secondary, #160000) 0 1px, transparent 1px 4px) no-repeat;
-  background-size: 0% 100%;
-  animation: intro-loader-fill 2.4s cubic-bezier(0.86, 0, 0.07, 1) infinite;
+  overflow: hidden;
+}
+
+.intro-loader__bits {
+  flex: none;
+  animation: intro-loader-scroll 6s linear infinite;
+}
+
+.intro-loader__dots span {
+  animation: intro-loader-dot 1.2s steps(1) infinite;
+}
+
+.intro-loader__dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.intro-loader__dots span:nth-child(3) {
+  animation-delay: 0.4s;
 }
 
 .intro-loader.is-done {
@@ -82,36 +91,59 @@ html:not(.intro-ready) .intro-swipe-hint {
   visibility: hidden;
 }
 
-@keyframes intro-loader-fill {
+@keyframes intro-loader-draw {
   0% {
-    background-position: 0 0;
-    background-size: 0% 100%;
+    stroke-dashoffset: 1;
+    fill-opacity: 0;
   }
-  50% {
-    background-position: 0 0;
-    background-size: 100% 100%;
+  45% {
+    stroke-dashoffset: 0;
+    fill-opacity: 0;
   }
-  50.01% {
-    background-position: 100% 0;
-  }
+  65%,
   100% {
-    background-position: 100% 0;
-    background-size: 0% 100%;
+    stroke-dashoffset: 0;
+    fill-opacity: 1;
   }
 }
 
-@keyframes intro-loader-blink {
-  50% {
+@keyframes intro-loader-logo {
+  0%,
+  80% {
+    opacity: 1;
+  }
+  100% {
     opacity: 0;
   }
 }
 
+@keyframes intro-loader-scroll {
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes intro-loader-dot {
+  0% {
+    opacity: 0;
+  }
+  30%,
+  100% {
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .intro-loader__name,
-  .intro-loader__slashes,
-  .intro-loader__cursor {
+  .intro-loader__logo,
+  .intro-loader__logo path,
+  .intro-loader__bits,
+  .intro-loader__dots span {
     animation: none;
-    background-size: 100% 100%;
+  }
+
+  .intro-loader__logo path {
+    stroke-dashoffset: 0;
+    fill-opacity: 1;
   }
 }
 
