@@ -169,6 +169,13 @@ test.describe("personal links", () => {
 });
 
 test.describe("images", () => {
+  test("tapping a link or button never flashes the browser's blue highlight", async ({ page }) => {
+    await page.goto("/", { waitUntil: "load" });
+    // The intro's stylesheet used to be the only thing turning it off.
+    await page.evaluate(() => document.querySelectorAll("link[data-intro-style]").forEach((l) => l.remove()));
+    await expect(page.locator(".js-button-text").first()).toHaveCSS("-webkit-tap-highlight-color", "rgba(0, 0, 0, 0)");
+  });
+
   test("project and archive images load in the background, before they are scrolled to", async ({ page }) => {
     await page.goto("/", { waitUntil: "load" });
     // No scrolling: they should still all arrive.

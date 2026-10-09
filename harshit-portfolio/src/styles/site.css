@@ -152,3 +152,12 @@ html:not(.intro-ready) .intro-swipe-hint {
   width: 20px;
   height: 20px;
 }
+
+/*
+  Phones draw a translucent blue box over anything tapped. The intro's
+  stylesheet turned it off, but that stylesheet is removed once the intro
+  ends, so the box came back on the GO button and other links.
+*/
+html {
+  -webkit-tap-highlight-color: transparent;
+}
