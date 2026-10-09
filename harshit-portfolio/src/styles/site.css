@@ -13,7 +13,8 @@
 
   position: absolute;
   inset: 0;
-  z-index: 1;
+  /* Above the 3D scene's own page (z-index 100), which otherwise hides it. */
+  z-index: 200;
   display: grid;
   place-content: center;
   justify-items: center;

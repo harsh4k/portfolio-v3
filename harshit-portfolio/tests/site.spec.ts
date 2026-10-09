@@ -208,6 +208,8 @@ test.describe("intro", () => {
     await expect(loader).toBeVisible();
     // Opaque, so the scene drawing underneath never shows through it.
     await expect(loader).toHaveCSS("background-color", "rgb(255, 11, 54)");
+    // Above the 3D scene's own page (z-index 100), which hid it before.
+    await expect(loader).toHaveCSS("z-index", "200");
     // Nothing to swipe yet, so the phone swipe hint waits for the scene too.
     await expect(page.locator("html")).not.toHaveClass(/intro-ready/);
     release();
@@ -263,15 +265,36 @@ test.describe("input", () => {
     await expect(page.locator(".s-hero")).toHaveCSS("opacity", "1");
   });
 
-  test("a Highlights tile uncovers as soon as it comes on screen, not half way", async ({ page }) => {
+  test("Highlights tiles start uncovering as they come on screen, not half way", async ({ page }) => {
     await page.goto("/", { waitUntil: "load" });
-    const tile = page.locator(".js-award").last();
-    // Put only the tile's top edge on screen.
-    await tile.evaluate((el) => {
-      const top = el.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo(0, top - window.innerHeight + 40);
+    // Record how much of each tile is on screen when its wipe starts.
+    await page.evaluate(() => {
+      const w = window as Window & { shares?: number[] };
+      w.shares = [];
+      for (const tile of document.querySelectorAll(".js-award")) {
+        const watch = new MutationObserver(() => {
+          if (!tile.classList.contains("is-revealed")) return;
+          watch.disconnect();
+          const box = tile.getBoundingClientRect();
+          const shown = Math.min(box.bottom, window.innerHeight) - Math.max(box.top, 0);
+          w.shares?.push(Math.max(0, shown) / box.height);
+        });
+        watch.observe(tile, { attributes: true, attributeFilter: ["class"] });
+      }
     });
-    await expect(tile).toHaveClass(/is-revealed/);
+    // Scroll down through the section in small steps, like a visitor would.
+    const start = await page.evaluate(
+      () => (document.querySelector("#about")?.getBoundingClientRect().top ?? 0) + window.scrollY,
+    );
+    for (let y = start; y < start + 3000; y += 20) {
+      await page.evaluate((top) => window.scrollTo(0, top), y);
+      await page.waitForTimeout(20);
+    }
+    const shares = await page.evaluate(() => (window as Window & { shares?: number[] }).shares ?? []);
+    expect(shares.length).toBeGreaterThan(3);
+    // The design's engine waits for half a tile; most should start well before that.
+    const early = shares.filter((share) => share < 0.5).length;
+    expect(early).toBeGreaterThan(shares.length / 2);
   });
 
   test("scrolling with a finger over a Highlights tile throws no smileys", async ({ page, isMobile }) => {
