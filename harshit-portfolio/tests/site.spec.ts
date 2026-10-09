@@ -260,6 +260,17 @@ test.describe("input", () => {
     await expect(page.locator(".s-hero")).toHaveCSS("opacity", "1");
   });
 
+  test("a Highlights tile uncovers as soon as it comes on screen, not half way", async ({ page }) => {
+    await page.goto("/", { waitUntil: "load" });
+    const tile = page.locator(".js-award").last();
+    // Put only the tile's top edge on screen.
+    await tile.evaluate((el) => {
+      const top = el.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo(0, top - window.innerHeight + 40);
+    });
+    await expect(tile).toHaveClass(/is-revealed/);
+  });
+
   test("the resume dock scrolls itself and keeps focus inside", async ({ page, isMobile }) => {
     await page.goto("/", { waitUntil: "load" });
     await page.locator(".js-resume-open").first().dispatchEvent("click");
