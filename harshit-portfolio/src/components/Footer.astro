@@ -4,14 +4,47 @@ import { profile } from "../data/profile";
 const year = new Date().getFullYear();
 ---
 
-<footer>
-  <div>
+<footer class="footer">
+  <p class="footer__mark" aria-hidden="true">
+    HC
+  </p>
+  <div class="footer__row mono">
     <p>
       © {year} {profile.name}
     </p>
-    <p>Built with Astro</p>
     <a href="#top">
       Back to top <span aria-hidden="true">↑</span>
     </a>
   </div>
 </footer>
+
+<style>
+  .footer {
+    display: grid;
+    justify-items: center;
+    gap: 1rem;
+    padding: 2rem var(--gutter) 1.5rem;
+    border-top: 1px solid var(--ink);
+  }
+
+  .footer__mark {
+    font-family: var(--display);
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .footer__row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .footer__row a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+  }
+</style>

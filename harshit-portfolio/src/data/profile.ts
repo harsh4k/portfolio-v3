@@ -25,10 +25,10 @@ export const profile = {
 export const hireMe = `mailto:${profile.email}?subject=${encodeURIComponent("Hello Harshit")}`;
 
 export const highlights = [
-  { value: "11", label: "Projects shipped", detail: "In production" },
-  { value: "2026", label: "Hackathon winner", detail: "NamasteDev, with GetCited" },
-  { value: "2025", label: "Junior dev intern", detail: "Synapical, summer" },
-  { value: "B.Tech", label: "Computer Engineering", detail: "NMIMS Mumbai" },
+  { word: "Shipped", value: "11", label: "Projects shipped", detail: "In production" },
+  { word: "Winner", value: "2026", label: "Hackathon winner", detail: "NamasteDev, with GetCited" },
+  { word: "Intern", value: "2025", label: "Junior dev intern", detail: "Synapical, summer" },
+  { word: "Degree", value: "B.Tech", label: "Computer Engineering", detail: "NMIMS Mumbai" },
 ] as const;
 
 export const focus = [

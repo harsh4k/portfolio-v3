@@ -9,41 +9,183 @@ const hostOf = (url: string) => {
   const host = hostname.replace(/^www\./, "");
   return host === "github.com" ? `github.com${pathname.replace(/\/$/, "")}` : host;
 };
+
+const letters = ["W", "O", "R", "K"];
 ---
 
-<section id="work" aria-labelledby="work-title">
-  <div>
-    <div>
-      <h2 id="work-title">Work</h2>
-      <p>{projects.length} projects</p>
+<section class="work" id="work" aria-labelledby="work-title">
+  <div class="work__intro grid-bg">
+    <h2 class="work__arch" id="work-title">
+      <span class="visually-hidden">Work</span>
+      {letters.map((letter) => (
+        <span aria-hidden="true">{letter}</span>
+      ))}
+    </h2>
+    <p class="work__count mono">{projects.length} projects, all in production</p>
+  </div>
+
+  <div class="work__stage">
+    <!-- Big letters stay pinned behind the cards while they scroll past. -->
+    <div class="work__letters" aria-hidden="true">
+      {letters.map((letter) => (
+        <span>{letter.repeat(10)}</span>
+      ))}
     </div>
 
-    <ol>
+    <ol class="work__list wrap">
       {projects.map((project, index) => (
-        <li>
-          <a href={project.data.url} target="_blank" rel="noopener">
-            <div>
-              <Image
-                src={project.data.image}
-                alt=""
-                widths={[480, 800, 1200]}
-                sizes="(min-width: 70rem) 30vw, (min-width: 45rem) 45vw, 92vw"
-                loading={index < 2 ? "eager" : "lazy"}
-              />
-            </div>
-            <div>
+        <li class="card" data-reveal>
+          <a class="card__link" href={project.data.url} target="_blank" rel="noopener">
+            <Image
+              src={project.data.image}
+              alt=""
+              widths={[480, 800, 1200]}
+              sizes="(min-width: 60rem) 40vw, 92vw"
+              loading={index < 2 ? "eager" : "lazy"}
+              class="card__image"
+            />
+            <span class="card__meta mono">
               <span>{String(index + 1).padStart(2, "0")}</span>
-              <h3>{project.data.title}</h3>
-              {project.data.summary && <p>{project.data.summary}</p>}
-              <p>
-                {hostOf(project.data.url)}
-                <span aria-hidden="true">↗</span>
-                <span class="visually-hidden">(opens in a new tab)</span>
-              </p>
-            </div>
+              <span>
+                {hostOf(project.data.url)} <span aria-hidden="true">↗</span>
+              </span>
+            </span>
+            <span class="card__title">{project.data.title}</span>
+            {project.data.summary && <span class="card__summary">{project.data.summary}</span>}
+            <span class="visually-hidden">(opens in a new tab)</span>
           </a>
         </li>
       ))}
     </ol>
   </div>
 </section>
+
+<style>
+  .work__intro {
+    display: grid;
+    justify-items: center;
+    gap: 1.5rem;
+    padding: clamp(3rem, 8vw, 6rem) var(--gutter);
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .work__arch {
+    display: grid;
+    justify-items: center;
+    width: clamp(6rem, 14vw, 9rem);
+    padding: 1.25rem 0 2rem;
+    border-radius: 999px;
+    outline: 1px solid var(--ink);
+    outline-offset: 0.5rem;
+    background: var(--ink);
+    color: var(--red);
+    font-size: clamp(4rem, 9vw, 6.5rem);
+    line-height: 0.82;
+  }
+
+  .work__count {
+    padding: 0.35rem 0.75rem;
+    background: var(--red);
+    border: 1px solid var(--ink);
+  }
+
+  .work__stage {
+    position: relative;
+    /* Keeps the pinned letters from spilling into the next section; clip, unlike hidden, leaves sticky working. */
+    overflow: clip;
+    background: var(--ink);
+    padding-bottom: clamp(3rem, 8vw, 6rem);
+  }
+
+  .work__letters {
+    position: sticky;
+    top: 0;
+    display: grid;
+    align-content: space-evenly;
+    height: 100svh;
+    margin-bottom: -100svh;
+    overflow: hidden;
+    font-family: var(--display);
+    font-size: clamp(5rem, 13vw, 11rem);
+    font-weight: 700;
+    line-height: 0.9;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    color: var(--red);
+    text-shadow: 0.04em 0.04em 0 var(--shadow);
+    opacity: 0.92;
+  }
+
+  .work__letters span:nth-child(even) {
+    margin-left: -0.4em;
+  }
+
+  .work__list {
+    position: relative;
+    display: grid;
+    gap: clamp(2rem, 6vw, 5rem) clamp(1.5rem, 4vw, 3rem);
+    margin-block: 0;
+    padding: clamp(3rem, 10vw, 8rem) 0 0;
+    list-style: none;
+  }
+
+  .card__link {
+    display: grid;
+    gap: 0.5rem;
+    color: var(--red);
+    text-decoration: none;
+  }
+
+  .card__image {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    border: 0.375rem solid var(--cream);
+    box-shadow: 0.75rem 0.75rem 0 var(--shadow);
+    transition: transform 0.4s var(--ease);
+  }
+
+  .card__link:hover .card__image,
+  .card__link:focus-visible .card__image {
+    transform: translate(-0.25rem, -0.25rem);
+  }
+
+  .card__meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.35rem 0.5rem;
+    background: var(--ink);
+    text-transform: none;
+  }
+
+  .card__title {
+    padding-inline: 0.5rem;
+    font-family: var(--display);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    line-height: 0.9;
+    text-transform: uppercase;
+    background: var(--ink);
+    justify-self: start;
+  }
+
+  .card__summary {
+    padding-inline: 0.5rem;
+    font-size: 1rem;
+    color: var(--cream);
+    background: var(--ink);
+    justify-self: start;
+  }
+
+  @media (min-width: 60rem) {
+    .work__list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    /* Stagger the two columns, so the cards read as a scattered wall. */
+    .card:nth-child(even) {
+      margin-top: 8rem;
+    }
+  }
+</style>

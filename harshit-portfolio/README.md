@@ -31,8 +31,8 @@ src/
 ├── layouts/Base.astro  # <head> and meta tags
 ├── pages/              # index and 404
 ├── scripts/            # small client scripts
-└── styles/a11y.css     # accessibility utilities only (see Design below)
-public/                 # served as-is: icons, resume, headers, manifest
+└── styles/global.css   # design tokens, fonts and shared utilities
+public/                 # served as-is: fonts, icons, resume, headers, manifest
 tests/                  # Playwright
 ```
 
@@ -60,4 +60,6 @@ The build fails, rather than shipping a broken page, when a project URL is not `
 
 ## Design
 
-The site ships deliberately unstyled: semantic HTML, the content and the guardrails, with no colours, fonts, layout or motion. The visual design will be added separately. `src/styles/a11y.css` holds only accessibility utilities (visually hidden text, the skip link, responsive images); keep design out of it.
+The look follows the previous site's red-and-black editorial style, rebuilt from scratch as original code: no files are copied from other sites. Colours, the page frame, line grids and hatching are tokens and utilities in `src/styles/global.css`; each section's layout lives in its component's `<style>` block. Motion is CSS only (scroll reveals, the ticker strips) and switches off under reduced motion.
+
+Fonts are self-hosted from `public/fonts/`, all under the SIL Open Font License: Big Shoulders Display (headlines), Fraunces (body) and IBM Plex Mono (labels).
