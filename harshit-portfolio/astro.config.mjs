@@ -7,7 +7,10 @@ export default defineConfig({
   outDir: "../dist",
   trailingSlash: "ignore",
   devToolbar: { enabled: false },
-  // Emits a per-page CSP <meta> with hashes for every inline script and style,
-  // so the page never needs 'unsafe-inline' or 'unsafe-eval'.
-  security: { csp: true },
+  // Keep the whitespace between tags: the copied design has inline elements
+  // whose spacing depends on it, exactly as the live page ships.
+  compressHTML: false,
+  // No per-page CSP <meta>: the copied design sets inline style attributes and
+  // its engine needs 'unsafe-eval', which a hash-based policy would block. The
+  // policy lives in public/_headers instead, matching what the live site sends.
 });
