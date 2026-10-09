@@ -1,97 +1,103 @@
 [
   {
-    "id": "01-p1",
+    "id": "00-telescope",
     "order": 1,
+    "caption": "Telescope under the Milky Way",
+    "image": "../assets/archive/pic2.webp"
+  },
+  {
+    "id": "01-p1",
+    "order": 2,
     "caption": "Poster study",
     "image": "../assets/archive/p1.webp"
   },
   {
     "id": "02-p2",
-    "order": 2,
+    "order": 3,
     "caption": "Poster study",
     "image": "../assets/archive/p2.webp"
   },
   {
     "id": "03-p3",
-    "order": 3,
+    "order": 4,
     "caption": "Poster study",
     "image": "../assets/archive/p3.webp"
   },
   {
     "id": "04-hackathon",
-    "order": 4,
+    "order": 5,
     "caption": "Hackathon night",
     "image": "../assets/archive/hackathon.webp"
   },
   {
     "id": "05-2024",
-    "order": 5,
+    "order": 6,
     "caption": "Clouds over the sea",
     "image": "../assets/archive/2024.webp"
   },
   {
     "id": "06-profile",
-    "order": 6,
+    "order": 7,
     "caption": "Somewhere colder",
     "image": "../assets/archive/profile.webp"
   },
   {
     "id": "07-t3",
-    "order": 7,
+    "order": 8,
     "caption": "Ferris wheel, night",
     "image": "../assets/archive/t3.webp"
   },
   {
     "id": "08-v6",
-    "order": 8,
+    "order": 9,
     "caption": "Rock-cut cave, monsoon",
     "image": "../assets/archive/v6.webp"
   },
   {
     "id": "09-v11",
-    "order": 9,
+    "order": 10,
     "caption": "Road to the high passes",
     "image": "../assets/archive/v11.webp"
   },
   {
     "id": "10-2026",
-    "order": 10,
+    "order": 11,
     "caption": "First snow",
     "image": "../assets/archive/2026.webp"
   },
   {
     "id": "11-v8",
-    "order": 11,
+    "order": 12,
     "caption": "Deodar forest",
     "image": "../assets/archive/v8.webp"
   },
   {
     "id": "12-v3",
-    "order": 12,
+    "order": 13,
     "caption": "Snowline",
     "image": "../assets/archive/v3.webp"
   },
   {
     "id": "13-v4",
-    "order": 13,
+    "order": 14,
     "caption": "Paper parasols",
     "image": "../assets/archive/v4.webp"
   },
   {
     "id": "14-v5",
-    "order": 14,
+    "order": 15,
     "caption": "Monsoon valley",
     "image": "../assets/archive/v5.webp"
   },
   {
     "id": "15-v12",
-    "order": 15,
+    "order": 16,
     "caption": "Mountain road",
     "image": "../assets/archive/v12.webp"
   },
   {
     "id": "16-pic1",
-    "order": 16,
+    "order": 17,
     "caption": "Desk at night",
     "image": "../assets/archive/pic1.webp"
   }

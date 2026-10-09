@@ -1,0 +1,186 @@
+---
+/**
+ * Harshit, drawn in flat ink: heavy straight fringe, almond eyes, broad nose,
+ * thin moustache, full cheeks, mauve hoodie with a backpack strap. Drawn from
+ * his reference photo; nothing here is generic.
+ *
+ * Every state (idle, blink, glance, smile) is the same set of layers with one
+ * part changed, so the face cannot drift between frames. The blink and glance
+ * are CSS/JS driven and switch off under prefers-reduced-motion.
+ */
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<svg class:list={["avatar", className]} viewBox="0 0 400 440" role="img" aria-labelledby="avatar-title" data-avatar>
+  <title id="avatar-title">Illustrated portrait of Harshit Chauhan</title>
+  <g stroke="var(--outline)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Hoodie, hood and backpack strap -->
+    <path fill="var(--hoodie)" d="M28 444c6-50 48-80 112-88l22-4h76l22 4c64 8 106 38 112 88Z"></path>
+    <path fill="var(--hoodie)" d="M116 348c2 44 40 72 84 72s82-28 84-72c-22 12-50 18-84 18s-62-6-84-18Z"></path>
+    <path fill="var(--outline)" stroke-width="5" d="M292 360c20 4 34 10 44 18l-14 66h-38Z"></path>
+    <path fill="none" stroke-width="4" d="M150 384c14 12 32 18 50 18s36-6 50-18"></path>
+    <path fill="none" stroke-width="4" d="M186 402v30M214 402v30"></path>
+
+    <!-- Neck -->
+    <path fill="var(--skin-shade)" d="M164 296h72v58c-10 10-24 14-36 14s-26-4-36-14Z"></path>
+
+    <!-- Ears -->
+    <g fill="var(--skin)">
+      <path d="M110 214c-22-10-36 4-32 26 4 22 18 34 38 34"></path>
+      <path d="M290 214c22-10 36 4 32 26-4 22-18 34-38 34"></path>
+    </g>
+    <path fill="none" stroke-width="4" d="M98 232c6-4 12 0 12 8M302 232c-6-4-12 0-12 8"></path>
+
+    <!-- Face: full cheeks, rounded jaw -->
+    <path fill="var(--skin)" d="M106 200c-6 76 26 146 94 150 68-4 100-74 94-150-4-60-42-96-94-96s-90 36-94 96Z"></path>
+    <path
+      fill="var(--skin-shade)"
+      stroke="none"
+      opacity="0.4"
+      d="M122 276c16 44 44 66 78 68 34-2 62-24 78-68-16 28-44 46-78 48-34-2-62-20-78-48Z"
+    ></path>
+  </g>
+
+  <!-- Stubble: sparse, along the chin -->
+  <g fill="var(--hair)" opacity="0.25">
+    <circle cx="172" cy="334" r="2"></circle>
+    <circle cx="188" cy="340" r="2"></circle>
+    <circle cx="204" cy="341" r="2"></circle>
+    <circle cx="220" cy="338" r="2"></circle>
+    <circle cx="232" cy="331" r="2"></circle>
+    <circle cx="198" cy="322" r="1.8"></circle>
+    <circle cx="212" cy="320" r="1.8"></circle>
+  </g>
+
+  <!-- Eyebrows sit under the fringe; only the ends show -->
+  <g fill="none" stroke="var(--hair)" stroke-width="10" stroke-linecap="round">
+    <path d="M140 204c12-6 28-7 42-3"></path>
+    <path d="M218 201c14-4 30-3 42 3"></path>
+  </g>
+
+  <!-- Eyes: almond, slightly hooded -->
+  <g class="avatar__eyes" stroke="var(--outline)" stroke-linejoin="round">
+    <g class="avatar__eye">
+      <path fill="#fbf7f0" stroke-width="4" d="M138 230c10-12 34-14 46-1-12 10-34 11-46 1Z"></path>
+      <g class="avatar__pupil">
+        <circle cx="162" cy="229" r="8.5" fill="#1d130e" stroke="none"></circle>
+        <circle cx="165" cy="226" r="2.6" fill="#fff" stroke="none"></circle>
+      </g>
+      <path fill="none" stroke-width="5" stroke-linecap="round" d="M135 229c12-14 38-15 51-1"></path>
+    </g>
+    <g class="avatar__eye">
+      <path fill="#fbf7f0" stroke-width="4" d="M216 229c12-13 36-11 46 1-12 10-34 9-46-1Z"></path>
+      <g class="avatar__pupil">
+        <circle cx="238" cy="229" r="8.5" fill="#1d130e" stroke="none"></circle>
+        <circle cx="241" cy="226" r="2.6" fill="#fff" stroke="none"></circle>
+      </g>
+      <path fill="none" stroke-width="5" stroke-linecap="round" d="M214 228c13-14 39-13 51 1"></path>
+    </g>
+  </g>
+
+  <!-- Nose: broad, rounded tip -->
+  <g fill="none" stroke="var(--outline)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M182 268c-8 4-8 14 0 16 6 1 10-1 12-3 4 3 8 3 12 0 2 2 6 4 12 3 8-2 8-12 0-16"></path>
+    <path stroke-width="4" d="M190 281c3 1 5 1 7-1M203 280c2 2 4 2 7 1"></path>
+  </g>
+
+  <!-- Moustache: thin and sparse -->
+  <path
+    fill="none"
+    stroke="var(--hair)"
+    stroke-width="4.5"
+    stroke-linecap="round"
+    opacity="0.75"
+    d="M176 300c8-5 16-6 22-3M202 297c6-3 14-2 22 3"
+  ></path>
+
+  <!-- Mouth: neutral by default, a grin while the portrait is hovered -->
+  <g class="avatar__mouth avatar__mouth--rest" fill="none" stroke="var(--outline)" stroke-linecap="round">
+    <path fill="#a8705f" stroke-width="4" d="M178 312c8-6 16-7 22-3 6-4 14-3 22 3-12 5-32 5-44 0Z"></path>
+    <path stroke-width="4" opacity="0.6" d="M186 322c8 5 20 5 28 0"></path>
+  </g>
+  <g class="avatar__mouth avatar__mouth--grin" stroke="var(--outline)" stroke-linejoin="round">
+    <path fill="#fbf7f0" stroke-width="5" d="M172 306c18 4 38 4 56 0-4 18-16 26-28 26s-24-8-28-26Z"></path>
+    <path fill="none" stroke-width="3" d="M174 315h52M200 307v24"></path>
+  </g>
+
+  <!-- Hair: thick, straight, a heavy fringe that falls to the eyes -->
+  <path
+    transform="translate(200 0) scale(1.1 1.04) translate(-200 0)"
+    fill="var(--hair)"
+    stroke="var(--outline)"
+    stroke-width="7"
+    stroke-linejoin="round"
+    d="M112 246c-14-30-18-70-2-104 10-22 26-38 46-46 6-14 22-24 44-24 14 0 24 4 32 10 26 2 48 16 62 38 18 28 22 66 10 100-6 16-8 26-12 30l-6-40c-4 8-8 16-14 20l-4-30c-6 10-14 18-24 22l2-26c-8 10-18 16-30 18l4-26c-10 10-22 16-36 16l6-24c-12 8-24 12-38 12l8-22c-8 4-16 6-24 6 2 16 0 32-6 48l-8-24c-2 14-4 28-6 36Z"
+  ></path>
+  <!-- A few strands for texture -->
+  <g
+    fill="none"
+    stroke="#3a3a46"
+    stroke-width="3"
+    stroke-linecap="round"
+    opacity="0.9"
+    transform="translate(200 0) scale(1.1 1.04) translate(-200 0)"
+  >
+    <path d="M160 112c-10 18-14 34-14 52"></path>
+    <path d="M214 98c-6 22-8 42-6 62"></path>
+    <path d="M262 122c4 20 4 40 0 58"></path>
+  </g>
+</svg>
+
+<style>
+  /* Fixed palette: the portrait is an illustration and reads the same in both themes. */
+  .avatar {
+    --skin: #d4a68c;
+    --skin-shade: #b5866f;
+    --hair: #16161c;
+    --hoodie: #8f6b66;
+    --outline: #0b0b10;
+    overflow: visible;
+  }
+
+  .avatar__mouth--grin {
+    display: none;
+  }
+
+  .avatar:hover .avatar__mouth--grin,
+  :global(.avatar-wrap:focus-within) .avatar__mouth--grin {
+    display: inline;
+  }
+
+  .avatar:hover .avatar__mouth--rest,
+  :global(.avatar-wrap:focus-within) .avatar__mouth--rest {
+    display: none;
+  }
+
+  .avatar__eye,
+  .avatar__pupil {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .avatar__pupil {
+    transform: translate(var(--look-x, 0px), var(--look-y, 0px));
+    transition: transform 0.25s var(--ease-out);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .avatar__eye {
+      animation: avatar-blink 6s infinite;
+    }
+  }
+
+  @keyframes avatar-blink {
+    0%,
+    95%,
+    100% {
+      transform: scaleY(1);
+    }
+    97% {
+      transform: scaleY(0.08);
+    }
+  }
+</style>

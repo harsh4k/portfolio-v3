@@ -6,16 +6,17 @@ A single-page portfolio built with [Astro](https://astro.build) and TypeScript, 
 
 Run from this folder. Node 22.12 or newer.
 
-| Command           | What it does                                               |
-| ----------------- | ---------------------------------------------------------- |
-| `npm run dev`     | Dev server at http://localhost:4321                        |
-| `npm run build`   | Production build into the repo-root `dist/`                |
-| `npm run preview` | Serve the build locally                                    |
-| `npm run lint`    | ESLint (TypeScript and Astro rules)                        |
-| `npm run format`  | Prettier, write                                            |
-| `npm run check`   | Astro and TypeScript type check                            |
-| `npm test`        | Playwright tests against the built site, desktop and phone |
-| `npm run verify`  | Everything CI runs, in order                               |
+| Command           | What it does                                                 |
+| ----------------- | ------------------------------------------------------------ |
+| `npm run dev`     | Dev server at http://localhost:4321                          |
+| `npm run build`   | Production build into the repo-root `dist/`                  |
+| `npm run preview` | Serve the build locally                                      |
+| `npm run lint`    | ESLint (TypeScript and Astro rules)                          |
+| `npm run format`  | Prettier, write                                              |
+| `npm run check`   | Astro and TypeScript type check                              |
+| `npm test`        | Playwright tests against the built site, desktop and phone   |
+| `npm run verify`  | Everything CI runs, in order                                 |
+| `npm run og`      | Re-render `public/og-image.png` (needs a Playwright browser) |
 
 From the repo root, `npm run build` and `npm run dev` forward here.
 
@@ -30,7 +31,7 @@ src/
 ├── components/         # one component per section
 ├── layouts/Base.astro  # <head>, meta tags, theme bootstrap
 ├── pages/              # index and 404
-├── scripts/            # small client scripts
+├── scripts/            # small client scripts, including the starfield canvas
 └── styles/             # design tokens, fonts, base styles
 public/                 # served as-is: fonts, icons, resume, headers, manifest
 tests/                  # Playwright
@@ -40,7 +41,8 @@ tests/                  # Playwright
 
 - **Add a project:** drop a screenshot in `src/assets/projects/`, then add an entry to `src/content/projects.json` with the next `order`. `summary` is optional.
 - **Add a photo:** drop it in `src/assets/archive/` and add an entry to `src/content/archive.json`.
-- **Change bio, links or highlights:** `src/data/profile.ts`.
+- **Change bio, links or highlights:** `src/data/profile.ts`. The Hire me `mailto:` is built there too.
+- **Change the portrait:** `src/components/Avatar.astro` is a hand-drawn SVG. Colours are CSS variables at the top of its style block.
 
 The build fails, rather than shipping a broken page, when a project URL is not `https://`, an image file is missing, two entries share an `order`, or the About text links to a project that no longer exists.
 

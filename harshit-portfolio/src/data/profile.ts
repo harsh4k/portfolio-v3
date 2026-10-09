@@ -1,12 +1,12 @@
 export const profile = {
   name: "Harshit Chauhan",
-  role: "Creative Developer",
+  role: "Software Developer",
   location: "Mumbai, India",
   timeZone: "Asia/Kolkata",
   email: "harshitsinhchauhan250@gmail.com",
   since: 2024,
   description:
-    "Harshit Chauhan — Computer Engineering student at NMIMS Mumbai and creative developer building production web applications, motion-led sites and local-first AI tools.",
+    "Harshit Chauhan — software developer and Computer Engineering student at NMIMS Mumbai, building production web applications, desktop tools and local-first AI.",
   socials: [
     { label: "GitHub", handle: "harsh4k", url: "https://github.com/harsh4k" },
     {
@@ -18,10 +18,16 @@ export const profile = {
   resume: { pdf: "/resume.pdf", docx: "/Harshit_Resume.docx" },
 } as const;
 
+/**
+ * The "Hire me" link. The subject is percent-encoded: an unencoded space ends
+ * the subject early in some mail clients.
+ */
+export const hireMe = `mailto:${profile.email}?subject=${encodeURIComponent("Hello Harshit")}`;
+
 export const highlights = [
   { value: "11", label: "Projects shipped", detail: "In production" },
   { value: "2026", label: "Hackathon winner", detail: "NamasteDev, with GetCited" },
-  { value: "2025", label: "Junior dev intern", detail: "Synapical, summer" },
+  { value: "2026", label: "Junior dev intern", detail: "Synapical, ongoing" },
   { value: "B.Tech", label: "Computer Engineering", detail: "NMIMS Mumbai" },
 ] as const;
 

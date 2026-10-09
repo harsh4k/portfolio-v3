@@ -1,6 +1,6 @@
 # Harshit Chauhan
 
-> Creative developer and Computer Engineering student at NMIMS Mumbai, building
+> Software developer and Computer Engineering student at NMIMS Mumbai, building
 > production web applications, motion-led sites and local-first AI tools.
 
 This is a single-page portfolio with an about section, selected work,
@@ -14,7 +14,7 @@ a photo archive and contact details.
 - [Attendo](https://attendov1.vercel.app/)
 - [Coffee Digital](https://coffeedigital.vercel.app/)
 - [Coffee Rebuild](https://threedwebs.vercel.app/)
-- [Oysnk](https://oysnk.vercel.app/)
+- [Osynk](https://oysnk.vercel.app/)
 - [Shipd](https://github.com/harsh4k/shipd)
 - [Rudo AI](https://github.com/harsh4k/rudo)
 - [Bunny OS](https://harsh4k.github.io/Bunny-OS/)

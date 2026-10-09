@@ -5,16 +5,25 @@ import { getOrdered } from "../data/collections";
 const photos = await getOrdered("archive");
 ---
 
-<section class="section" id="archive" aria-labelledby="archive-title">
+<!--
+  The space section. A night band in both themes: the same sky as the hero,
+  denser and with more shooting stars, behind photos from trips and late nights.
+-->
+<section class="section archive-band" id="archive" aria-labelledby="archive-title" data-archive>
+  <canvas class="archive-band__sky" aria-hidden="true" data-sky></canvas>
+
   <div class="wrap">
     <div class="section__head">
       <h2 class="section__title" id="archive-title">
         Archive
       </h2>
       <p class="label">
-        <span class="section__index">03</span> <span class="muted">· Off-screen, {photos.length} frames</span>
+        <span class="section__index">03</span> <span class="muted">· After hours, {photos.length} frames</span>
       </p>
     </div>
+    <p class="archive-band__lead">
+      Away from the editor, I look up: mountain roads, monsoon valleys, first snow and clear night skies.
+    </p>
   </div>
 
   <!-- Focusable so keyboard users can scroll it with the arrow keys. -->
@@ -39,7 +48,50 @@ const photos = await getOrdered("archive");
   </div>
 </section>
 
+<script>
+  import { createStarfield } from "../scripts/starfield";
+
+  const band = document.querySelector<HTMLElement>("[data-archive]");
+  const sky = band?.querySelector<HTMLCanvasElement>("[data-sky]");
+  if (band && sky) createStarfield(sky, { areaPerStar: 3600, maxStars: 320, meteorEvery: 3, interactiveArea: band });
+</script>
+
 <style>
+  /* Always night, whichever theme is on, so the colours are fixed here. */
+  .archive-band {
+    --paper: #0b0c18;
+    --paper-raised: #161829;
+    --ink: #eeece6;
+    --muted: #a8abc2;
+    --line: color-mix(in srgb, #eeece6 16%, transparent);
+    --accent: #ffb547;
+    --focus: #8ab4ff;
+    --star: #f6f4ee;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    color-scheme: dark;
+    background: radial-gradient(120% 80% at 70% 0%, #1d2150 0%, var(--paper) 60%);
+    color: var(--ink);
+  }
+
+  .archive-band__sky {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+  }
+
+  .archive-band__lead {
+    max-width: 34rem;
+    margin-top: calc(-1 * clamp(1rem, 3vw, 2.5rem));
+    margin-bottom: clamp(2rem, 4vw, 3rem);
+    color: var(--muted);
+    font-size: clamp(1.15rem, 1vw + 0.9rem, 1.5rem);
+    line-height: 1.4;
+  }
+
   .archive {
     overflow-x: auto;
     overscroll-behavior-x: contain;

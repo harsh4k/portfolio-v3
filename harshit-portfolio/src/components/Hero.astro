@@ -1,10 +1,13 @@
 ---
-import { profile } from "../data/profile";
+import Avatar from "./Avatar.astro";
+import { profile, hireMe } from "../data/profile";
 
 const [first, last] = profile.name.split(" ");
 ---
 
-<section class="hero" aria-labelledby="hero-title">
+<section class="hero" aria-labelledby="hero-title" data-hero>
+  <canvas class="hero__sky" aria-hidden="true" data-sky></canvas>
+
   <div class="hero__inner wrap">
     <p class="hero__eyebrow label">
       <span class="hero__status">
@@ -20,21 +23,28 @@ const [first, last] = profile.name.split(" ");
           .
         </span>
       </span>
-      <span class="visually-hidden">, {profile.role}</span>
+      <span class="hero__role">{profile.role}</span>
     </h1>
+
+    <div class="hero__portrait avatar-wrap" data-no-sky>
+      <Avatar class="hero__avatar" />
+    </div>
 
     <div class="hero__foot">
       <p class="hero__lead">
-        {profile.role} and Computer Engineering student in Mumbai. I design and build production web applications,
-        motion-led studio sites and local-first AI tools, balancing performance, interaction and clean systems.
+        Computer Engineering student in Mumbai and intern at Synapical. I design and build production web applications,
+        desktop tools and local-first AI, balancing performance, interaction and clean systems.
       </p>
 
       <div class="hero__actions">
-        <a class="button button--solid" href="#work">
+        <a class="button button--solid" href={hireMe}>
+          Hire me
+        </a>
+        <a class="button" href="#work">
           See the work
         </a>
-        <a class="button" href={`mailto:${profile.email}`}>
-          Email me
+        <a class="button" href={profile.resume.pdf} target="_blank" rel="noopener">
+          Resume<span class="visually-hidden"> (PDF, opens in a new tab)</span>
         </a>
       </div>
     </div>
@@ -57,10 +67,53 @@ const [first, last] = profile.name.split(" ");
         <dd>{profile.since}</dd>
       </div>
     </dl>
+
+    <p class="hero__hint label muted" aria-hidden="true">
+      <span class="hero__hint-star">✦</span>
+      <span class="hero__hint--pointer">Click the sky to make a wish</span>
+      <span class="hero__hint--touch">Tap the sky to make a wish</span>
+    </p>
   </div>
 </section>
 
 <script>
+  import { createStarfield } from "../scripts/starfield";
+
+  const hero = document.querySelector<HTMLElement>("[data-hero]");
+  const sky = hero?.querySelector<HTMLCanvasElement>("[data-sky]");
+  if (hero && sky) createStarfield(sky, { interactiveArea: hero });
+
+  // The portrait glances toward the pointer: pointer devices only, only when
+  // motion is welcome, and it never captures or cancels the event.
+  const avatar = hero?.querySelector<SVGSVGElement>("[data-avatar]");
+  const canGlance = window.matchMedia("(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)");
+  if (avatar) {
+    let pending = false;
+    let x = 0;
+    let y = 0;
+    window.addEventListener(
+      "pointermove",
+      (event) => {
+        if (!canGlance.matches) return;
+        x = event.clientX;
+        y = event.clientY;
+        if (pending) return;
+        pending = true;
+        requestAnimationFrame(() => {
+          pending = false;
+          const rect = avatar.getBoundingClientRect();
+          const dx = x - (rect.left + rect.width / 2);
+          const dy = y - (rect.top + rect.height * 0.52);
+          const distance = Math.hypot(dx, dy) || 1;
+          const reach = Math.min(1, distance / 400);
+          avatar.style.setProperty("--look-x", `${((dx / distance) * 4 * reach).toFixed(2)}px`);
+          avatar.style.setProperty("--look-y", `${((dy / distance) * 2.5 * reach).toFixed(2)}px`);
+        });
+      },
+      { passive: true },
+    );
+  }
+
   const clock = document.querySelector<HTMLTimeElement>("[data-clock]");
   const timeZone = clock?.dataset.timeZone;
 
@@ -81,12 +134,131 @@ const [first, last] = profile.name.split(" ");
 
 <style>
   .hero {
+    /* Stars are drawn in the text colour, so they read on both themes. */
+    --star: var(--ink);
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
     padding-block: clamp(3rem, 9vw, 7rem) clamp(3rem, 6vw, 5rem);
+  }
+
+  .hero__sky {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
   }
 
   .hero__inner {
     display: grid;
+    grid-template-areas:
+      "eyebrow"
+      "portrait"
+      "title"
+      "foot"
+      "meta"
+      "hint";
     gap: clamp(2rem, 4vw, 3.5rem);
+  }
+
+  .hero__eyebrow {
+    grid-area: eyebrow;
+  }
+
+  .hero__title {
+    grid-area: title;
+  }
+
+  .hero__foot {
+    grid-area: foot;
+  }
+
+  .hero__meta {
+    grid-area: meta;
+  }
+
+  .hero__portrait {
+    grid-area: portrait;
+    width: clamp(8.5rem, 34vw, 12rem);
+  }
+
+  .hero__portrait {
+    position: relative;
+  }
+
+  /* A moon behind the portrait keeps the dark hair readable on the dark theme. */
+  .hero__portrait::before {
+    content: "";
+    position: absolute;
+    inset: 0 2% 16%;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: var(--paper-raised);
+  }
+
+  .hero__portrait :global(.hero__avatar) {
+    position: relative;
+    width: 100%;
+    height: auto;
+  }
+
+  .hero__role {
+    margin-top: 0.35em;
+    font-family: var(--mono);
+    font-size: clamp(0.95rem, 0.6rem + 1.4vw, 1.5rem);
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .hero__hint {
+    grid-area: hint;
+    display: inline-flex;
+    gap: 0.5rem;
+    margin-top: -1rem;
+  }
+
+  .hero__hint-star {
+    color: var(--accent);
+  }
+
+  .hero__hint--touch {
+    display: none;
+  }
+
+  @media (hover: none) {
+    .hero__hint--pointer {
+      display: none;
+    }
+
+    .hero__hint--touch {
+      display: inline;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__hint {
+      display: none;
+    }
+  }
+
+  @media (min-width: 60rem) {
+    .hero__inner {
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas:
+        "eyebrow eyebrow"
+        "title portrait"
+        "foot foot"
+        "meta meta"
+        "hint hint";
+    }
+
+    .hero__portrait {
+      align-self: center;
+      width: clamp(14rem, 24vw, 22rem);
+    }
   }
 
   .hero__status {
@@ -108,7 +280,7 @@ const [first, last] = profile.name.split(" ");
 
   .hero__title {
     display: grid;
-    font-size: clamp(4.25rem, 16vw, 15rem);
+    font-size: clamp(4.25rem, 14vw, 13rem);
     line-height: 0.86;
     letter-spacing: -0.045em;
   }

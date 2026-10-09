@@ -187,6 +187,69 @@ test.describe("interactions", () => {
   });
 });
 
+test.describe("hero and personal links", () => {
+  test("the hero names the role and shows the portrait", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("h1")).toContainText("Software Developer");
+    await expect(page.getByRole("img", { name: "Illustrated portrait of Harshit Chauhan" })).toBeVisible();
+  });
+
+  test("the header GitHub icon links to the GitHub profile", async ({ page }) => {
+    await page.goto("/");
+    const github = page.locator("header").getByRole("link", { name: /GitHub/ });
+    await expect(github).toHaveAttribute("href", "https://github.com/harsh4k");
+    await expect(github).toHaveAttribute("target", "_blank");
+  });
+
+  test("every Hire me link is a well-formed mailto", async ({ page }) => {
+    await page.goto("/");
+    const hrefs = await page
+      .getByRole("link", { name: "Hire me" })
+      .evaluateAll((links) => links.map((a) => a.getAttribute("href")));
+    expect(hrefs.length).toBeGreaterThan(0);
+    for (const href of hrefs) expect(href).toBe("mailto:harshitsinhchauhan250@gmail.com?subject=Hello%20Harshit");
+  });
+
+  test("every resume PDF link opens /resume.pdf in a new tab", async ({ page }) => {
+    await page.goto("/");
+    const links = page.locator('a[href="/resume.pdf"]');
+    expect(await links.count()).toBeGreaterThan(0);
+    for (const link of await links.all()) await expect(link).toHaveAttribute("target", "_blank");
+  });
+
+  test("middle clicks and wheel scrolling are never cancelled", async ({ page }) => {
+    await page.goto("/");
+    const cancelled = await page.evaluate(() => {
+      const targets = [document.querySelector("[data-sky]"), document.querySelector("#work a"), document.body];
+      const results: string[] = [];
+      for (const target of targets) {
+        if (!target) continue;
+        const events = [
+          new MouseEvent("mousedown", { button: 1, bubbles: true, cancelable: true }),
+          new PointerEvent("pointerdown", { button: 1, bubbles: true, cancelable: true }),
+          new MouseEvent("auxclick", { button: 1, bubbles: true, cancelable: true }),
+          new WheelEvent("wheel", { deltaY: 100, bubbles: true, cancelable: true }),
+        ];
+        for (const event of events)
+          if (!target.dispatchEvent(event)) results.push(`${event.type} on ${target.nodeName}`);
+      }
+      return results;
+    });
+    expect(cancelled).toEqual([]);
+  });
+
+  test("the starfield is decorative and holds still under reduced motion", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    const sky = page.locator("[data-hero] [data-sky]");
+    await expect(sky).toHaveAttribute("aria-hidden", "true");
+    const frame = () => sky.evaluate((canvas: HTMLCanvasElement) => canvas.toDataURL());
+    const first = await frame();
+    await page.waitForTimeout(600);
+    expect(await frame()).toBe(first);
+  });
+});
+
 test.describe("service worker retirement", () => {
   test.use({ serviceWorkers: "allow" });
 
