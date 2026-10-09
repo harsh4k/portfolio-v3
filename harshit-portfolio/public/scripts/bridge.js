@@ -334,7 +334,17 @@
     hideIntroLoader();
     revealPortfolio(true);
   }, INTRO_TIMEOUT_MS);
-  window.addEventListener("intro:ready", hideIntroLoader, { once: true });
+  // On a fast connection the scene is ready almost at once and the loader only
+  // flashed. Keep it up until the logo has been traced and filled once.
+  const LOADER_MIN_MS = 2300;
+  window.addEventListener(
+    "intro:ready",
+    () => {
+      const wait = Math.max(0, LOADER_MIN_MS - performance.now());
+      window.setTimeout(hideIntroLoader, wait);
+    },
+    { once: true },
+  );
 
   import("/assets/index-wQJ6Ws5X.js")
     .then(() => {

@@ -271,6 +271,30 @@ test.describe("input", () => {
     await expect(tile).toHaveClass(/is-revealed/);
   });
 
+  test("scrolling with a finger over a Highlights tile throws no smileys", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "touch only");
+    await page.goto("/", { waitUntil: "load" });
+    const tile = page.locator(".js-award").first();
+    await tile.scrollIntoViewIfNeeded();
+    // The engine marks a tile is-active while it throws smileys.
+    await tile.evaluate((el) => {
+      const w = window as Window & { thrown?: number };
+      w.thrown = 0;
+      new MutationObserver(() => {
+        if (el.classList.contains("is-active")) w.thrown = (w.thrown ?? 0) + 1;
+      }).observe(el, { attributes: true, attributeFilter: ["class"] });
+    });
+    const box = await tile.boundingBox();
+    if (!box) throw new Error("tile has no box");
+    const cdp = await page.context().newCDPSession(page);
+    const at = (y: number) => [{ x: box.x + 20, y }];
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: at(box.y + 40) });
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: at(box.y - 60) });
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    await page.waitForTimeout(300);
+    expect(await page.evaluate(() => (window as Window & { thrown?: number }).thrown)).toBe(0);
+  });
+
   test("the resume dock scrolls itself and keeps focus inside", async ({ page, isMobile }) => {
     await page.goto("/", { waitUntil: "load" });
     await page.locator(".js-resume-open").first().dispatchEvent("click");
