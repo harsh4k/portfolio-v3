@@ -24,6 +24,8 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   pointer-events: none;
+  /* Opaque, so the 3D scene drawing underneath never shows through. */
+  background: #ff0b36;
   transition: opacity 0.4s ease;
 }
 
@@ -76,16 +78,18 @@
   animation: intro-loader-scroll 6s linear infinite;
 }
 
+/* One shared cycle: "", ".", "..", "..." */
 .intro-loader__dots span {
-  animation: intro-loader-dot 1.2s steps(1) infinite;
+  opacity: 0;
+  animation: intro-loader-dot1 1.6s steps(1) infinite;
 }
 
 .intro-loader__dots span:nth-child(2) {
-  animation-delay: 0.2s;
+  animation-name: intro-loader-dot2;
 }
 
 .intro-loader__dots span:nth-child(3) {
-  animation-delay: 0.4s;
+  animation-name: intro-loader-dot3;
 }
 
 .intro-loader.is-done {
@@ -123,12 +127,23 @@ html:not(.intro-ready) .intro-swipe-hint {
   }
 }
 
-@keyframes intro-loader-dot {
-  0% {
-    opacity: 0;
+@keyframes intro-loader-dot1 {
+  25%,
+  99% {
+    opacity: 1;
   }
-  30%,
-  100% {
+}
+
+@keyframes intro-loader-dot2 {
+  50%,
+  99% {
+    opacity: 1;
+  }
+}
+
+@keyframes intro-loader-dot3 {
+  75%,
+  99% {
     opacity: 1;
   }
 }
@@ -138,6 +153,7 @@ html:not(.intro-ready) .intro-swipe-hint {
   .intro-loader__bits,
   .intro-loader__dots span {
     animation: none;
+    opacity: 1;
   }
 
   .intro-loader__trace {
