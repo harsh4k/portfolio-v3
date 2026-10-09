@@ -177,3 +177,31 @@ html:not(.intro-ready) .intro-swipe-hint {
 html {
   -webkit-tap-highlight-color: transparent;
 }
+
+/*
+  The hero's type sizes were tuned to "Creative". "Software" is about 16%
+  wider, so the same sizes push "Developer" past the edge on desktop and run
+  into the star on phones. These are the design's own sizes scaled down just
+  enough to fit with the spacing "Creative" had.
+*/
+.s-hero.astro-7dteeuzc h1.s__title.astro-7dteeuzc {
+  font-size: min(13.8vw, 17rem);
+}
+
+@media only screen and (max-width: 1080px) {
+  .s-hero.astro-7dteeuzc h1.s__title.astro-7dteeuzc {
+    font-size: 12.9vw;
+  }
+}
+
+@media only screen and (max-width: 987px) {
+  .s-hero.astro-7dteeuzc h1.s__title.astro-7dteeuzc {
+    font-size: calc(27.3vw - 0.88rem);
+  }
+}
+
+@media only screen and (max-width: 767px) and (orientation: landscape), only screen and (max-width: 576px) {
+  .s-hero.astro-7dteeuzc h1.s__title.astro-7dteeuzc {
+    font-size: calc(27.3vw - 0.66rem);
+  }
+}
