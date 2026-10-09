@@ -90,10 +90,26 @@ const fonts = [
   <body class="astro-j7pv25f6">
     <div id="intro-layer" class="intro-layer">
       <div class="intro-loader js-intro-loader" role="status">
-        <!-- The header's HC logo, drawn as an outline and then filled. -->
+        <!--
+          The header's HC logo: a faint outline that is always there, traced over
+          and filled in on a loop. --len is each path's length in viewBox units.
+        -->
         <svg class="intro-loader__logo" viewBox="0 0 280 280" aria-hidden="true">
-          <path pathLength="1" d="M0 0v280h39.755V158.4h59.65V280h39.756V0H99.411v118.8H39.755V0H0Z"></path>
-          <path pathLength="1" d="M160.734 0v280H280V240.245h-79.51V39.755H280V0H160.734Z"></path>
+          <path
+            class="intro-loader__ghost"
+            d="M0 0v280h39.755V158.4h59.65V280h39.756V0H99.411v118.8H39.755V0H0Z"
+          ></path>
+          <path class="intro-loader__ghost" d="M160.734 0v280H280V240.245h-79.51V39.755H280V0H160.734Z"></path>
+          <path
+            class="intro-loader__trace"
+            style="--len: 1320"
+            d="M0 0v280h39.755V158.4h59.65V280h39.756V0H99.411v118.8H39.755V0H0Z"
+          ></path>
+          <path
+            class="intro-loader__trace"
+            style="--len: 958"
+            d="M160.734 0v280H280V240.245h-79.51V39.755H280V0H160.734Z"
+          ></path>
         </svg>
         <!-- A ruler like the hero's; the bits spell "HC". Doubled so the scroll loops. -->
         <p class="intro-loader__strip" aria-hidden="true">
@@ -126,6 +142,7 @@ const fonts = [
     <script is:inline type="module" src="/scripts/resume-dock.js"></script>
     <script>
       import "../scripts/warm-images";
+      import "../scripts/reveal-highlights";
     </script>
   </body>
 </html>
