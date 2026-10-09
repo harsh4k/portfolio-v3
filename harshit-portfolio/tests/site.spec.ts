@@ -206,12 +206,15 @@ test.describe("intro", () => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
     const loader = page.locator(".js-intro-loader");
     await expect(loader).toBeVisible();
+    // Opaque, so the scene drawing underneath never shows through it.
+    await expect(loader).toHaveCSS("background-color", "rgb(255, 11, 54)");
     // Nothing to swipe yet, so the phone swipe hint waits for the scene too.
     await expect(page.locator("html")).not.toHaveClass(/intro-ready/);
     release();
     // The bundle fires intro:ready on its first rendered frame (patched in, see README).
     await page.evaluate(() => window.dispatchEvent(new Event("intro:ready")));
-    await expect(loader).toHaveCount(0);
+    // It stays up for one full logo cycle (about 2.3s from page start) before fading.
+    await expect(loader).toHaveCount(0, { timeout: 10_000 });
     await expect(page.locator("html")).toHaveClass(/intro-ready/);
   });
 
