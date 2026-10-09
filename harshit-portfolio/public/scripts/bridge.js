@@ -24,6 +24,22 @@
   let navigating = false;
   let unbindSwipe = () => {};
 
+  // The intro scene sets playful tab titles ("… :D"); restore the real one on exit.
+  const pageTitle = document.title;
+
+  /**
+   * Run once the page has fully loaded. The portfolio's header and hero only
+   * start listening for their intro after load, so starting it any earlier
+   * (Reduced Motion, or Enter pressed straight away) left them hidden.
+   */
+  const afterLoad = (fn) => {
+    if (document.readyState === "complete") {
+      window.setTimeout(fn, 50);
+    } else {
+      window.addEventListener("load", () => window.setTimeout(fn, 50), { once: true });
+    }
+  };
+
   /**
    * Stop the intro engine and release WebGL contexts.
    */
@@ -80,12 +96,18 @@
     document
       .querySelectorAll("link[data-intro-style]")
       .forEach((link) => link.remove());
-    introLayer?.remove();
+    // Hide the layer now but keep it in the DOM until load: the engine waits
+    // for startPortfolioIntro only while #intro-layer exists, and its header
+    // and hero listen for "intro" only after load.
+    if (introLayer) introLayer.hidden = true;
     document.documentElement.classList.add("intro-started", "intro-done");
     document.documentElement.classList.remove("is-scroll-blocked");
-    window.dispatchEvent(new Event("resize"));
-    window.dispatchEvent(new CustomEvent("startPortfolioIntro"));
-    window.dispatchEvent(new CustomEvent("portfolio:entered"));
+    afterLoad(() => {
+      introLayer?.remove();
+      window.dispatchEvent(new Event("resize"));
+      window.dispatchEvent(new CustomEvent("startPortfolioIntro"));
+      window.dispatchEvent(new CustomEvent("portfolio:entered"));
+    });
     return;
   }
 
@@ -97,11 +119,13 @@
     if (navigating) return;
     navigating = true;
     unbindSwipe();
+    document.removeEventListener("keydown", onSkipKey);
+    window.clearTimeout(introTimeout);
 
     const introLayer = document.getElementById("intro-layer");
     document.documentElement.classList.add("intro-started");
     document.documentElement.classList.remove("intro-swipe");
-    window.dispatchEvent(new CustomEvent("startPortfolioIntro"));
+    afterLoad(() => window.dispatchEvent(new CustomEvent("startPortfolioIntro")));
     watchScrollUnblock();
 
     const dropIntroLayer = () => {
@@ -110,6 +134,7 @@
         .querySelectorAll("link[data-intro-style]")
         .forEach((link) => link.remove());
       introLayer?.remove();
+      document.title = pageTitle;
       window.dispatchEvent(new CustomEvent("portfolio:entered"));
     };
 
@@ -294,12 +319,29 @@
 
   bindSwipeToEnter(document.getElementById("intro-layer"));
 
+  // --- Loader on the red cover until the 3D scene draws its first frame ---
+  const INTRO_TIMEOUT_MS = 20000;
+  const introLoader = document.querySelector(".js-intro-loader");
+  const hideIntroLoader = () => {
+    window.clearTimeout(introTimeout);
+    if (!introLoader) return;
+    introLoader.classList.add("is-done");
+    window.setTimeout(() => introLoader.remove(), 450);
+  };
+  // If the scene never renders (no WebGL, very slow network), go straight in.
+  const introTimeout = window.setTimeout(() => {
+    hideIntroLoader();
+    revealPortfolio(true);
+  }, INTRO_TIMEOUT_MS);
+  window.addEventListener("intro:ready", hideIntroLoader, { once: true });
+
   import("/assets/index-wQJ6Ws5X.js")
     .then(() => {
       window.__resetIntroHand?.();
     })
     .catch((err) => {
       console.warn("Could not load 3D intro bundle, falling back to direct entry", err);
+      hideIntroLoader();
       revealPortfolio(true);
     });
 
@@ -329,11 +371,12 @@
     attributeFilter: ["class"],
   });
 
-  // --- Keyboard skip for accessibility ---
-  document.addEventListener("keydown", (e) => {
+  // --- Keyboard skip for accessibility (removed once the intro is gone) ---
+  function onSkipKey(e) {
     if (e.key === "Escape" || e.key === "Enter") {
       observer.disconnect();
       revealPortfolio(true);
     }
-  });
+  }
+  document.addEventListener("keydown", onSkipKey);
 })();

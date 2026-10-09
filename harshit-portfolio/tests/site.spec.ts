@@ -151,12 +151,57 @@ test.describe("personal links", () => {
     );
   });
 
+  test("the GitHub icon is the GitHub mark, not the design's CodePen cube", async ({ page }) => {
+    await page.goto("/");
+    const icon = page.locator(".sb-socials a[aria-label='GitHub'] .sb__icon");
+    await expect(icon).toHaveClass(/sb__icon--github/);
+    await expect(page.locator(".sb__icon--codepen")).toHaveCount(0);
+  });
+
   test("the resume opens in the dock with PDF and DOCX downloads", async ({ page }) => {
     await page.goto("/");
     const dock = page.locator("#resume-dock");
     await expect(dock).toBeAttached();
-    await expect(dock.locator('a[href="/resume.pdf"]')).toHaveAttribute("download", /\.pdf$/);
+    await expect(dock.locator('a[href="/resume.pdf"][download]')).toHaveAttribute("download", /\.pdf$/);
     await expect(dock.locator('a[href="/Harshit_Resume.docx"]')).toHaveAttribute("download", /\.docx$/);
+    await expect(dock.locator('a[href="/resume.pdf"][target="_blank"]')).toHaveText("Open");
+  });
+});
+
+test.describe("intro", () => {
+  test("shows a loader on the red cover until the 3D scene has rendered", async ({ page }) => {
+    // Hold the 3D bundle back, as a slow phone network would.
+    let release = () => {};
+    const held = new Promise<void>((resolve) => (release = resolve));
+    await page.route("**/assets/index-wQJ6Ws5X.js", async (route) => {
+      await held;
+      await route.continue();
+    });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    const loader = page.locator(".js-intro-loader");
+    await expect(loader).toBeVisible();
+    release();
+    // The bundle fires intro:ready on its first rendered frame (patched in, see README).
+    await page.evaluate(() => window.dispatchEvent(new Event("intro:ready")));
+    await expect(loader).toHaveCount(0);
+  });
+
+  test("Enter skips the intro, shows the site and restores the tab title", async ({ page }) => {
+    await page.goto("/", { waitUntil: "load" });
+    const title = await page.title();
+    // The intro scene renames the tab while it plays.
+    await page.evaluate(() => (document.title = "Harshit Chauhan :D"));
+    await page.keyboard.press("Enter");
+    await expect(page.locator("#intro-layer")).toHaveCount(0, { timeout: 10_000 });
+    await expect(page).toHaveTitle(title);
+    await expect(page.locator(".site-head")).toHaveCSS("opacity", "1");
+  });
+
+  test("the 3D intro bundle keeps its ready hook and none of its author's details", () => {
+    const bundle = readFileSync(new URL("../public/assets/index-wQJ6Ws5X.js", import.meta.url), "utf8");
+    expect(bundle).toContain('window.dispatchEvent(new Event("intro:ready"))');
+    expect(bundle).not.toContain("adrien-lamy");
+    expect(bundle).not.toContain("frank leboeuf");
   });
 });
 
@@ -177,6 +222,57 @@ test.describe("input", () => {
       return results;
     });
     expect(cancelled).toEqual([]);
+  });
+
+  test("with Reduced Motion the header and hero still appear", async ({ page }) => {
+    await page.goto("/", { waitUntil: "load" });
+    await expect(page.locator("#intro-layer")).toHaveCount(0);
+    await expect(page.locator(".site-head")).toHaveCSS("opacity", "1");
+    await expect(page.locator(".s-hero")).toHaveCSS("opacity", "1");
+  });
+
+  test("the resume dock scrolls itself and keeps focus inside", async ({ page, isMobile }) => {
+    await page.goto("/", { waitUntil: "load" });
+    await page.locator(".js-resume-open").first().dispatchEvent("click");
+    const dock = page.locator("#resume-dock");
+    await expect(dock).toBeVisible();
+    await expect(page.locator(".js-site-wrapper")).toHaveJSProperty("inert", true);
+    await expect(dock.locator(".resume-dock__page").first()).toBeVisible({ timeout: 15_000 });
+
+    if (!isMobile) {
+      const frame = dock.locator(".resume-dock__frame");
+      const box = await frame.boundingBox();
+      if (!box) throw new Error("resume frame has no box");
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+      await page.mouse.wheel(0, 600);
+      await expect.poll(() => frame.evaluate((el) => el.scrollTop)).toBeGreaterThan(0);
+      expect(await page.evaluate(() => window.scrollY)).toBe(0);
+    }
+
+    await page.keyboard.press("Escape");
+    await expect(dock).toBeHidden();
+    await expect(page.locator(".js-site-wrapper")).toHaveJSProperty("inert", false);
+  });
+
+  test("Ctrl+click on Resume is left to the browser", async ({ page }) => {
+    await page.goto("/", { waitUntil: "load" });
+    const prevented = await page.evaluate(() => {
+      let seen: boolean | null = null;
+      // Runs after the dock's handler; also stops this tab following #resume.
+      window.addEventListener(
+        "click",
+        (e) => {
+          seen = e.defaultPrevented;
+          e.preventDefault();
+        },
+        { once: true },
+      );
+      const event = new MouseEvent("click", { ctrlKey: true, bubbles: true, cancelable: true });
+      document.querySelector(".js-resume-open")?.dispatchEvent(event);
+      return seen;
+    });
+    expect(prevented).toBe(false);
+    await expect(page.locator("#resume-dock")).toBeHidden();
   });
 
   test("the wheel scrolls the page once the intro is done", async ({ page, isMobile }) => {
