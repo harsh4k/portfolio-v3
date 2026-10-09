@@ -334,15 +334,27 @@
     hideIntroLoader();
     revealPortfolio(true);
   }, INTRO_TIMEOUT_MS);
-  // On a fast connection the scene is ready almost at once and the loader only
-  // flashed. Keep it up until the logo has been traced and filled once.
+  // Hide the loader at a moment the HC logo is fully drawn and filled (70% into
+  // its CSS cycle), and never before it has been drawn once: on a fast
+  // connection the scene is ready almost at once and the loader only flashed,
+  // or faded out half drawn.
+  const LOADER_FILLED_AT = 0.7;
   const LOADER_MIN_MS = 2300;
+  const msUntilLogoFilled = () => {
+    const trace = introLoader?.querySelector(".intro-loader__trace");
+    const animation = trace?.getAnimations?.()[0];
+    const duration = animation?.effect?.getTiming().duration;
+    const time = animation?.currentTime;
+    if (typeof duration !== "number" || typeof time !== "number") {
+      return Math.max(0, LOADER_MIN_MS - performance.now());
+    }
+    const filled = duration * LOADER_FILLED_AT;
+    if (time < filled) return filled - time;
+    return (filled - (time % duration) + duration) % duration;
+  };
   window.addEventListener(
     "intro:ready",
-    () => {
-      const wait = Math.max(0, LOADER_MIN_MS - performance.now());
-      window.setTimeout(hideIntroLoader, wait);
-    },
+    () => window.setTimeout(hideIntroLoader, msUntilLogoFilled()),
     { once: true },
   );
 

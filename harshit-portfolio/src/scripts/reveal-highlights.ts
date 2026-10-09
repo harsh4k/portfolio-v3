@@ -1,26 +1,37 @@
 /**
  * Each Highlights tile starts under a black panel with a star that wipes
- * away. The design's engine starts the wipe only once a tile is half on
- * screen, so on a phone you scroll past half-covered black blocks that
- * look like a glitch. Uncover every tile a screen before the section
- * arrives instead, so the wipes have finished by the time they are seen.
- * (The tiles sit in a clipped, transformed block, so they are watched
- * through the section, which is in normal flow.) The engine's own
- * `is-revealed` styles are unchanged.
+ * away. The design's engine starts a tile's wipe only once half of it is on
+ * screen; phone tiles are tall, so you scrolled past half-covered black
+ * blocks that looked like a glitch. Start each tile's wipe as soon as its
+ * top edge comes on screen instead, so the same animation plays as the tile
+ * arrives rather than after it has sat there half black. The tiles sit in a clipped, transformed block that
+ * IntersectionObserver can't see into reliably, so this checks their boxes
+ * on scroll. The engine's own `is-revealed` styles are unchanged.
  */
-const section = document.querySelector("#about");
-const tiles = document.querySelectorAll(".js-award");
+let waiting = [...document.querySelectorAll<HTMLElement>(".js-award")];
+let queued = false;
 
-if (section) {
-  const reveal = new IntersectionObserver(
-    (entries) => {
-      if (!entries.some((entry) => entry.isIntersecting)) return;
-      tiles.forEach((tile) => tile.classList.add("is-revealed"));
-      reveal.disconnect();
-    },
-    { rootMargin: "0px 0px 100% 0px" },
-  );
-  reveal.observe(section);
+function revealArrived() {
+  queued = false;
+  const line = window.innerHeight;
+  waiting = waiting.filter((tile) => {
+    const box = tile.getBoundingClientRect();
+    if (box.top >= line) return true;
+    tile.classList.add("is-revealed");
+    return false;
+  });
+  if (!waiting.length) window.removeEventListener("scroll", onScroll);
+}
+
+function onScroll() {
+  if (queued) return;
+  queued = true;
+  requestAnimationFrame(revealArrived);
+}
+
+if (waiting.length) {
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
 }
 
 /*
