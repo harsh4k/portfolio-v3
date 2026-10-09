@@ -10,8 +10,8 @@
   "orientation": "any",
   "lang": "en",
   "dir": "ltr",
-  "background_color": "#FFFFFF",
-  "theme_color": "#FFFFFF",
+  "background_color": "#F40C3F",
+  "theme_color": "#F40C3F",
   "categories": ["portfolio", "personalization"],
   "icons": [
     {

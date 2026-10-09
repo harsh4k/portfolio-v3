@@ -14,57 +14,172 @@ const [velsaro, nexcart, synapical, attendo] = await Promise.all(
 );
 ---
 
-<section id="about" aria-labelledby="about-title">
-  <div>
-    <div>
-      <h2 id="about-title">About</h2>
+<section class="about grid-bg" id="about" aria-labelledby="about-title">
+  <div class="about__panel" data-reveal>
+    <h2 class="about__bar mono" id="about-title">
+      About
+    </h2>
+
+    <div class="about__bio">
+      <p>
+        I design and build production web applications, motion-led studio sites and local-first AI tools, balancing
+        performance, interaction and clean systems.
+      </p>
+      <p>
+        I'm a Computer Engineering student at NMIMS Mumbai and a software developer crafting considered digital
+        experiences. I learn quickest by taking things apart, building from scratch and shipping: from e-commerce
+        platforms like{" "}
+        <a href={velsaro?.url} target="_blank" rel="noopener">
+          {velsaro?.title}
+        </a>{" "}
+        and{" "}
+        <a href={nexcart?.url} target="_blank" rel="noopener">
+          {nexcart?.title}
+        </a>{" "}
+        to studio sites like{" "}
+        <a href={synapical?.url} target="_blank" rel="noopener">
+          {synapical?.title}
+        </a>{" "}
+        and college systems like{" "}
+        <a href={attendo?.url} target="_blank" rel="noopener">
+          {attendo?.title}
+        </a>
+        .
+      </p>
     </div>
 
-    <div>
-      <div>
-        <p>
-          I'm a Computer Engineering student at NMIMS Mumbai and a software developer crafting considered digital
-          experiences.
-        </p>
-        <p>
-          I learn quickest by taking things apart, building from scratch and shipping: from e-commerce platforms like{" "}
-          <a href={velsaro?.url} target="_blank" rel="noopener">
-            {velsaro?.title}
-          </a>{" "}
-          and{" "}
-          <a href={nexcart?.url} target="_blank" rel="noopener">
-            {nexcart?.title}
-          </a>{" "}
-          to studio sites like{" "}
-          <a href={synapical?.url} target="_blank" rel="noopener">
-            {synapical?.title}
-          </a>{" "}
-          and college systems like{" "}
-          <a href={attendo?.url} target="_blank" rel="noopener">
-            {attendo?.title}
-          </a>
-          .
-        </p>
-      </div>
+    <h3 class="about__bar mono">Highlights</h3>
+    <dl class="about__stats">
+      {highlights.map((item, index) => (
+        <div class="about__stat">
+          <dt class="about__word">{item.word}</dt>
+          <dd class="about__value">{item.value}</dd>
+          <dd class="about__detail mono">
+            ({item.label})<br />({item.detail})
+          </dd>
+          {index % 2 === 0 && <span class="about__hatch hatch" aria-hidden="true" />}
+        </div>
+      ))}
+    </dl>
 
-      <dl>
-        {highlights.map((item) => (
-          <div>
-            <dt>{item.label}</dt>
-            <dd>{item.value}</dd>
-            <dd>{item.detail}</dd>
-          </div>
-        ))}
-      </dl>
-    </div>
-
-    <ul aria-label="What I work on">
+    <h3 class="about__bar mono">What I work on</h3>
+    <ul class="about__focus">
       {focus.map((item) => (
         <li>
-          <h3>{item.title}</h3>
-          <p>{item.detail}</p>
+          <span class="about__focus-title">{item.title}</span>
+          <span class="about__focus-detail mono">{item.detail}</span>
         </li>
       ))}
     </ul>
   </div>
 </section>
+
+<style>
+  .about {
+    padding: clamp(3rem, 8vw, 6rem) var(--gutter);
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .about__panel {
+    width: min(100%, 38rem);
+    margin-inline: auto;
+    border: 1px solid var(--ink);
+    background: var(--red);
+  }
+
+  .about__bar {
+    padding: 0.3rem 1rem;
+    background: var(--ink);
+    color: var(--red);
+    font-family: var(--mono);
+    font-size: 0.625rem;
+    line-height: 1.4;
+    letter-spacing: 0.2em;
+    text-align: center;
+  }
+
+  .about__bio {
+    display: grid;
+    gap: 1.25rem;
+    padding: clamp(1.5rem, 5vw, 2.5rem);
+    font-size: clamp(1.125rem, 0.6vw + 1rem, 1.375rem);
+  }
+
+  .about__stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .about__stat {
+    position: relative;
+    display: grid;
+    align-content: end;
+    gap: 0.25rem;
+    min-height: 11rem;
+    padding: 1rem;
+    border-bottom: 1px solid var(--ink);
+    overflow: hidden;
+  }
+
+  .about__stat:nth-child(odd) {
+    border-right: 1px solid var(--ink);
+  }
+
+  .about__word {
+    font-family: var(--display);
+    font-size: clamp(2rem, 5vw, 2.75rem);
+    line-height: 0.85;
+    text-transform: uppercase;
+  }
+
+  .about__value {
+    position: absolute;
+    top: 0.75rem;
+    right: 1rem;
+    font-size: 1.25rem;
+  }
+
+  .about__detail {
+    font-size: 0.6875rem;
+    letter-spacing: 0.02em;
+    text-transform: none;
+  }
+
+  .about__hatch {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 30%;
+    height: 40%;
+    border-right: 1px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .about__focus {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .about__focus li {
+    display: grid;
+    gap: 0.25rem;
+    padding: 1rem;
+    border-top: 1px solid var(--ink);
+    text-align: center;
+  }
+
+  .about__focus li:first-child {
+    border-top: 0;
+  }
+
+  .about__focus-title {
+    font-size: clamp(1.25rem, 1vw + 1rem, 1.6rem);
+    line-height: 1.1;
+  }
+
+  .about__focus-detail {
+    font-size: 0.6875rem;
+    text-transform: none;
+  }
+</style>

@@ -155,12 +155,16 @@ test.describe("personal links", () => {
     await expect(page.locator("section[aria-labelledby='hero-title']")).toContainText("Software Developer");
   });
 
-  test("Hire me is a well-formed mailto with an encoded subject", async ({ page }) => {
+  test("every Hire me link is a well-formed mailto with an encoded subject", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("link", { name: "Hire me" })).toHaveAttribute(
-      "href",
-      "mailto:harshitsinhchauhan250@gmail.com?subject=Hello%20Harshit",
-    );
+    await expect(
+      page.locator("section[aria-labelledby='hero-title']").getByRole("link", { name: "Hire me" }),
+    ).toBeVisible();
+    const hrefs = await page
+      .locator('a[href^="mailto:"][href*="?subject="]')
+      .evaluateAll((links) => links.map((a) => a.getAttribute("href")));
+    expect(hrefs.length).toBeGreaterThanOrEqual(2);
+    for (const href of hrefs) expect(href).toBe("mailto:harshitsinhchauhan250@gmail.com?subject=Hello%20Harshit");
   });
 
   test("every resume PDF link opens /resume.pdf in a new tab", async ({ page }) => {

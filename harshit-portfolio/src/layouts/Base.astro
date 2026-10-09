@@ -1,5 +1,5 @@
 ---
-import "../styles/a11y.css";
+import "../styles/global.css";
 import { profile } from "../data/profile";
 
 interface Props {
@@ -35,6 +35,10 @@ const personSchema = {
     <link rel="icon" href="/icons/favicon.ico" sizes="48x48" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#f40c3f" />
+
+    <link rel="preload" href="/fonts/BigShouldersDisplay-Bold.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/Fraunces-Light.woff2" as="font" type="font/woff2" crossorigin />
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={profile.name} />
@@ -44,6 +48,10 @@ const personSchema = {
     <meta name="twitter:card" content="summary" />
 
     <script type="application/ld+json" set:html={JSON.stringify(personSchema)} />
+    <!-- Marks JS as running, so the scroll reveals never hide content without it. -->
+    <script is:inline>
+      document.documentElement.classList.add("js");
+    </script>
   </head>
   <body>
     <a class="skip-link" href="#main">

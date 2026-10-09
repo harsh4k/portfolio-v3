@@ -5,24 +5,93 @@ import { getOrdered } from "../data/collections";
 const photos = await getOrdered("archive");
 ---
 
-<section id="archive" aria-labelledby="archive-title">
-  <div>
-    <div>
-      <h2 id="archive-title">Archive</h2>
-      <p>Off-screen, {photos.length} frames</p>
-    </div>
+<section class="archive" id="archive" aria-labelledby="archive-title">
+  <div class="archive__head wrap">
+    <h2 class="archive__title" id="archive-title">
+      Archive
+    </h2>
+    <p class="mono">Off-screen, {photos.length} frames</p>
   </div>
 
-  <div>
-    <ul>
+  <!-- Focusable so keyboard users can scroll it with the arrow keys. -->
+  <div class="archive__scroller" tabindex="0" role="region" aria-label="Photo archive, scrolls sideways">
+    <ul class="archive__track">
       {photos.map((photo) => (
         <li>
-          <figure>
-            <Image src={photo.data.image} alt={photo.data.caption} height={480} densities={[1, 2]} loading="lazy" />
-            <figcaption>{photo.data.caption}</figcaption>
+          <figure class="archive__item">
+            <Image
+              src={photo.data.image}
+              alt={photo.data.caption}
+              height={480}
+              densities={[1, 2]}
+              loading="lazy"
+              class="archive__image"
+            />
+            <figcaption class="mono">{photo.data.caption}</figcaption>
           </figure>
         </li>
       ))}
     </ul>
   </div>
 </section>
+
+<style>
+  .archive {
+    padding-block: clamp(3rem, 8vw, 6rem);
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .archive__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+  }
+
+  .archive__title {
+    font-size: clamp(4rem, 12vw, 10rem);
+  }
+
+  .archive__scroller {
+    overflow-x: auto;
+    border-block: 1px solid var(--ink);
+    scrollbar-color: var(--ink) transparent;
+  }
+
+  .archive__track {
+    display: flex;
+    width: max-content;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .archive__item {
+    display: grid;
+    gap: 0.5rem;
+    padding: 1rem;
+    border-right: 1px solid var(--ink);
+  }
+
+  .archive__image {
+    width: auto;
+    height: clamp(14rem, 34vw, 22rem);
+    filter: grayscale(1) contrast(1.1);
+    mix-blend-mode: multiply;
+    transition:
+      filter 0.4s,
+      mix-blend-mode 0.4s;
+  }
+
+  .archive__item:hover .archive__image {
+    filter: none;
+    mix-blend-mode: normal;
+  }
+
+  .archive__item figcaption {
+    max-width: 22ch;
+    text-transform: none;
+  }
+</style>

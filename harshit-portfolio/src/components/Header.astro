@@ -1,5 +1,5 @@
 ---
-import { profile } from "../data/profile";
+import { hireMe, profile } from "../data/profile";
 
 const links = [
   { href: "#about", label: "About" },
@@ -9,25 +9,101 @@ const links = [
 ];
 ---
 
-<header>
-  <div>
-    <a href="#top" aria-label={`${profile.name}, back to top`}>
-      {profile.name}
-    </a>
+<header class="header">
+  <a class="header__mark" href="#top" aria-label={`${profile.name}, back to top`}>
+    HC
+  </a>
 
-    <nav aria-label="Sections">
-      <ul>
-        {links.map((link) => (
-          <li>
-            <a href={link.href}>{link.label}</a>
-          </li>
-        ))}
+  <nav class="header__nav" aria-label="Sections">
+    <ul>
+      {links.map((link) => (
         <li>
-          <a href={profile.resume.pdf} target="_blank" rel="noopener">
-            Resume<span class="visually-hidden"> (PDF, opens in a new tab)</span>
+          <a class="mono" href={link.href}>
+            {link.label}
           </a>
         </li>
-      </ul>
-    </nav>
-  </div>
+      ))}
+      <li>
+        <a class="mono" href={profile.resume.pdf} target="_blank" rel="noopener">
+          Resume<span class="visually-hidden"> (PDF, opens in a new tab)</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <a class="header__hire pill pill--solid" href={hireMe}>
+    Hire me
+  </a>
 </header>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-height: 3.5rem;
+    padding-inline: var(--gutter);
+    background: var(--red);
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .header__mark {
+    display: grid;
+    place-items: center;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    font-family: var(--display);
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    text-decoration: none;
+  }
+
+  .header__nav {
+    margin-left: auto;
+  }
+
+  .header__nav ul {
+    display: flex;
+    gap: clamp(0.25rem, 2vw, 1.75rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .header__nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding-inline: 0.25rem;
+    text-decoration: none;
+  }
+
+  .header__nav a:hover {
+    text-decoration: underline;
+  }
+
+  .header__hire {
+    min-height: 2.25rem;
+    padding-block: 0.4rem;
+  }
+
+  @media (max-width: 47.99rem) {
+    .header__hire,
+    .header__nav li:nth-child(3) {
+      display: none;
+    }
+
+    .header__nav ul {
+      gap: 0.125rem;
+    }
+
+    .header__nav .mono {
+      font-size: 0.6875rem;
+      letter-spacing: 0.04em;
+    }
+  }
+</style>
