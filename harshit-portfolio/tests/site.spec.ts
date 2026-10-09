@@ -111,6 +111,26 @@ test.describe("layout and accessibility", () => {
     expect(overflow).toBeLessThanOrEqual(0);
   });
 
+  test("the hero title fits inside its box and clear of the star", async ({ page }) => {
+    await page.goto("/", { waitUntil: "networkidle" });
+    const boxes = await page.evaluate(() => {
+      const title = document.querySelector(".s-hero .s__title");
+      const style = title ? getComputedStyle(title) : null;
+      const box = title?.getBoundingClientRect();
+      const [first, star, second] = [".js-word", ".js-star", ".js-word:last-of-type"].map((s) =>
+        title?.querySelector(s)?.getBoundingClientRect(),
+      );
+      const left = (box?.left ?? 0) + parseFloat(style?.paddingLeft ?? "0");
+      const right = (box?.right ?? 0) - parseFloat(style?.paddingRight ?? "0");
+      return { left, right, first, star, second };
+    });
+    for (const word of [boxes.first, boxes.second]) {
+      expect(word?.left ?? 0).toBeGreaterThanOrEqual(boxes.left - 1);
+      expect(word?.right ?? Infinity).toBeLessThanOrEqual(boxes.right + 1);
+    }
+    expect(boxes.first?.right ?? Infinity).toBeLessThan(boxes.star?.left ?? 0);
+  });
+
   test("every image has alt text, empty only where a caption already names it", async ({ page }) => {
     await page.goto("/");
     const missingAlt = await page.locator("img:not([alt])").count();

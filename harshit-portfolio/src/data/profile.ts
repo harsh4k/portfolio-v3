@@ -3,9 +3,9 @@ export const profile = {
   role: "Software Developer",
   /**
    * The two giant words in the hero. The design's type size is tuned to these
-   * exact words: "Software" is about 16% wider than "Creative" and wraps.
+   * words; src/styles/site.css scales it down to fit "Software".
    */
-  heroTitle: ["Creative", "Developer"],
+  heroTitle: ["Software", "Developer"],
   location: "Mumbai, India",
   availability: "Available for projects & roles",
   timeZone: "Asia/Kolkata",
