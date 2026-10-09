@@ -13,4 +13,6 @@ export default defineConfig({
   // No per-page CSP <meta>: the copied design sets inline style attributes and
   // its engine needs 'unsafe-eval', which a hash-based policy would block. The
   // policy lives in public/_headers instead, matching what the live site sends.
+  // That policy blocks inline scripts, so never inline our bundled ones.
+  vite: { build: { assetsInlineLimit: 0 } },
 });
