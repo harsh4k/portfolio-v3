@@ -1,0 +1,102 @@
+---
+import { hireMe, profile } from "../data/profile";
+
+const [github, linkedin] = profile.socials;
+
+const links = [
+  { href: "#about", label: "About" },
+  { href: "#work", label: "Work" },
+  { href: "#contact", label: "Contact" },
+  // Opens the resume dock (public/scripts/resume-dock.js) instead of scrolling.
+  { href: "#resume", label: "Resume", className: "js-resume-open" },
+];
+---
+
+<header class="site-head astro-5qrshpxv" data-intersect>
+  <div class="site-head__container astro-5qrshpxv">
+    <div class="sb-logo astro-5qrshpxv">
+      <a href="/" class="astro-5qrshpxv">
+        <svg
+          class="js-logo astro-5qrshpxv"
+          width="280"
+          height="280"
+          viewBox="0 0 280 280"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M0 0v280h39.755V158.4h59.65V280h39.756V0H99.411v118.8H39.755V0H0Z"
+            fill="#160000"
+            class="astro-5qrshpxv"
+          ></path>
+          <path
+            d="M160.734 0v280H280V240.245h-79.51V39.755H280V0H160.734Z"
+            fill="#160000"
+            class="astro-5qrshpxv"
+          ></path>
+        </svg>
+        <span class="u-sr-only astro-5qrshpxv">{profile.name}</span>
+      </a>
+    </div>
+    <div class="sb-console astro-5qrshpxv" role="presentation">
+      <div class="sb-console__inner js-console astro-5qrshpxv"></div>
+    </div>
+    <nav class="sb-menu astro-5qrshpxv">
+      <ul class="sb__list astro-5qrshpxv">
+        {links.map((link) => (
+          <li class="sb__item js-menu-item astro-5qrshpxv">
+            <a href={link.href} class={`${link.className ?? "js-menu-link"} astro-5qrshpxv`}>
+              <span class="sb__text astro-5qrshpxv">{link.label}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+    <ul class="sb-socials astro-5qrshpxv">
+      <li class="sb__item astro-5qrshpxv">
+        <a href={github.url} target="_blank" rel="noopener noreferrer" class="astro-5qrshpxv" aria-label={github.label}>
+          <span
+            class="sb__icon sb__icon--github astro-5qrshpxv"
+            style="--path: path('M 10 0 c 5.525 0 10 4.475 10 10 a 10.016 10.016 0 0 1 -6.812 9.488 c -0.5 0.1 -0.688 -0.213 -0.688 -0.475 0 -0.338 0.013 -1.412 0.013 -2.75 0 -0.938 -0.312 -1.538 -0.675 -1.85 2.225 -0.25 4.562 -1.1 4.562 -4.938 0 -1.1 -0.388 -1.988 -1.025 -2.688 0.1 -0.25 0.45 -1.275 -0.1 -2.65 0 0 -0.838 -0.275 -2.75 1.025 -0.8 -0.225 -1.65 -0.338 -2.5 -0.338 -0.85 0 -1.7 0.112 -2.5 0.338 -1.913 -1.288 -2.75 -1.025 -2.75 -1.025 -0.55 1.375 -0.2 2.4 -0.1 2.65 -0.637 0.7 -1.025 1.6 -1.025 2.688 0 3.825 2.325 4.688 4.55 4.938 -0.288 0.25 -0.55 0.688 -0.637 1.338 -0.575 0.263 -2.013 0.688 -2.913 -0.825 -0.188 -0.3 -0.75 -1.037 -1.538 -1.025 -0.838 0.013 -0.338 0.475 0.013 0.663 0.425 0.237 0.912 1.125 1.025 1.412 0.2 0.562 0.85 1.638 3.362 1.175 0 0.838 0.013 1.625 0.013 1.863 0 0.263 -0.188 0.562 -0.688 0.475 A 9.994 9.994 0 0 1 0 10 c 0 -5.525 4.475 -10 10 -10 Z');"
+          ></span>
+          <span class="u-sr-only astro-5qrshpxv">Follow me on {github.label}</span>
+        </a>
+      </li>
+      <li class="sb__item astro-5qrshpxv">
+        <a
+          href={linkedin.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="astro-5qrshpxv"
+          aria-label={linkedin.label}
+        >
+          <span
+            class="sb__icon sb__icon--linkedin astro-5qrshpxv"
+            style="--path: path('M1.13025 14.9839H3.93671V4.6H1.13025V14.9839ZM2.53348 0.0161285C1.598 0.0161285 0.849609 0.764516 0.849609 1.7C0.849609 2.63548 1.598 3.38387 2.53348 3.38387C3.46896 3.38387 4.21735 2.63548 4.21735 1.7C4.21735 0.764516 3.46896 0.0161285 2.53348 0.0161285ZM8.70767 6.19032V4.6H5.90122V14.9839H8.70767V9.65161C8.70767 6.65806 12.5432 6.47097 12.5432 9.65161V14.9839H15.3496V8.62258C15.3496 3.57097 10.0174 3.75806 8.70767 6.19032Z');"
+          ></span>
+          <span class="u-sr-only astro-5qrshpxv">Follow me on {linkedin.label}</span>
+        </a>
+      </li>
+    </ul>
+    <button class="sb-contrast js-contrast astro-5qrshpxv" type="button">
+      <span
+        class="sb__icon astro-5qrshpxv"
+        style="--path: path('M10.0996 20C8.71628 20 7.41628 19.7373 6.19961 19.212C4.98294 18.6867 3.92461 17.9743 3.02461 17.075C2.12461 16.1757 1.41228 15.1173 0.887611 13.9C0.362944 12.6827 0.100277 11.3827 0.0996106 10C0.098944 8.61733 0.361611 7.31733 0.887611 6.1C1.41361 4.88267 2.12594 3.82433 3.02461 2.925C3.92328 2.02567 4.98161 1.31333 6.19961 0.788C7.41761 0.262667 8.71761 0 10.0996 0C11.4816 0 12.7816 0.262667 13.9996 0.788C15.2176 1.31333 16.2759 2.02567 17.1746 2.925C18.0733 3.82433 18.7859 4.88267 19.3126 6.1C19.8393 7.31733 20.1016 8.61733 20.0996 10C20.0976 11.3827 19.8349 12.6827 19.3116 13.9C18.7883 15.1173 18.0759 16.1757 17.1746 17.075C16.2733 17.9743 15.2149 18.687 13.9996 19.213C12.7843 19.739 11.4843 20.0013 10.0996 20ZM11.0996 17.925C13.0829 17.675 14.7456 16.804 16.0876 15.312C17.4296 13.82 18.1003 12.0493 18.0996 10C18.0989 7.95067 17.4279 6.18 16.0866 4.688C14.7453 3.196 13.0829 2.325 11.0996 2.075V17.925Z');"
+      ></span>{" "}
+      <span class="u-sr-only astro-5qrshpxv">Change contrast</span>
+    </button>
+    <aside class="sb-availability astro-5qrshpxv">
+      <p class="astro-5qrshpxv">
+        <span class="sb__line astro-5qrshpxv">
+          <span class="sb__text astro-5qrshpxv">Coding from {profile.location}.</span>
+        </span>
+        <span class="sb__line astro-5qrshpxv">
+          <span class="sb__text astro-5qrshpxv">{profile.availability} →</span>
+          <a href={hireMe} class="sb__link astro-5qrshpxv">
+            Hire me
+          </a>
+        </span>
+      </p>
+    </aside>
+  </div>
+</header>

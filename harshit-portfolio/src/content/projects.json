@@ -1,0 +1,95 @@
+[
+  {
+    "id": "velsaro",
+    "order": 1,
+    "title": "Velsaro",
+    "code": "vlsr",
+    "url": "https://www.velsaro.in/",
+    "image": "/images/velsaro.webp",
+    "summary": "E-commerce platform"
+  },
+  {
+    "id": "nexcart",
+    "order": 2,
+    "title": "Nexcart",
+    "code": "nxtc",
+    "url": "https://nexcart-v1.vercel.app/",
+    "image": "/images/nexcart.webp",
+    "summary": "E-commerce platform"
+  },
+  {
+    "id": "synapical",
+    "order": 3,
+    "title": "Synapical",
+    "code": "synp",
+    "url": "https://synapical-com.pages.dev/",
+    "image": "/images/synapical.webp",
+    "summary": "Studio site"
+  },
+  {
+    "id": "attendo",
+    "order": 4,
+    "title": "Attendo",
+    "code": "attd",
+    "url": "https://attendov1.vercel.app/",
+    "image": "/images/attendo.webp",
+    "summary": "College attendance system"
+  },
+  {
+    "id": "coffee-digital",
+    "order": 5,
+    "title": "Coffee Digital",
+    "code": "coff",
+    "url": "https://coffeedigital.vercel.app/",
+    "image": "/images/coffee-digital.webp"
+  },
+  {
+    "id": "coffee-rebuild",
+    "order": 6,
+    "title": "Coffee Rebuild",
+    "code": "rebld",
+    "url": "https://threedwebs.vercel.app/",
+    "image": "/images/coffee-rebuild.webp"
+  },
+  {
+    "id": "oysnk",
+    "order": 7,
+    "title": "Oysnk",
+    "code": "osnk",
+    "url": "https://oysnk.vercel.app/",
+    "image": "/images/Osynk.webp"
+  },
+  {
+    "id": "shipd",
+    "order": 8,
+    "title": "Shipd",
+    "code": "shpd",
+    "url": "https://github.com/harsh4k/shipd",
+    "image": "/images/shipd.webp"
+  },
+  {
+    "id": "rudo",
+    "order": 9,
+    "title": "Rudo AI",
+    "code": "rudo",
+    "url": "https://github.com/harsh4k/rudo",
+    "image": "/images/rudo.webp"
+  },
+  {
+    "id": "bunny-os",
+    "order": 10,
+    "title": "Bunny OS",
+    "code": "bnny",
+    "url": "https://harsh4k.github.io/Bunny-OS/",
+    "image": "/images/bunny-os.webp"
+  },
+  {
+    "id": "getcited",
+    "order": 11,
+    "title": "GetCited",
+    "code": "gtct",
+    "url": "https://github.com/harsh4k/Getcited",
+    "image": "/images/getcited.webp",
+    "summary": "AEO & GEO website platform \u00b7 NamasteDev Hackathon 2026 winner"
+  }
+]

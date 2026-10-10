@@ -1,32 +1,38 @@
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
-  X-Frame-Options: SAMEORIGIN
-  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
   Strict-Transport-Security: max-age=31536000; includeSubDomains
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self'; worker-src 'self' blob:; frame-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'
+  Cross-Origin-Opener-Policy: same-origin
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+
+# The same policy the live site sends. No inline script can run (script-src has
+# no 'unsafe-inline'). The copied design sets inline style attributes and uses
+# blob: workers and images; 'unsafe-eval' is kept as live has it until the
+# engine is confirmed not to need it.
+
+/
+  Cache-Control: no-cache
 
 /index.html
   Cache-Control: no-cache
 
-# The worker carries a hash of every precached asset, so this file is what tells
-# a returning visitor a new build exists. An HTTP-cached copy would strand them
-# on the previous cache.
+# Must never be HTTP-cached, or old visitors would not receive the retirement
+# worker that clears the previous site's offline cache.
 /sw.js
   Cache-Control: no-cache
 
-# NOT immutable. The hashes in these filenames come from the upstream builds
-# they were vendored from; our build patches the file contents in place and the
-# names never change. Marking them immutable told browsers to keep a year-old
-# copy of engine code we actively rewrite, so shipped fixes never reached anyone
-# who had already visited. Revalidate instead — unchanged files still cost only
-# a 304.
+# Not immutable: _astro/ also holds the copied design's engine, whose file
+# names never change when its contents do. Unchanged files still cost only a 304.
 /_astro/*
   Cache-Control: public, max-age=0, must-revalidate
 
 /assets/*
   Cache-Control: public, max-age=0, must-revalidate
 
-# Fonts are genuinely static binaries, safe to pin.
+/scripts/*
+  Cache-Control: public, max-age=0, must-revalidate
+
 /fonts/*
   Cache-Control: public, max-age=31536000, immutable

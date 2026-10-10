@@ -1,0 +1,144 @@
+---
+import ProjectLink from "./ProjectLink.astro";
+import { getOrdered } from "../data/collections";
+import { highlights } from "../data/profile";
+
+// The bio links these projects by name; the build fails if one is removed.
+const projects = await getOrdered("projects");
+const linked = (id: string) => {
+  const project = projects.find((entry) => entry.id === id);
+  if (!project) throw new Error(`About links to project "${id}", which is not in projects.json`);
+  return project.data;
+};
+const velsaro = linked("velsaro");
+const nexcart = linked("nexcart");
+const synapical = linked("synapical");
+const attendo = linked("attendo");
+---
+
+<section id="about" class="s-about astro-am7g2yfn" data-intersect>
+  <div class="s__inner js-inner astro-am7g2yfn">
+    <div class="s__block s__block--about astro-am7g2yfn">
+      <h2 class="s__title astro-am7g2yfn">About</h2>
+      <div class="s__content astro-am7g2yfn">
+        <p class="astro-am7g2yfn">
+          I design and build production web applications, motion-led studio sites, and local-first AI tools — balancing
+          performance, interaction, and clean systems.
+        </p>
+        <p class="astro-am7g2yfn">
+          I'm a Computer Engineering student at NMIMS Mumbai and frontend developer crafting considered digital
+          experiences. I learn quickest by taking things apart, building from scratch, and shipping — from e-commerce
+          platforms like <ProjectLink project={velsaro} /> and <ProjectLink project={nexcart} /> to studio sites like
+          <ProjectLink project={synapical} /> and college systems like <ProjectLink project={attendo} />.
+        </p>
+      </div>
+    </div>
+    <div class="s__block s__block--awards astro-am7g2yfn">
+      <h2 class="s__title astro-am7g2yfn">Highlights</h2>
+      <ul class="s__awards astro-am7g2yfn">
+        {highlights.map((item) =>
+          item.kind === "blank" ? (
+            <li class="s__award s__award--blank astro-am7g2yfn">
+              <svg
+                width="101"
+                height="113"
+                viewBox="0 0 101 113"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                class="astro-am7g2yfn"
+              >
+                <path
+                  d="M80.05 107.398c-21.944 12.67-52.875.18-69.085-27.896m69.086 27.896c21.945-12.67 26.594-45.702 10.384-73.778M80.05 107.398c-19.686 11.366-48.786-2.181-64.996-30.258C-1.155 49.063 1.663 17.09 21.35 5.723m58.702 101.675c19.686-11.366 22.504-43.34 6.293-71.417C70.134 7.904 41.034-5.642 21.35 5.723"
+                  class="astro-am7g2yfn"
+                ></path>
+              </svg>
+              <svg
+                width="49"
+                height="49"
+                viewBox="0 0 49 49"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                class="astro-am7g2yfn"
+              >
+                <path
+                  fill="#160000"
+                  d="m24.5 0 3.3 21.2L49 24.5l-21.2 3.3L24.5 49l-3.3-21.2L0 24.5l21.2-3.3L24.5 0z"
+                  class="astro-am7g2yfn"
+                ></path>
+              </svg>
+              <svg
+                width="49"
+                height="49"
+                viewBox="0 0 49 49"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                class="astro-am7g2yfn"
+              >
+                <path
+                  fill="#160000"
+                  d="m24.5 0 3.3 21.2L49 24.5l-21.2 3.3L24.5 49l-3.3-21.2L0 24.5l21.2-3.3L24.5 0z"
+                  class="astro-am7g2yfn"
+                ></path>
+              </svg>
+              <svg
+                width="49"
+                height="49"
+                viewBox="0 0 49 49"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                class="astro-am7g2yfn"
+              >
+                <path
+                  fill="#160000"
+                  d="m24.5 0 3.3 21.2L49 24.5l-21.2 3.3L24.5 49l-3.3-21.2L0 24.5l21.2-3.3L24.5 0z"
+                  class="astro-am7g2yfn"
+                ></path>
+              </svg>
+              <svg
+                width="49"
+                height="49"
+                viewBox="0 0 49 49"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                class="astro-am7g2yfn"
+              >
+                <path
+                  fill="#160000"
+                  d="m24.5 0 3.3 21.2L49 24.5l-21.2 3.3L24.5 49l-3.3-21.2L0 24.5l21.2-3.3L24.5 0z"
+                  class="astro-am7g2yfn"
+                ></path>
+              </svg>
+            </li>
+          ) : (
+            <li class={`s__award s__award--${item.kind} s__award--${item.slot} js-award astro-am7g2yfn`}>
+              <span class="s__award__inner astro-am7g2yfn">
+                {item.kind === "text" ? (
+                  <span class="s__award__text astro-am7g2yfn">
+                    {item.lines.map((line, index) => (
+                      <>
+                        {index > 0 && <br />}
+                        {line}
+                      </>
+                    ))}
+                  </span>
+                ) : (
+                  <>
+                    <span class="s__award__name astro-am7g2yfn">{item.name}</span>
+                    {item.counters.map((counter) => (
+                      <span class="s__award__counter astro-am7g2yfn">({counter})</span>
+                    ))}
+                  </>
+                )}
+              </span>
+              <span class="s__award__mask astro-am7g2yfn"></span>
+            </li>
+          ),
+        )}
+      </ul>
+    </div>
+  </div>
+  <svg class="s__grid js-grid astro-am7g2yfn">
+    <path class="js-path astro-am7g2yfn" d=""></path>
+  </svg>
+  <canvas class="s__canvas js-canvas astro-am7g2yfn"></canvas>
+</section>
