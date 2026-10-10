@@ -1,37 +1,25 @@
 /**
- * The hero's stardust scene, where the wave lines used to be. Adapted from
- * the "Stardust Stage Preloader" React component with its loading gate taken
- * out, so it is a scene instead of a screen in front of the page.
- *
- * A star burns in a stippled cosmos while a dotted orbit fills around it.
- * When the orbit closes, every dot takes flight: the core folds into a moon,
- * the orbit spreads into its halo, the warp lines trace a proscenium arch and
- * clouds and curtains rise into a moonlit stage. Pressing the scene rushes the
- * star while it charges and rewinds the stage back into the cosmos once it is
- * up. The pointer parts the dust and leans the camera.
+ * The hero's stardust scene, in the band the wave lines used to fill. Drawn
+ * from the "Stardust Stage Preloader" React component's final act, without its
+ * loading parts: a stippled night with a moonlit proscenium stage in the
+ * middle (moon and halo, arch, curtains, clouds, a lone figure, the wordmark in
+ * the reflection) and stippled planets hung in the sky on either side, clear
+ * of the arch. When the hero comes in, the stage draws itself in once; after
+ * that it only breathes. The pointer parts the dust and leans the camera.
  *
  * Plain TypeScript, no framework: an Astro island would need an inline script,
  * which the site's CSP (public/_headers) blocks. Every texture is painted
  * procedurally onto canvas, seeded so it comes out the same every time, in the
- * page's own --color-primary (the stage) and --color-secondary (the ink), and
+ * page's own --color-primary (the night) and --color-secondary (the ink), and
  * repainted when the theme switch changes them. The dots live on one canvas
  * driven by one requestAnimationFrame loop that only runs while the scene is
- * on screen; everything else moves with the .ssp- styles in StardustStage.astro.
+ * on screen; everything else is styled in StardustStage.astro.
  */
 
 interface Palette {
   stage: string;
   ink: string;
 }
-
-type Phase = "load" | "morph" | "reveal";
-
-const ACTS = ["Gathering starlight", "Charting the orbit", "Waking the moon", "Raising the curtain"];
-
-const DURATION_MS = 5200;
-const RUSH_MS = 700;
-const MORPH_MS = 3000;
-const REWIND_MS = 800;
 
 // A four-point star in a 2 × 2 box centred on the origin.
 const SPARK = "M0-1C.07-.24.24-.07 1 0 .24.07.07.24 0 1-.07.24-.24.07-1 0-.24-.07-.07-.24 0-1Z";
@@ -52,33 +40,6 @@ function rng(seed: number) {
   };
 }
 
-// Speed lines streaming out of the star, in a 200 × 200 box around it.
-interface Ray {
-  ang: number;
-  from: number;
-  to: number;
-  dash: number;
-  dur: number;
-}
-const RAYS: Ray[] = (() => {
-  const out: Ray[] = [];
-  let s = 9;
-  const r = () => ((s = (s * 16807) % 2147483647) - 1) / 2147483646;
-  for (let i = 0; i < 44; i++) {
-    const ang = (i / 44) * Math.PI * 2 + (r() - 0.5) * 0.08;
-    out.push({ ang, from: 22 + r() * 6, to: 52 + r() * 48, dash: 0.6 + r() * 1.6, dur: 0.6 + r() * 1.2 });
-  }
-  return out;
-})();
-
-// Pixel planets around the star: [x, y in units of the short side, size, texture, float s].
-const PLANETS = [
-  [-0.66, 0.3, 0.2, 0, 9],
-  [0.78, -0.42, 0.4, 1, 13],
-  [-0.44, -0.34, 0.075, 2, 7],
-  [0.42, 0.32, 0.11, 3, 11],
-] as const;
-
 // Sparkles over the stage: [x %, y % of the stage box, size, delay s].
 const STAGE_SPARKS = [
   [36, 14, 0.026, 0],
@@ -88,12 +49,12 @@ const STAGE_SPARKS = [
   [74, 12, 0.012, 3.1],
 ] as const;
 
-// Sky sparkles, in both acts: [x %, y % of the root, size, delay s].
+// Sky sparkles: [x %, y % of the root, size, delay s].
 const SKY_SPARKS = [
-  [9, 18, 0.03, 0.4],
-  [88, 64, 0.036, 1.8],
-  [16, 78, 0.022, 2.9],
-  [93, 14, 0.018, 1.1],
+  [6, 82, 0.03, 0.4],
+  [94, 86, 0.036, 1.8],
+  [3, 12, 0.022, 2.9],
+  [97, 10, 0.018, 1.1],
 ] as const;
 
 // Where the painted pieces sit in the stage box, as fractions of its width
@@ -107,58 +68,43 @@ const CLOUDS = [
 const CURTAIN_W = 0.15;
 const FIGURE_H = 0.16;
 
-// ---- timeline -------------------------------------------------------------------
-
-// Surges and stalls like a real load instead of a linear tween. [time, progress] knots.
-const KNOTS = [
-  [0, 0],
-  [0.2, 0.27],
-  [0.31, 0.3],
-  [0.58, 0.66],
-  [0.7, 0.7],
-  [1, 1],
-] as const;
-
-function simulated(t: number) {
-  if (t <= 0) return 0;
-  if (t >= 1) return 1;
-  for (let i = 0; i < KNOTS.length - 1; i++) {
-    const a = KNOTS[i];
-    const b = KNOTS[i + 1];
-    if (a && b && t <= b[0]) {
-      const local = (t - a[0]) / (b[0] - a[0]);
-      return a[1] + (b[1] - a[1]) * (1 - Math.pow(1 - local, 3));
-    }
-  }
-  return 1;
+/** The planet kinds: 0 cratered, 1 banded giant, 2 small plain, 3 ringed. */
+type PlanetKind = 0 | 1 | 2 | 3;
+interface Planet {
+  kind: PlanetKind;
+  /** Centre, in root pixels. */
+  x: number;
+  y: number;
+  /** Disc radius, in root pixels. A ringed planet's ring reaches 1.9 times as far. */
+  r: number;
+  /** Seconds per float cycle. */
+  float: number;
 }
 
-function ease(t: number) {
-  const x = clamp01(t);
-  return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
-}
+// How far a ringed planet's ring reaches, in disc radii, across and up.
+const RING_X = 1.9;
+const RING_Y = 0.62;
 
-// Where one dot is in its flight at global morph progress m. Each dot waits
-// out its own delay (at most 0.4), then flies for the remaining 0.6.
-const morphAt = (m: number, delay: number) => clamp01((m - delay) / 0.6);
-
-// How lit the orbit dot at position a (0–1, clockwise from twelve) is at progress p.
-// Overshoots by one ramp width, so the last dot is fully lit at exactly 100%.
-const ringLit = (a: number, p: number) => clamp01((p * (31 / 30) - a) * 30);
-
-// The stage box and everything placed in it, in root pixels.
+// The stage box and everything placed in it, in root pixels. The stage
+// widens with the band and fills most of its height; the wordmark sits in the
+// reflection under the floor.
 function layout(w: number, h: number) {
-  const a = Math.min(1.45, Math.max(0.9, w / Math.max(1, h)));
-  const H = Math.min(h * 0.74, (w * 0.94) / a);
-  const W = H * a;
+  const a = Math.min(1.75, Math.max(0.9, w / Math.max(1, h)));
+  let H = h * 0.86;
+  let W = H * a;
+  if (W > w * 0.94) {
+    W = w * 0.94;
+    H = W / a;
+  }
   const x0 = (w - W) / 2;
-  const y0 = (h - H) / 2 - h * 0.015;
-  return {
+  // When the band is taller than the stage needs (phones), sit the stage low
+  // so the wordmark ends near the bottom and the room above is sky.
+  const y0 = Math.max(h * 0.03, h * 0.97 - H * 1.04);
+  const st = {
     w,
     h,
     u: Math.min(w, h),
     cx: w / 2,
-    cy: h * 0.47,
     x0,
     y0,
     W,
@@ -170,10 +116,42 @@ function layout(w: number, h: number) {
     floor: y0 + H * 0.86,
     moonX: w / 2,
     moonY: y0 + H * 0.22,
-    moonR: Math.min(W, H) * 0.066,
+    moonR: Math.min(W, H) * 0.075,
+    /** Room left and right of the stage box, for the planets and cloud banks. */
+    side: x0,
+    planets: [] as Planet[],
   };
+  st.planets = placePlanets(st);
+  return st;
 }
 type Stage = ReturnType<typeof layout>;
+
+// Hangs the planets in the sky around the stage, never over it or each other.
+// With room either side (desktop) they fill the side skies; on a narrow band
+// two small ones sit in the arch's upper corners, outside its curve.
+function placePlanets(st: Omit<Stage, "planets"> & { planets: Planet[] }): Planet[] {
+  const { w, h, side } = st;
+  if (side > h * 0.32) {
+    const giant = Math.min(side * 0.28, h * 0.19);
+    return [
+      { kind: 1, x: side * 0.44, y: h * 0.32, r: giant, float: 13 },
+      { kind: 2, x: side * 0.86, y: h * 0.12, r: Math.min(side * 0.05, h * 0.035), float: 7 },
+      { kind: 0, x: w - side * 0.74, y: h * 0.2, r: Math.min(side * 0.11, h * 0.09), float: 9 },
+      { kind: 3, x: w - side * 0.42, y: h * 0.44, r: Math.min(side * 0.15, h * 0.1), float: 11 },
+    ];
+  }
+  // Above the arch's shoulders, outside its curve: e is how far out, in arch radii.
+  const rx = (st.right - st.left) / 2;
+  const ry = st.spring - st.crown;
+  const corner = (fx: number, fy: number, kind: PlanetKind, float: number): Planet => {
+    const x = st.left + rx * fx;
+    const y = st.crown + ry * fy;
+    const e = Math.hypot((x - st.cx) / rx, (st.spring - y) / ry);
+    const room = Math.min((e - 1) * ry, y - st.y0 * 0.2, Math.min(x - st.x0, st.x0 + st.W - x) + rx * 0.08);
+    return { kind, x, y, r: Math.max(4, Math.min(rx * 0.16, room * 0.62)), float };
+  };
+  return [corner(0.12, -0.12, 1, 13), corner(1.86, 0.04, 0, 9)];
+}
 
 // A point s (0–1) along the proscenium: up the left column, over the arch,
 // down the right column. inset pulls the line inward, for the inner moulding.
@@ -198,10 +176,10 @@ function archPoint(st: Stage, s: number, inset: number) {
 
 interface Textures {
   stars: string;
-  nebula: string;
   planets: string[];
   moon: string;
   clouds: string[];
+  banks: string[];
   curtain: string;
   figure: string;
   rain: string;
@@ -219,38 +197,6 @@ function ctx(c: HTMLCanvasElement) {
   const g = c.getContext("2d", { willReadFrequently: true });
   if (!g) throw new Error("no 2d context");
   return g;
-}
-
-const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v + 0.5) / 16);
-const bayer = (x: number, y: number) => BAYER[(y % 4) * 4 + (x % 4)] ?? 0.5;
-
-// Smooth value noise on a wrapping grid, summed over octaves.
-function makeNoise(seed: number) {
-  const rnd = rng(seed);
-  const N = 64;
-  const grid = Array.from({ length: N * N }, rnd);
-  const at = (x: number, y: number) => grid[(((y % N) + N) % N) * N + (((x % N) + N) % N)] ?? 0;
-  const smooth = (t: number) => t * t * (3 - 2 * t);
-  const value = (x: number, y: number) => {
-    const xi = Math.floor(x);
-    const yi = Math.floor(y);
-    const fx = smooth(x - xi);
-    const fy = smooth(y - yi);
-    const a = at(xi, yi) + (at(xi + 1, yi) - at(xi, yi)) * fx;
-    const b = at(xi, yi + 1) + (at(xi + 1, yi + 1) - at(xi, yi + 1)) * fx;
-    return a + (b - a) * fy;
-  };
-  return (x: number, y: number) => {
-    let sum = 0;
-    let amp = 0.5;
-    let f = 1;
-    for (let o = 0; o < 5; o++) {
-      sum += value(x * f, y * f) * amp;
-      f *= 2;
-      amp *= 0.5;
-    }
-    return sum / 0.97;
-  };
 }
 
 // Scatter dots wherever a shape is, more of them where tone is high. The
@@ -319,111 +265,67 @@ function paintStars(ink: string) {
   return c;
 }
 
-// A pixel-art nebula: fractal noise, ordered-dithered into four levels.
-function paintNebula(ink: string) {
-  const w = 320;
-  const h = 180;
-  const c = canvas(w, h);
-  const g = ctx(c);
-  const noise = makeNoise(19);
-  const warp = makeNoise(41);
-  const rnd = rng(23);
-  g.fillStyle = ink;
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      const nx = x / 60;
-      const ny = y / 60;
-      const q = noise(nx + warp(nx, ny) * 1.6, ny + warp(nx + 5, ny + 3) * 1.6);
-      // a diagonal river of cloud, thinning toward the corners
-      const band = 1 - Math.min(1, Math.abs(y / h - 0.5 - (x / w - 0.5) * 0.55) * 2.3);
-      const v = clamp01((q - 0.42) * 2.4 * (0.35 + band * 0.9));
-      const level = Math.min(3, Math.floor(v * 3 + bayer(x, y)));
-      if (level <= 0) continue;
-      g.globalAlpha = level === 1 ? 0.22 : level === 2 ? 0.5 : 0.85;
-      g.fillRect(x, y, 1, 1);
-    }
-  }
-  // pixel stars and a few plus-shaped glints
-  for (let k = 0; k < 110; k++) {
-    const x = Math.floor(rnd() * w);
-    const y = Math.floor(rnd() * h);
-    const b = rnd();
-    g.globalAlpha = 0.4 + b * 0.6;
-    g.fillRect(x, y, 1, 1);
-    if (b > 0.95) {
-      g.globalAlpha = 0.55;
-      g.fillRect(x - 2, y, 5, 1);
-      g.fillRect(x, y - 2, 1, 5);
-    }
-  }
-  g.globalAlpha = 1;
-  return c;
-}
-
-// A dithered pixel planet. kind 0: cratered, 1: banded giant, 2: plain, 3: ringed.
-function paintPlanet(kind: number, ink: string, stage: string) {
-  const n = kind === 1 ? 72 : kind === 0 ? 44 : 26;
-  const pad = kind === 3 ? Math.round(n * 0.45) : 0;
-  const W = n + pad * 2;
-  const c = canvas(W, W);
-  const g = ctx(c);
+// A stippled planet, shaded like the moon so it reads as part of the same
+// drawing: lit from the upper left, dense where the light catches. The canvas
+// is the planet's box, or for a ringed planet the ring's.
+function paintPlanet(kind: PlanetKind, r: number, ink: string, stage: string) {
+  const ringed = kind === 3;
+  const w = Math.ceil(r * 2 * (ringed ? RING_X : 1)) + 4;
+  const h = Math.ceil(r * 2 * (ringed ? RING_Y * 1.9 : 1)) + 4;
+  const cx = w / 2;
+  const cy = h / 2;
   const rnd = rng(61 + kind * 13);
-  const r = n / 2 - 0.5;
-  const craters = Array.from({ length: kind === 0 ? 7 : kind === 2 ? 2 : 0 }, () => ({
-    x: (rnd() - 0.5) * 1.3,
-    y: (rnd() - 0.5) * 1.3,
-    r: 0.1 + rnd() * 0.16,
+  const craters = Array.from({ length: kind === 0 ? 9 : kind === 2 ? 3 : 0 }, () => ({
+    x: (rnd() - 0.5) * 1.4,
+    y: (rnd() - 0.5) * 1.4,
+    r: 0.08 + rnd() * rnd() * 0.24,
   }));
-  const L = [-0.55, -0.5, 0.67] as const;
-  const ring = (x: number, y: number) => {
-    // a tilted ring around kind 3, back half hidden behind the disc
-    const dx = (x - W / 2) / (n * 0.95);
-    const dy = (y - W / 2) / (n * 0.95);
-    const ry = dy * Math.cos(0.3) - dx * Math.sin(0.3);
-    const rx = dx * Math.cos(0.3) + dy * Math.sin(0.3);
-    const e = Math.hypot(rx, ry * 3.6);
-    return e > 0.78 && e < 0.98 ? (ry > 0 ? 1 : -1) : 0;
+  const tilt = -0.28;
+  // where (px, py) falls on the ring: 0 off it, 1 on its front half, -1 on its back
+  const ringAt = (px: number, py: number) => {
+    const dx = (px - cx) / r;
+    const dy = (py - cy) / r;
+    const rx = dx * Math.cos(tilt) + dy * Math.sin(tilt);
+    const ry = dy * Math.cos(tilt) - dx * Math.sin(tilt);
+    const e = Math.hypot(rx / RING_X, ry / (RING_X * 0.3));
+    return e > 0.66 && e < 0.98 ? (ry > 0 ? 1 : -1) : 0;
   };
-  for (let y = 0; y < W; y++) {
-    for (let x = 0; x < W; x++) {
-      const nx = (x - W / 2 + 0.5) / r;
-      const ny = (y - W / 2 + 0.5) / r;
+  return stipple(
+    w,
+    h,
+    (g) => {
+      g.fillStyle = "#fff";
+      g.beginPath();
+      g.arc(cx, cy, r - 1, 0, Math.PI * 2);
+      g.fill();
+      if (!ringed) return;
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (ringAt(x + 0.5, y + 0.5)) g.fillRect(x, y, 1, 1);
+    },
+    (x, y) => {
+      const px = x * w;
+      const py = y * h;
+      const ring = ringed ? ringAt(px, py) : 0;
+      const nx = (px - cx) / r;
+      const ny = (py - cy) / r;
       const d2 = nx * nx + ny * ny;
-      const rg = kind === 3 ? ring(x + 0.5, y + 0.5) : 0;
-      const th = bayer(x, y);
-      if (d2 > 1) {
-        if (rg) {
-          g.globalAlpha = 1;
-          g.fillStyle = ink;
-          if (th < 0.7) g.fillRect(x, y, 1, 1);
-        }
-        continue;
-      }
-      const nz = Math.sqrt(1 - d2);
-      let lam = Math.max(0, nx * L[0] + ny * L[1] + nz * L[2]);
-      if (kind === 1) lam *= 0.75 + 0.25 * Math.sin(ny * 11 + Math.sin(nx * 3) * 1.4);
+      if (ring > 0 || (ring < 0 && d2 > 1)) return 0.5 + 0.25 * Math.sin(Math.hypot(nx, ny * 3.3) * 9);
+      const nz = Math.sqrt(Math.max(0, 1 - d2));
+      let lam = Math.max(0, -0.42 * nx - 0.46 * ny + 0.78 * nz);
+      if (kind === 1) lam *= 0.62 + 0.38 * Math.sin(ny * 10 + Math.sin(nx * 3) * 1.3);
+      if (ringed) lam *= 0.8 + 0.2 * Math.sin(ny * 7);
       for (const cr of craters) {
-        const cd = Math.hypot(nx - cr.x, ny - cr.y);
-        if (cd < cr.r) lam *= cd < cr.r * 0.75 ? 0.45 : 1.25;
+        const d = Math.hypot(nx - cr.x, ny - cr.y) / cr.r;
+        if (d < 1) lam *= d < 0.8 ? 0.55 : 1.2;
       }
-      g.globalAlpha = 1;
-      g.fillStyle = stage;
-      g.fillRect(x, y, 1, 1);
-      if (rg > 0) {
-        g.fillStyle = ink;
-        if (th < 0.7) g.fillRect(x, y, 1, 1);
-        continue;
-      }
-      const v = Math.min(1, lam * 1.15);
-      if (v > th) {
-        g.fillStyle = ink;
-        g.globalAlpha = v > 0.8 ? 1 : 0.8;
-        g.fillRect(x, y, 1, 1);
-      }
-    }
-  }
-  g.globalAlpha = 1;
-  return c;
+      // a thin rim of dots keeps the dark side's edge readable
+      const rim = d2 > 0.86 ? 0.3 : 0;
+      return 0.05 + 0.95 * Math.pow(lam, 1.1) + rim;
+    },
+    ink,
+    0.95,
+    71 + kind,
+    stage,
+  );
 }
 
 function paintMoon(n: number, ink: string, stage: string) {
@@ -639,14 +541,21 @@ function paintAll(pal: Palette, st: Stage, q: number): Textures {
     () => 0.4,
   ];
   const figH = st.H * FIGURE_H;
+  const bank = bankBox(st);
   return {
     stars: toUrl(paintStars(ink)),
-    nebula: toUrl(paintNebula(ink)),
-    planets: [0, 1, 2, 3].map((k) => toUrl(paintPlanet(k, ink, stage))),
+    planets: st.planets.map((p) => toUrl(paintPlanet(p.kind, p.r * q, ink, stage))),
     moon: toUrl(paintMoon(px(st.moonR * 2), ink, stage)),
     clouds: CLOUDS.map(([, , w, h], k) =>
       toUrl(paintCloud(401 + k * 31, px(st.W * w), px(st.H * h), profiles[k] ?? (() => 0.4), ink, stage)),
     ),
+    // the cloud sea carries on past the gate, rising toward it
+    banks: bank
+      ? [
+          toUrl(paintCloud(521, px(bank.w), px(bank.h), (x) => 0.25 + 0.75 * x, ink, stage)),
+          toUrl(paintCloud(557, px(bank.w), px(bank.h), (x) => 1 - 0.75 * x, ink, stage)),
+        ]
+      : [],
     curtain: toUrl(paintCurtain(px(st.W * CURTAIN_W), px(st.floor - st.spring + st.H * 0.02), ink, stage)),
     figure: toUrl(paintFigure(px(figH / 2), px(figH), ink, stage)),
     rain: toUrl(paintRain(ink)),
@@ -654,23 +563,26 @@ function paintAll(pal: Palette, st: Stage, q: number): Textures {
   };
 }
 
+// The cloud banks either side of the gate, when there is room for them.
+function bankBox(st: Stage) {
+  if (st.side < st.h * 0.32) return null;
+  return { w: st.side + st.W * 0.12, h: st.H * 0.26 };
+}
+
 // ---- the dot field --------------------------------------------------------------
-// Every dot has a place in the cosmos (computed per frame, since it moves) and
-// a place on the stage (computed here, once per size). Roles:
-// 0 core → moon, 1 orbit → halo, 2 warp line → arch, 3 star → floor or sky.
+// The live dust drawn over the painted scene. Roles: 0 the moon's face,
+// 1 its halo, 2 the arch's mouldings, 3 the floor's glint (it runs the width
+// of the band, as a horizon), 4 stars.
 
 interface Dot {
-  role: 0 | 1 | 2 | 3;
-  r1: number;
-  r2: number;
+  role: 0 | 1 | 2 | 3 | 4;
   r3: number;
   r4: number;
-  /** Place on the stage, and alpha there. */
-  bx: number;
-  by: number;
-  ba: number;
+  x: number;
+  y: number;
+  alpha: number;
+  /** When it fades in, 0–1 of the entrance. */
   delay: number;
-  twist: number;
   size: number;
   depth: number;
   /** Current push from the pointer. */
@@ -685,7 +597,7 @@ function buildField(st: Stage, n: number): Dot[] {
   const dots: Dot[] = [];
   for (let i = 0; i < n; i++) {
     const q = i / n;
-    const role = q < 0.22 ? 0 : q < 0.46 ? 1 : q < 0.78 ? 2 : 3;
+    const role = q < 0.18 ? 0 : q < 0.38 ? 1 : q < 0.66 ? 2 : q < 0.82 ? 3 : 4;
     const r1 = rnd();
     const r2 = rnd();
     const r3 = rnd();
@@ -695,56 +607,52 @@ function buildField(st: Stage, n: number): Dot[] {
     let a;
     let delay;
     if (role === 0) {
-      const rr = st.moonR * Math.sqrt(r1) * 0.97;
+      const rr = Math.sqrt(r1) * 0.97;
       const ang = r2 * Math.PI * 2;
-      const nx = (Math.cos(ang) * rr) / st.moonR;
-      const ny = (Math.sin(ang) * rr) / st.moonR;
+      const nx = Math.cos(ang) * rr;
+      const ny = Math.sin(ang) * rr;
       const nz = Math.sqrt(Math.max(0, 1 - nx * nx - ny * ny));
       const lam = Math.max(0, nx * L[0] + ny * L[1] + nz * L[2]);
       x = st.moonX + nx * st.moonR;
       y = st.moonY + ny * st.moonR;
       a = 0.12 + 0.88 * lam;
-      delay = r4 * 0.15;
+      delay = 0.3 + r4 * 0.2;
     } else if (role === 1) {
       const g = r1 + r4 - 1;
       const rad = r3 < 0.55 ? st.moonR * (1.5 + g * 0.16) : st.moonR * (2.15 + g * 0.3);
       x = st.moonX + Math.cos(r2 * Math.PI * 2) * rad;
       y = st.moonY + Math.sin(r2 * Math.PI * 2) * rad;
       a = r3 < 0.55 ? 0.55 : 0.3;
-      delay = 0.08 + r4 * 0.2;
+      delay = 0.4 + r4 * 0.2;
     } else if (role === 2) {
       const pt = archPoint(st, r1, r2 < 0.55 ? 0 : inner);
       x = pt.x + (r3 - 0.5) * 2.2;
       y = pt.y + (r4 - 0.5) * 2.2;
       a = 0.55 + 0.45 * r3;
-      // the arch is traced from the left column round to the right
-      delay = 0.12 + r1 * 0.28;
-    } else if (r3 < 0.5) {
-      const spread = (st.right - st.left) * 0.5;
+      // traced from the left column round to the right
+      delay = 0.1 + r1 * 0.4;
+    } else if (role === 3) {
       const dx = (r1 - 0.5) * 2;
-      x = st.cx + dx * spread;
+      x = st.cx + dx * st.w * 0.5;
       y = st.floor + (r2 - 0.35) * st.H * 0.025 * (0.4 + Math.abs(dx));
-      a = 0.15 + 0.7 * Math.pow(1 - Math.abs(dx), 1.5);
-      delay = 0.2 + r4 * 0.2;
+      a = 0.12 + 0.7 * Math.pow(1 - Math.abs(dx), 1.5);
+      delay = 0.2 + Math.abs(dx) * 0.4;
     } else {
       x = r1 * st.w;
-      y = r2 * st.h;
+      y = r2 * st.floor;
       a = 0.1 + 0.55 * Math.pow(r4, 3);
-      delay = r4 * 0.4;
+      delay = r4 * 0.6;
     }
     dots.push({
       role,
-      r1,
-      r2,
       r3,
       r4,
-      bx: x,
-      by: y,
-      ba: a,
+      x,
+      y,
+      alpha: a,
       delay,
-      twist: (r3 - 0.5) * 0.7,
       size: 0.9 + Math.pow(r4, 5) * 1.3,
-      depth: st.u * (role === 3 ? 0.012 + r4 * 0.014 : 0.008),
+      depth: st.u * (role === 4 ? 0.012 + r4 * 0.014 : 0.008),
       ox: 0,
       oy: 0,
     });
@@ -782,7 +690,7 @@ function sparkle(className: string, style: Styles) {
   return node;
 }
 
-/** The pieces of the scene that are sized off the root: rebuilt on resize and on rewind. */
+/** The pieces of the scene that are sized off the root: rebuilt on resize and repaint. */
 function buildScene(st: Stage, tex: Textures | null): Node[] {
   const lx = (x: number) => x - st.x0;
   const ly = (y: number) => y - st.y0;
@@ -940,37 +848,41 @@ function buildScene(st: Stage, tex: Textures | null): Node[] {
     ]),
   ];
 
-  const planets =
-    tex === null
-      ? []
-      : PLANETS.map(([x, y, size, k, fl]) => {
-          const side = st.u * size * (k === 3 ? 1.9 : 1);
-          const img = el("img", "");
-          img.src = tex.planets[k] ?? "";
-          img.alt = "";
-          img.draggable = false;
-          return el(
-            "div",
-            "ssp-planet-par",
-            { left: px(st.cx + x * st.u), top: px(st.cy + y * st.u), "--d": 10 + size * 60 },
-            [
-              el(
-                "div",
-                "ssp-planet",
-                {
-                  left: px(-side / 2),
-                  top: px(-side / 2),
-                  width: px(side),
-                  height: px(side),
-                  "--vx": x,
-                  "--vy": y,
-                  "--f": `${fl}s`,
-                },
-                [img],
-              ),
-            ],
-          );
-        });
+  // The cloud sea past the gate, behind its columns.
+  const box = bankBox(st);
+  const banks = box
+    ? [0, 1].map((k) =>
+        el(
+          "div",
+          "ssp-cloud ssp-bank",
+          {
+            left: px(k === 0 ? 0 : st.w - box.w),
+            top: px(st.floor - box.h),
+            width: px(box.w),
+            height: px(box.h),
+            "--bg": url(tex?.banks[k]),
+            "--w": `${0.6 + k * 0.2}s`,
+          },
+          [el("div", "ssp-cloud-drift", { "--f": `${19 + k * 4}s` })],
+        ),
+      )
+    : [];
+
+  const planets = st.planets.map((p, i) => {
+    const w = p.r * 2 * (p.kind === 3 ? RING_X : 1) + 4;
+    const h = p.r * 2 * (p.kind === 3 ? RING_Y * 1.9 : 1) + 4;
+    return el("div", "ssp-planet-par", { left: px(p.x), top: px(p.y), "--d": Math.round(6 + (p.r / st.u) * 60) }, [
+      el("div", "ssp-planet", {
+        left: px(-w / 2),
+        top: px(-h / 2),
+        width: px(w),
+        height: px(h),
+        "background-image": url(tex?.planets[i]),
+        "--f": `${p.float}s`,
+        "--w": `${0.4 + i * 0.25}s`,
+      }),
+    ]);
+  });
 
   const stage = el("div", "ssp-stage", { left: px(st.x0), top: px(st.y0), width: px(st.W), height: px(st.H) }, [
     ...scene(false),
@@ -984,63 +896,24 @@ function buildScene(st: Stage, tex: Textures | null): Node[] {
     ]),
   ]);
 
-  const rig = el("div", "ssp-rig", { left: px(st.cx), top: px(st.cy) }, [
-    el("div", "ssp-glow"),
-    svg(
-      "svg",
-      { class: "ssp-rays", viewBox: "-100 -100 200 200", "aria-hidden": "true" },
-      RAYS.map((r) =>
-        svg("line", {
-          x1: Math.cos(r.ang) * r.from,
-          y1: Math.sin(r.ang) * r.from,
-          x2: Math.cos(r.ang) * r.to,
-          y2: Math.sin(r.ang) * r.to,
-          "stroke-dasharray": `${r.dash} ${12 - r.dash}`,
-          style: `animation-duration: ${r.dur}s`,
-        }),
-      ),
-    ),
-    el("span", "ssp-flare", { "--a": "-27deg" }),
-    el("span", "ssp-flare ssp-flare-b", { "--a": "58deg" }),
-    el("div", "ssp-orbit", {}, [
-      el("i", "ssp-moonlet", { left: "50%", top: "0%" }),
-      el("i", "ssp-moonlet", { left: "93.3%", top: "75%" }),
-      el("i", "ssp-moonlet", { left: "6.7%", top: "75%", transform: "scale(0.6)" }),
-    ]),
-    el("div", "ssp-core", {}, [
-      svg("svg", { viewBox: "-1 -1 2 2", "aria-hidden": "true" }, [svg("path", { d: SPARK })]),
-    ]),
-  ]);
-
-  return [...planets, stage, rig];
+  return [el("div", "ssp-par ssp-par-far", {}, banks), ...planets, stage];
 }
 
 // ---- the scene ------------------------------------------------------------------
+
+/** How long the dust takes to settle in when the hero arrives. */
+const ENTER_MS = 2600;
 
 class StardustStage {
   private readonly root: HTMLElement;
   private readonly canvas: HTMLCanvasElement;
   private readonly scene: HTMLElement;
   private readonly sky: HTMLElement;
-  private readonly count: HTMLElement | null;
-  private act: HTMLElement | null;
   private readonly title: HTMLElement | null;
-  private readonly readout: HTMLElement | null;
-  private readonly hint: HTMLElement | null;
-  private readonly veil: HTMLElement | null;
-  private readonly live: HTMLElement | null;
   private readonly still = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  private phase: Phase = "load";
-  private phaseAt = performance.now();
-  private started = false;
-  private rush = false;
-  private rewinding = false;
-  private elapsed = 0;
-  private shown = 0;
-  private pct = -1;
-  private actIndex = -1;
-  private timer = 0;
+  /** When the scene came in, or null while it waits for the hero's entrance. */
+  private shownAt: number | null = null;
 
   private st: Stage;
   private dots: Dot[] = [];
@@ -1050,31 +923,21 @@ class StardustStage {
 
   private pointer: { x: number; y: number; px: number; py: number; touch: boolean } | null = null;
   private raf = 0;
-  private last = 0;
-  private t0 = performance.now();
+  private readonly t0 = performance.now();
   private visible = false;
-  private m = 0;
-  private warp = 0;
   private mx = 0;
   private my = 0;
 
   constructor(root: HTMLElement) {
     this.root = root;
-    const q = (s: string) => root.querySelector<HTMLElement>(s);
     const canvasEl = root.querySelector(".ssp-dots");
-    const sceneEl = q(".js-ssp-scene");
-    const skyEl = q(".js-ssp-sparks");
+    const sceneEl = root.querySelector<HTMLElement>(".js-ssp-scene");
+    const skyEl = root.querySelector<HTMLElement>(".js-ssp-sparks");
     if (!(canvasEl instanceof HTMLCanvasElement) || !sceneEl || !skyEl) throw new Error("stardust markup missing");
     this.canvas = canvasEl;
     this.scene = sceneEl;
     this.sky = skyEl;
-    this.count = q(".ssp-count");
-    this.act = q(".ssp-act");
-    this.title = q(".ssp-title");
-    this.readout = q(".ssp-readout");
-    this.hint = q(".ssp-hint");
-    this.veil = q(".ssp-veil");
-    this.live = q(".ssp-sr");
+    this.title = root.querySelector<HTMLElement>(".ssp-title");
     this.st = layout(1280, 800);
 
     this.readPalette();
@@ -1097,24 +960,19 @@ class StardustStage {
     this.root.addEventListener("pointermove", (e) => this.onPointer(e));
     this.root.addEventListener("pointerdown", (e) => this.onPointer(e));
     this.root.addEventListener("pointerleave", () => (this.pointer = null));
-    this.root.addEventListener("click", () => this.activate());
-    this.root.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        this.activate();
-      }
-    });
 
-    // The orbit starts filling once the hero has played its own entrance, so
-    // the scene's opening is seen rather than spent behind the 3D intro.
+    // The stage draws itself in as the hero plays its own entrance, so that is
+    // seen rather than spent behind the 3D intro.
     const waves = this.root.closest("a-waves");
-    waves?.addEventListener("introend", () => this.start(), { once: true });
-    window.addEventListener("portfolio:entered", () => window.setTimeout(() => this.start(), 3500), { once: true });
-    if (document.documentElement.classList.contains("intro-done")) window.setTimeout(() => this.start(), 3500);
+    waves?.addEventListener("introend", () => this.show(), { once: true });
+    window.addEventListener("portfolio:entered", () => window.setTimeout(() => this.show(), 2500), { once: true });
+    if (this.still || document.documentElement.classList.contains("intro-done")) this.show();
   }
 
-  private start() {
-    this.started = true;
+  private show() {
+    if (this.shownAt !== null) return;
+    this.shownAt = performance.now();
+    this.root.dataset["shown"] = "true";
   }
 
   /** Reads the page's colours. Returns true when they changed. */
@@ -1134,15 +992,10 @@ class StardustStage {
     const h = Math.round(r.height);
     if (w === this.st.w && h === this.st.h && this.dots.length) return;
     this.st = layout(w, h);
-    const n = Math.round(Math.min(3600, Math.max(1300, (w * h) / 300)) * (w < 768 ? 0.7 : 1));
+    const n = Math.round(Math.min(3600, Math.max(1300, (w * h) / 260)) * (w < 768 ? 0.7 : 1));
     this.dots = buildField(this.st, n);
-    const { st } = this;
-    const s = this.root.style;
-    s.setProperty("--ssp-u", px(st.u));
-    s.setProperty("--ssp-dx", px(st.moonX - st.cx));
-    s.setProperty("--ssp-dy", px(st.moonY - st.cy));
-    if (this.readout) this.readout.style.top = px(st.cy + st.u * 0.27);
-    if (this.title) this.title.style.top = px(st.floor + st.H * 0.045);
+    this.root.style.setProperty("--ssp-u", px(this.st.u));
+    if (this.title) this.title.style.top = px(this.st.floor + this.st.H * 0.035);
     this.repaint();
   }
 
@@ -1150,25 +1003,24 @@ class StardustStage {
   private repaint() {
     const q = Math.min(2, window.devicePixelRatio || 1);
     const { st } = this;
-    const look = JSON.stringify([this.palette, Math.round(st.W / 60), Math.round(st.H / 60), q]);
+    const look = JSON.stringify([this.palette, Math.round(st.w / 60), Math.round(st.h / 60), q]);
     if (look !== this.look) {
       this.look = look;
       try {
         this.tex = paintAll(this.palette, st, q);
       } catch {
-        /* no canvas: the dots and lines still play */
+        /* no canvas: the dots still play */
         this.tex = null;
       }
       const s = this.root.style;
       s.setProperty("--ssp-stars", url(this.tex?.stars));
-      s.setProperty("--ssp-nebula", url(this.tex?.nebula));
       s.setProperty("--ssp-rain", url(this.tex?.rain));
       s.setProperty("--ssp-grain", url(this.tex?.grain));
     }
     this.render();
   }
 
-  /** Rebuilds the sized pieces: the planets, the stage and the star rig. */
+  /** Rebuilds the sized pieces: the cloud banks, the planets and the stage. */
   private render() {
     const { st } = this;
     this.scene.replaceChildren(...buildScene(st, this.tex));
@@ -1185,47 +1037,6 @@ class StardustStage {
     );
   }
 
-  private setPhase(phase: Phase) {
-    this.phase = phase;
-    this.phaseAt = performance.now();
-    this.root.dataset["phase"] = phase;
-    window.clearTimeout(this.timer);
-    if (phase === "morph") this.timer = window.setTimeout(() => this.setPhase("reveal"), MORPH_MS);
-    const label =
-      phase === "load" ? "Stardust scene. Press to rush the star." : "Moonlit stage. Press to rewind to the stars.";
-    this.root.setAttribute("aria-label", label);
-    if (this.hint) this.hint.textContent = phase === "load" ? "" : this.pointerHint();
-    if (phase === "reveal" && this.live) this.live.textContent = this.title?.dataset["word"] ?? "";
-  }
-
-  private pointerHint() {
-    return matchMedia("(hover: hover)").matches ? "Click to rewind" : "Tap to rewind";
-  }
-
-  private activate() {
-    if (this.rewinding) return;
-    this.started = true;
-    if (this.phase === "load") this.rush = true;
-    else if (this.phase === "morph") this.setPhase("reveal");
-    else this.rewind();
-  }
-
-  // The veil comes down, the cosmos resets beneath it, the veil goes up.
-  private rewind() {
-    this.rewinding = true;
-    this.veil?.setAttribute("data-on", "true");
-    window.setTimeout(() => {
-      this.elapsed = 0;
-      this.shown = 0;
-      this.rush = false;
-      this.m = 0;
-      this.setPhase("load");
-      this.render();
-      this.veil?.setAttribute("data-on", "false");
-      this.rewinding = false;
-    }, REWIND_MS);
-  }
-
   private onPointer(e: PointerEvent) {
     const r = this.root.getBoundingClientRect();
     this.pointer = {
@@ -1240,7 +1051,6 @@ class StardustStage {
   private toggleLoop() {
     const run = this.visible && document.visibilityState === "visible";
     if (run && !this.raf) {
-      this.last = performance.now();
       this.raf = requestAnimationFrame((now) => this.tick(now));
     } else if (!run && this.raf) {
       cancelAnimationFrame(this.raf);
@@ -1248,47 +1058,14 @@ class StardustStage {
     }
   }
 
-  // Drives the orbit from the simulated load, then hands over to the morph.
-  private progress(dt: number) {
-    if (this.phase !== "load") return;
-    if (this.started) this.elapsed += dt;
-    // A rush closes the rest of the orbit at a steady pace, on wall time.
-    this.shown = this.rush
-      ? Math.min(1, this.shown + dt / RUSH_MS)
-      : Math.max(this.shown, simulated(this.elapsed / DURATION_MS));
-    const p = this.shown;
-    this.root.style.setProperty("--ssp-p", p.toFixed(4));
-    const pct = Math.round(p * 100);
-    if (pct !== this.pct) {
-      this.pct = pct;
-      if (this.count) this.count.textContent = String(pct).padStart(3, "0");
-      const act = Math.max(0, Math.min(ACTS.length - 1, Math.floor(p * ACTS.length)));
-      if (act !== this.actIndex && this.act) {
-        this.actIndex = act;
-        // a fresh node, so its fade-in plays again
-        const next = this.act.cloneNode() as HTMLElement;
-        next.textContent = ACTS[act] ?? "";
-        this.act.replaceWith(next);
-        this.act = next;
-      }
-    }
-    if (p >= 1) this.setPhase("morph");
-  }
-
-  // One loop draws every dot, wherever it is in its flight.
+  // One loop draws every dot.
   private tick(now: number) {
-    // The load runs on wall time, so slow frames don't stretch it; the
-    // animation steps are capped so one long frame doesn't jump them.
-    this.progress(Math.min(250, now - this.last));
-    const dt = Math.min(64, now - this.last);
-    this.last = now;
-
-    const { still, st: s, dots, phase } = this;
+    const { still, st: s, dots } = this;
     const t = still ? 0 : (now - this.t0) / 1000;
-    const p = this.shown;
     const ptr = this.pointer;
     const g = this.canvas.getContext("2d");
     if (!g) return;
+    const enter = this.shownAt === null ? 0 : still ? 1 : clamp01((now - this.shownAt) / ENTER_MS);
 
     // the camera leans toward the pointer, or wanders when there is none
     let tx = 0;
@@ -1306,15 +1083,6 @@ class StardustStage {
     this.root.style.setProperty("--ssp-mx", mx.toFixed(4));
     this.root.style.setProperty("--ssp-my", my.toFixed(4));
 
-    // how far the flight from cosmos to stage has come
-    if (phase === "load") this.m = 0;
-    else if (phase === "morph")
-      this.m = Math.max(this.m, clamp01((now - this.phaseAt) / (still ? 500 : MORPH_MS * 0.85)));
-    else this.m = Math.min(1, this.m + dt / 700);
-    const m = this.m;
-    this.warp += (dt / 1000) * (0.05 + 0.3 * p) * (still ? 0 : 1);
-    const warp = this.warp;
-
     const dpr = Math.min(2, window.devicePixelRatio || 1);
     const cw = Math.round(s.w * dpr);
     const ch = Math.round(s.h * dpr);
@@ -1329,8 +1097,6 @@ class StardustStage {
     g.clearRect(0, 0, s.w, s.h);
     g.fillStyle = this.palette.ink;
 
-    const R = s.u * 0.2;
-    const TAU = Math.PI * 2;
     const haloA = Math.cos(t * 0.05);
     const haloB = Math.sin(t * 0.05);
     const reach = s.u * 0.12;
@@ -1338,80 +1104,20 @@ class StardustStage {
     const ppy = ptr ? ptr.py : -1e5;
 
     for (const d of dots) {
-      const { role, r1, r2, r3, r4 } = d;
-
-      // place in the cosmos
-      let ax = 0;
-      let ay = 0;
-      let aa = 0;
-      if (m < 1) {
-        if (role === 0) {
-          const rad = s.u * 0.075 * Math.pow(r1, 1.5) * (1 + 0.06 * Math.sin(t * 1.6 + r3 * 9));
-          const ang = r2 * TAU + t * 0.14 * (1 - r1);
-          ax = s.cx + Math.cos(ang) * rad;
-          ay = s.cy + Math.sin(ang) * rad;
-          aa = (0.25 + 0.75 * (1 - r1)) * (0.35 + 0.65 * p);
-        } else if (role === 1) {
-          const ang = -Math.PI / 2 + r1 * TAU + Math.sin(t * 0.6 + r3 * 6) * 0.004;
-          const rad = R * (1 + (r2 - 0.5) * 0.045);
-          ax = s.cx + Math.cos(ang) * rad;
-          ay = s.cy + Math.sin(ang) * rad;
-          aa = 0.09 + 0.91 * ringLit(r1, p);
-        } else if (role === 2) {
-          const ang = (Math.floor(r1 * 64) / 64) * TAU + (r2 - 0.5) * 0.02 + 0.05;
-          const trav = (r3 + warp * (0.6 + 0.8 * r4)) % 1;
-          const dist = R * 1.18 + Math.pow(trav, 1.7) * s.u * 0.95;
-          ax = s.cx + Math.cos(ang) * dist;
-          ay = s.cy + Math.sin(ang) * dist;
-          aa = Math.sin(Math.PI * trav) * (0.1 + 0.7 * p) * (0.4 + 0.6 * r4);
-        } else if (r3 < 0.5) {
-          ax = r1 * s.w;
-          ay = r4 * s.h;
-          aa = 0.1 + 0.45 * r2 * r2;
-        } else {
-          ax = d.bx;
-          ay = d.by;
-          aa = d.ba;
-        }
+      // each dot fades in at its own moment of the entrance
+      const fade = clamp01((enter - d.delay * 0.6) / 0.4);
+      if (fade <= 0) continue;
+      let { x, y } = d;
+      // the halo turns slowly about the moon
+      if (d.role === 1) {
+        const dx = x - s.moonX;
+        const dy = y - s.moonY;
+        const dir = d.r3 < 0.55 ? 1 : -1;
+        x = s.moonX + dx * haloA - dy * haloB * dir;
+        y = s.moonY + dx * haloB * dir + dy * haloA;
       }
-
-      // place on the stage; the halo turns slowly about the moon
-      let bx = d.bx;
-      let by = d.by;
-      if (role === 1) {
-        const dx = bx - s.moonX;
-        const dy = by - s.moonY;
-        const dir = r3 < 0.55 ? 1 : -1;
-        bx = s.moonX + dx * haloA - dy * haloB * dir;
-        by = s.moonY + dx * haloB * dir + dy * haloA;
-      }
-      const ba = d.ba;
-
-      let x = ax;
-      let y = ay;
-      let a = aa;
-      if (m >= 1) {
-        x = bx;
-        y = by;
-        a = ba;
-      } else if (m > 0) {
-        const e = ease(morphAt(m, d.delay));
-        if (still) {
-          x = e < 0.5 ? ax : bx;
-          y = e < 0.5 ? ay : by;
-          a = e < 0.5 ? aa * (1 - e * 2) : ba * (e * 2 - 1);
-        } else {
-          // fly along an arc, not a straight line
-          const arc = Math.sin(Math.PI * e) * d.twist;
-          const dx = bx - ax;
-          const dy = by - ay;
-          x = ax + dx * e - dy * arc;
-          y = ay + dy * e + dx * arc;
-          a = aa + (ba - aa) * e + Math.sin(Math.PI * e) * 0.35;
-        }
-      }
-
-      if (!still) a *= 0.8 + 0.2 * Math.sin(t * (1.4 + r3 * 3) + r4 * 40);
+      let a = d.alpha * fade;
+      if (!still) a *= 0.8 + 0.2 * Math.sin(t * (1.4 + d.r3 * 3) + d.r4 * 40);
 
       // the pointer parts the dust, and it settles back behind it
       let qx = 0;
@@ -1425,7 +1131,7 @@ class StardustStage {
         const pw = push * push * reach * 0.55;
         qx = (ddx / dist) * pw;
         qy = (ddy / dist) * pw;
-        a += push * 0.5;
+        a += push * 0.5 * fade;
       }
       d.ox += (qx - d.ox) * 0.12;
       d.oy += (qy - d.oy) * 0.12;
