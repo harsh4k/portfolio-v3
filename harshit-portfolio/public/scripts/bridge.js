@@ -119,6 +119,8 @@
     if (navigating) return;
     navigating = true;
     unbindSwipe();
+    // The page-wide panel watcher below has done its job however we got here.
+    observer.disconnect();
     document.removeEventListener("keydown", onSkipKey);
     window.clearTimeout(introTimeout);
 
@@ -394,7 +396,6 @@
     // Enter on the loader's own buttons (scatter, Skip intro) is theirs.
     if (e.target instanceof Element && e.target.closest(".js-intro-loader")) return;
     if (e.key === "Escape" || e.key === "Enter") {
-      observer.disconnect();
       revealPortfolio(true);
     }
   }

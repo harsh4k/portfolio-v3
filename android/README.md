@@ -40,7 +40,7 @@ cd android
 
 ## Hide the Chrome URL bar (Digital Asset Links)
 
-Until `https://harshitchauhan.dev/.well-known/assetlinks.json` lists this app’s **release signing certificate** SHA-256, Chrome may show a thin URL bar.
+Until `https://harshh.pages.dev/.well-known/assetlinks.json` lists this app’s **release signing certificate** SHA-256, Chrome may show a thin URL bar.
 
 1. Build a release keystore (or use Play App Signing’s **app signing key** certificate).
 2. `keytool -list -v -keystore your.keystore`

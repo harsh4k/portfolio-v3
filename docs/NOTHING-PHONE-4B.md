@@ -14,7 +14,7 @@ This file is the source of truth. Nothing in the repo pretends a website can be 
 
 | Goal | Possible? | How |
 | --- | --- | --- |
-| Keep the existing site as the experience | Yes | PWA + optional TWA loads `https://harshitchauhan.dev/` |
+| Keep the existing site as the experience | Yes | PWA + optional TWA loads `https://harshh.pages.dev/` |
 | Install as an app (no browser chrome) | Yes | Chrome **Add to Home screen** / PWA, or Android TWA after Digital Asset Links |
 | Put the **website itself** on the lock screen | **No** | Android and Nothing OS do not let arbitrary sites run as lock-screen content |
 | One tap from lock screen toward the site | **Maybe** | If Nothing’s lock-screen widget picker lists the Android widget; otherwise home-screen widget / app icon |
@@ -47,7 +47,7 @@ This file is the source of truth. Nothing in the repo pretends a website can be 
 
 ## 4. What cannot be done
 
-- Embed `harshitchauhan.dev` as the lock screen.
+- Embed `harshh.pages.dev` as the lock screen.
 - A PWA “lock screen widget.”
 - Claiming a normal Android widget is a first-party Nothing lock-screen widget.
 - Shipping Glyph animations from JavaScript.
@@ -61,7 +61,7 @@ This file is the source of truth. Nothing in the repo pretends a website can be 
 ### A. Fastest path (recommended): install the PWA
 
 1. Open **Chrome** (not a Mini window).
-2. Go to `https://harshitchauhan.dev/`.
+2. Go to `https://harshh.pages.dev/`.
 3. Menu **⋮ → Add to Home screen** / **Install app**.
 4. Open **Harshit** from the home screen. It should run **standalone** (no Chrome tab UI).
 5. Optional: long-press the icon → **About / Work / Contact** (manifest shortcuts, Chrome-dependent).
@@ -100,7 +100,7 @@ cd android
 .\gradlew.bat :app:installDebug
 ```
 
-The activity is a **Trusted Web Activity** pointed at `https://harshitchauhan.dev/`. Local `127.0.0.1` will not work inside the TWA (HTTPS + asset links). Test the PWA against `http://127.0.0.1:4175/` in Chrome instead.
+The activity is a **Trusted Web Activity** pointed at `https://harshh.pages.dev/`. Local `127.0.0.1` will not work inside the TWA (HTTPS + asset links). Test the PWA against `http://127.0.0.1:4175/` in Chrome instead.
 
 ---
 
