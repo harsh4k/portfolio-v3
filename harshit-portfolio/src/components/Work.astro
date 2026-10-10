@@ -57,3 +57,9 @@ const total = projects.length;
     <div class="s__ruler js-ruler astro-doefkd43"></div>
   </div>
 </section>
+<!-- Outside the section so its stacking order can't hide the bar. The cards are skipped by the keyboard until scrolled into view; this list is always tabbable. -->
+<nav class="work-keys" aria-label="Projects">
+  {projects.map(({ data }) => (
+    <a href={data.url} target="_blank" rel="noopener noreferrer" set:text={data.title} />
+  ))}
+</nav>
