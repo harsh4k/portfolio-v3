@@ -90,3 +90,94 @@ html {
     font-size: calc(27.3vw - 0.66rem);
   }
 }
+
+/*
+  Phones and tablets hide the header menu, so the resume gets its own cell
+  there. Hidden on desktop, where the menu already has it.
+*/
+.site-head .sb-resume {
+  display: none;
+}
+
+@media only screen and (max-width: 987px) {
+  .site-head .sb-resume {
+    display: flex;
+    align-items: center;
+    order: 1;
+    padding: 0 1rem;
+    border-right: 1px solid var(--color-secondary);
+    color: var(--color-secondary);
+    font: 400 12px/1 var(--font-family-fraktion);
+    white-space: nowrap;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+}
+
+@media only screen and (max-width: 576px) {
+  .site-head .sb-resume {
+    padding: 0 0.625rem;
+    font-size: 11px;
+    letter-spacing: 0.02em;
+  }
+
+  /* "Hire me" must stay on one line now that the resume shares the row. */
+  .site-head .sb-availability .sb__line {
+    padding: 1px 0.75rem 0;
+    white-space: nowrap;
+  }
+}
+
+@media only screen and (max-width: 380px) {
+  .site-head .sb-resume {
+    padding: 0 0.5rem;
+    font-size: 10px;
+  }
+
+  .site-head .sb-socials a,
+  .site-head .sb-contrast {
+    width: 40px;
+  }
+
+  .site-head .sb-availability .sb__line {
+    padding: 1px 0.5rem 0;
+    font-size: 1.05rem;
+  }
+}
+
+/*
+  Project links for keyboard users. The cards are skipped by Tab until they
+  scroll into view, so this list is the way in. It stays off-screen until it
+  has focus, then shows as a bar over the page.
+*/
+.work-keys {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.work-keys:focus-within {
+  position: fixed;
+  inset: auto 1rem 1rem;
+  z-index: 60;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip-path: none;
+  white-space: normal;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  padding: 1rem 1.25rem;
+  background: var(--color-secondary);
+}
+
+.work-keys a {
+  color: var(--color-primary);
+  font: 400 14px/1.4 var(--font-family-fraktion);
+  text-transform: uppercase;
+}
