@@ -285,6 +285,33 @@ test.describe("input", () => {
     await expect(page.locator(".s-hero")).toHaveCSS("opacity", "1");
   });
 
+  test("the hero's stardust scene charges into the stage, rewinds on a press and is never a dead button", async ({
+    page,
+  }) => {
+    const errors = watchForErrors(page);
+    await page.goto("/", { waitUntil: "load" });
+    const scene = page.locator(".s-hero .js-stardust");
+    await expect(scene).toHaveAttribute("role", "button");
+    await expect(scene).toHaveAttribute("aria-label", /rush the star/);
+    // The wave lines it replaces are hidden, and the scene fills their band.
+    await expect(page.locator(".s__waves .js-svg")).toBeHidden();
+    const [band, box] = await Promise.all([page.locator(".s__waves").boundingBox(), scene.boundingBox()]);
+    expect(box?.height).toBeGreaterThan(100);
+    expect(box).toEqual(band);
+
+    // Pressing while it charges rushes the star; the stage then comes up.
+    await scene.press("Enter");
+    await expect(page.locator(".ssp-count")).toHaveText("100");
+    await expect(scene).toHaveAttribute("data-phase", /morph|reveal/);
+    await expect(scene).toHaveAttribute("data-phase", "reveal", { timeout: 6_000 });
+    await expect(scene).toHaveAttribute("aria-label", /rewind/);
+
+    // On the stage, a press rewinds to the cosmos.
+    await scene.click();
+    await expect(scene).toHaveAttribute("data-phase", "load");
+    expect(errors).toEqual([]);
+  });
+
   test("Highlights tiles start uncovering as they come on screen, not half way", async ({ page }) => {
     await page.goto("/", { waitUntil: "load" });
     // Record how much of each tile is on screen when its wipe starts.
