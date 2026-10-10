@@ -1,13 +1,22 @@
-name: build
+name: ci
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   pull_request:
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: harshit-portfolio
+
 jobs:
-  build:
+  verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -18,46 +27,29 @@ jobs:
           cache-dependency-path: harshit-portfolio/package-lock.json
 
       - run: npm ci
-        working-directory: harshit-portfolio
 
-      # Same command Cloudflare Pages runs. references/ is not in the repo, so
-      # this exercises the real deploy path rather than a local-only one.
-      - run: npm run build
+      - name: Lint
+        run: npm run lint
 
-      # dist/ is not committed; server.mjs serves it, so the build must have run.
-      - name: Check the build produced a deployable dist/
-        run: |
-          test -f dist/index.html
-          test -f dist/_astro/hoisted.BvNyQ0G_.js
-          test -f dist/assets/index-wQJ6Ws5X.js
-          echo "dist/ files: $(find dist -type f | wc -l)"
+      - name: Format
+        run: npm run format:check
 
-      # public/sw.js ships a placeholder manifest that generate-precache.mjs
-      # replaces with the real file list. If the placeholder reaches dist/, the
-      # worker caches nothing and the site silently stops working offline.
-      - name: Check the service worker carries a real precache manifest
-        run: |
-          grep -q 'precache:end' dist/sw.js
-          grep -q '"shell":' dist/sw.js
-          ! grep -q 'version: "dev"' dist/sw.js
+      - name: Type check
+        run: npm run check
 
-      # Re-running must be a no-op. The bundle patches are applied in place, and
-      # a non-idempotent guard previously grew the engine on every build.
-      - name: Check the build is idempotent
-        run: |
-          find dist -type f -exec sha256sum {} + | sort -k2 > /tmp/dist-first.txt
-          npm run build
-          find dist -type f -exec sha256sum {} + | sort -k2 > /tmp/dist-second.txt
-          diff /tmp/dist-first.txt /tmp/dist-second.txt \
-            || { echo "::error::build is not idempotent - a second run changed dist/"; exit 1; }
+      # Runtime dependencies only: dev tooling never reaches visitors.
+      - name: Audit shipped dependencies
+        run: npm audit --omit=dev --audit-level=high
+
+      # Also validates every project and archive entry against its schema.
+      - name: Build
+        run: npm run build
 
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
-        working-directory: harshit-portfolio
 
-      - name: Smoke tests
+      - name: Test
         run: npm test
-        working-directory: harshit-portfolio
         env:
           CI: "true"
 

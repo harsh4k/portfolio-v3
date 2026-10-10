@@ -1,0 +1,13 @@
+node_modules
+.astro
+package-lock.json
+test-results
+playwright-report
+public/**/*.svg
+src/content/*.json
+
+# The design, copied unchanged from the live site (see eslint.config.js).
+public/_astro/
+public/assets/
+public/scripts/
+public/styles/

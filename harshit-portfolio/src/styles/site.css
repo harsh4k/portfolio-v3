@@ -1,0 +1,92 @@
+/*
+  Our own additions on top of the copied design. The design files in public/
+  stay byte-for-byte as on the live site; anything new goes here.
+*/
+
+/*
+  Holds the slat-count loader on the red intro cover until the 3D scene has
+  drawn its first frame. The loader paints its own red; this only places it.
+*/
+.intro-loader {
+  position: absolute;
+  inset: 0;
+  /* Above the 3D scene's own page (z-index 100), which otherwise hides it. */
+  z-index: 200;
+  /* Opaque until React mounts, so the 3D scene drawing underneath never shows through. */
+  background: #ff0b36;
+  transition: opacity 0.4s ease;
+}
+
+/* Once the count starts the blinds paint the red, so they can slide away. */
+.intro-loader:has(.scp-gate:not([data-phase="idle"])) {
+  background: transparent;
+}
+
+/* The loader's dimmed HUD type is 3.1:1 on this red; 0.85 keeps it AA (4.5:1). */
+.intro-loader .scp-dim,
+.intro-loader .scp-skip {
+  opacity: 0.85;
+}
+
+.intro-loader.is-done {
+  opacity: 0;
+}
+
+/*
+  The hero is about 110px shorter than the screen, so the top of About sits
+  inside the first viewport. Under the 3D intro and the HC loader that follows
+  it, only the covers keep it hidden, and the HC loader's cover turns
+  transparent while it draws, so the About text showed through at the bottom.
+  Keep everything below the hero hidden until the engine unlocks scrolling.
+*/
+html.is-scroll-blocked .s-hero ~ * {
+  visibility: hidden;
+}
+
+/* The swipe hint only makes sense once there is something to swipe. */
+html:not(.intro-ready) .intro-swipe-hint {
+  visibility: hidden;
+}
+
+/* GitHub mark in the header, in the same box the design gives its icons. */
+.sb__icon.sb__icon--github {
+  width: 20px;
+  height: 20px;
+}
+
+/*
+  Phones draw a translucent blue box over anything tapped. The intro's
+  stylesheet turned it off, but that stylesheet is removed once the intro
+  ends, so the box came back on the GO button and other links.
+*/
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/*
+  The hero's type sizes were tuned to "Creative". "Software" is about 16%
+  wider, so the same sizes push "Developer" past the edge on desktop and run
+  into the star on phones. These are the design's own sizes scaled down just
+  enough to fit with the spacing "Creative" had.
+*/
+.s-hero.astro-7dteeuzc h1.s__title.astro-7dteeuzc {
+  font-size: min(13.8vw, 17rem);
+}
+
+@media only screen and (max-width: 1080px) {
+  .s-hero.astro-7dteeuzc h1.s__title.astro-7dteeuzc {
+    font-size: 12.9vw;
+  }
+}
+
+@media only screen and (max-width: 987px) {
+  .s-hero.astro-7dteeuzc h1.s__title.astro-7dteeuzc {
+    font-size: calc(27.3vw - 0.88rem);
+  }
+}
+
+@media only screen and (max-width: 767px) and (orientation: landscape), only screen and (max-width: 576px) {
+  .s-hero.astro-7dteeuzc h1.s__title.astro-7dteeuzc {
+    font-size: calc(27.3vw - 0.66rem);
+  }
+}

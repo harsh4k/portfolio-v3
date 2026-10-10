@@ -1,0 +1,10 @@
+---
+interface Props {
+  project: { url: string; title: string };
+}
+
+// set:text below keeps formatting from adding spaces inside the link, which would be underlined.
+const { project } = Astro.props;
+---
+
+<a href={project.url} target="_blank" rel="noopener noreferrer" class="astro-am7g2yfn" set:text={project.title} />

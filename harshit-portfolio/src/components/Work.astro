@@ -1,0 +1,59 @@
+---
+import { getOrdered } from "../data/collections";
+
+const projects = await getOrdered("projects");
+const total = projects.length;
+---
+
+<section id="work" class="s-work astro-doefkd43" data-intersect>
+  <div class="s__outer astro-doefkd43">
+    <div class="s__inner js-container astro-doefkd43">
+      <h2 class="s__title astro-doefkd43">
+        <span class="s__title__inner js-title astro-doefkd43">
+          {[..."WORK"].map((letter) => (
+            <>
+              {" "}
+              <span class="s__title__letter js-letter astro-doefkd43">{letter}</span>
+            </>
+          ))}{" "}
+        </span>
+      </h2>
+      <div class="s__scene js-scene astro-doefkd43">
+        {projects.map(({ data }, index) => (
+          <a-work class="s__scene__work s__scene__work--video js-work astro-meqjtcea">
+            <div class="a__inner astro-meqjtcea">
+              <a href={data.url} target="_blank" rel="noopener noreferrer" class="astro-meqjtcea">
+                <img
+                  src={data.image}
+                  alt={data.title}
+                  class="a__video js-video astro-meqjtcea"
+                  width="1082"
+                  height="636"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div class="a__caption astro-meqjtcea">
+                  <div class="a__caption__text astro-meqjtcea">{data.title}</div>
+                  <div class="a__caption__key astro-meqjtcea">
+                    #{data.code}-{String(index + 1).padStart(4, "0")}/{total}
+                  </div>
+                </div>
+              </a>
+            </div>
+          </a-work>
+        ))}
+      </div>
+      <canvas class="s__canvas js-canvas astro-doefkd43"></canvas>
+    </div>
+    <div class="s__mask-outer astro-doefkd43">
+      <div class="s__mask js-mask astro-doefkd43">
+        <svg class="s__mask__svg js-mask-svg astro-doefkd43">
+          <path class="s__mask__path-inner js-mask-path-inner astro-doefkd43" d=""></path>
+          <path class="s__mask__path-outer js-mask-path-outer astro-doefkd43" d=""></path>
+          <path class="s__mask__path-lines js-mask-path-lines astro-doefkd43" d=""></path>
+        </svg>
+      </div>
+    </div>
+    <div class="s__ruler js-ruler astro-doefkd43"></div>
+  </div>
+</section>

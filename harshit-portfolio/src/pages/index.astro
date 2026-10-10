@@ -1,0 +1,29 @@
+---
+import Base from "../layouts/Base.astro";
+import Header from "../components/Header.astro";
+import Hero from "../components/Hero.astro";
+import About from "../components/About.astro";
+import Separator from "../components/Separator.astro";
+import Work from "../components/Work.astro";
+import Archive from "../components/Archive.astro";
+import Contact from "../components/Contact.astro";
+import Footer from "../components/Footer.astro";
+import SiteChrome from "../components/SiteChrome.astro";
+import { profile } from "../data/profile";
+
+const separatorClass = "style--secondary astro-j7pv25f6 astro-rdpcjfuz";
+const motto = ["Do", "Things", "Your", "Way"];
+---
+
+<Base title={`${profile.name} — ${profile.role}`} description={profile.description}>
+  <Header />
+  <Hero />
+  <About />
+  <Separator class={separatorClass} codes={motto} />
+  <Work />
+  <Separator class={separatorClass} codes={motto} />
+  <Archive />
+  <Contact />
+  <Footer />
+  <SiteChrome slot="after" />
+</Base>

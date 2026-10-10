@@ -1,120 +1,74 @@
-# Harshit Chauhan — Creative Developer Portfolio (v3)
+# Harshit Chauhan — portfolio
 
-A static, zero-framework, high-performance personal portfolio for **Harshit Chauhan** (Computer Engineering student at NMIMS Mumbai & Creative Developer).
+A single-page portfolio built with [Astro](https://astro.build) and TypeScript, deployed as static files to Cloudflare Pages.
 
----
+## Commands
 
-## Architecture & Technology
+Run from this folder. Node 22.12 or newer.
 
-- **No Framework / Zero Bundler**: Pure vanilla HTML5 + CSS3 + modern ES modules.
-- **Intro Layer**: Interactive Three.js WebGL intro scene with hand-pull interaction and 3D character animation.
-  - Dynamically imported (`import()` in `bridge.js`), so the 819 KB bundle is not render-blocking.
-  - Desktop: grab the 3D hand and pull it. Touch and narrow viewports get the same scene with a visible "Swipe down" affordance, since the engine only builds the hand on desktop.
-  - `prefers-reduced-motion: reduce` bypasses the 3D layer *and* fast-forwards the site intro timeline, settling in ~150 ms instead of ~5.2 s. The timeline is GSAP-driven, so CSS `animation-duration` overrides alone do not shorten it.
-- **Portfolio Layer**: GSAP + Lenis smooth scrolling + ScrollTrigger animation pipeline.
-- **Handover (`src/scripts/bridge.js`)**: Manages seamless transition from WebGL intro scene to the GSAP portfolio with complete GPU resource release and style detachment.
-- **Mobile First Responsive Redesign**:
-  - Clean vertical flex card stack for all 11 production projects below 900px.
-  - Accessible touch buttons for contact and navigation.
-  - 44×44px tap targets, extended via an invisible `::after` on the header and footer monograms so nothing shifts visually. The four inline project links inside the About paragraph are deliberately left at text size — WCAG 2.5.8 exempts targets inline in a sentence, and padding them would break the line box.
-  - Zero horizontal overflow (`document.scrollWidth === viewport width`).
-- **SEO & Performance**:
-  - OpenGraph & Twitter Card metadata with 1200×630 preview image.
-  - JSON-LD `Person` structured data for search engine knowledge graphs.
-  - Canonical link, `sitemap.xml`, `robots.txt`, and `site.webmanifest`.
-  - Responsive WebP images with `loading="lazy"` and `decoding="async"`.
+| Command           | What it does                                               |
+| ----------------- | ---------------------------------------------------------- |
+| `npm run dev`     | Dev server at http://localhost:4321                        |
+| `npm run build`   | Production build into the repo-root `dist/`                |
+| `npm run preview` | Serve the build locally                                    |
+| `npm run lint`    | ESLint (TypeScript and Astro rules)                        |
+| `npm run format`  | Prettier, write                                            |
+| `npm run check`   | Astro and TypeScript type check                            |
+| `npm test`        | Playwright tests against the built site, desktop and phone |
+| `npm run verify`  | Everything CI runs, in order                               |
 
----
+From the repo root, `npm run build` and `npm run dev` forward here.
 
-## Directory Architecture
+## Layout
 
 ```text
-harshit-portfolio/
-├── public/                     # Static public assets
-│   ├── _astro/                 # GSAP engine & portfolio core stylesheets
-│   ├── assets/                 # Bundled Three.js WebGL intro application
-│   ├── fonts/                  # Editorial New, Fraktion Mono, Bigger Display
-│   ├── icons/                  # Web icons & favicons
-│   ├── images/                 # Project screenshots, OG images & visual archive
-│   ├── videos/                 # Background video loops
-│   ├── webgl/                  # 3D character textures with custom "HARSHIT" drawings
-│   ├── robots.txt              # Search crawler directives
-│   ├── sitemap.xml             # XML sitemap
-│   ├── site.webmanifest        # PWA / web manifest
-│   ├── favicon.png             # Site favicon
-│   └── resume.pdf              # Downloadable resume
-│
-├── src/                        # Developer source code
-│   ├── scripts/
-│   │   ├── bridge.js           # Hand pull / touch entry → layer teardown → portfolio intro
-│   │   ├── build.mjs           # Portfolio compiler (generates index.html)
-│   │   ├── clean-adrien.mjs    # Patches the 3D intro bundle (hand exit, titles, RAF stop)
-│   │   └── patch-intro.mjs     # Gates the site intro & silences null GSAP targets
-│   └── styles/
-│       └── integration.css     # Mobile responsive layout, tap targets, focus states & overrides
-│
-├── index.html                  # Generated production entry point
-├── package.json                # Project scripts & metadata
-└── server.mjs                  # Fast local dev HTTP server
+src/
+├── content/            # projects.json, archive.json: the site's data
+├── content.config.ts   # schemas the data is validated against at build time
+├── data/profile.ts     # name, links, highlights
+├── components/         # one component per section, emitting the design's markup
+├── layouts/Base.astro  # <head>, meta tags, and the design's styles and scripts
+├── styles/site.css     # our additions on top of the design (intro loader, GitHub icon)
+└── pages/              # index and 404
+public/                 # served as-is
+├── _astro/, assets/    # the design's styles, motion engine and 3D intro (copied unchanged)
+├── scripts/, styles/   # intro hand-off, resume dock and the CSS joining them
+├── fonts/, webgl/      # the design's fonts and 3D textures
+├── images/             # project screenshots and archive photos
+└── _headers, sw.js     # security headers; the old service worker's retirement
+tests/                  # Playwright
 ```
 
----
+## Editing content
 
-## Fonts
+- **Add a project:** drop a 1082×636 `.webp` screenshot in `public/images/`, then add an entry to `src/content/projects.json` with the next `order` and a short `code` for its caption. `summary` is optional.
+- **Add a photo:** drop a `.webp` in `public/images/` and add an entry to `src/content/archive.json` with its pixel `width` and `height`.
+- **Change bio, links or highlights:** `src/data/profile.ts`.
 
-The site self-hosts **PP Editorial New**, **PP Fraktion Mono**, **Bigger Display**, and **Comic CAT** from the Wodniack reference. You need a valid web license to serve these on a public host.
+The build fails, rather than shipping a broken page, when a project URL is not `https://`, an image file is missing, two entries share an `order`, or the About text links to a project that no longer exists.
 
----
+## Guardrails
 
-## Development & Build Commands
+- **Content validation:** Zod schemas in `src/content.config.ts`.
+- **Types:** `astro/tsconfigs/strictest`, checked by `astro check`.
+- **Lint and format:** ESLint (typescript-eslint strict, eslint-plugin-astro) and Prettier.
+- **Tests** (`tests/site.spec.ts`): axe accessibility scan, no console errors or failed requests, every local link returns 200, every in-page anchor resolves, external links are https and open with `noopener`, no sideways scroll on phones, content in the HTML without JavaScript, Hire me is a well-formed `mailto:`, the resume dock offers PDF and DOCX, middle clicks aren't swallowed, the wheel scrolls, no inline scripts allowed by the CSP, 404 page.
+- **Security headers:** `public/_headers` sets the CSP and other headers, matching what the live site sends.
+- **CI** (`.github/workflows/ci.yml`) runs all of the above on every pull request. Dependabot opens weekly update PRs.
 
-```bash
-# 1. Compile assets into repo dist/
-npm run build   # from repo root, or from this folder
+## Notes
 
-# 2. Serve dist/ locally (Port 4175)
-npm run dev
-```
+- `public/sw.js` exists only to retire the service worker the previous site installed: it clears its caches, unregisters itself and reloads the tab. The new site registers no worker. Keep the file for a few months, until returning visitors have cycled through.
+- Section ids `#about`, `#work` and `#contact` are linked from the Android app's shortcuts; keep them stable.
 
-Both bundle patchers (`src/scripts/clean-adrien.mjs` and `src/scripts/patch-intro.mjs`) are idempotent and safe to re-run.
+## Design
 
----
+The design is the live site's, carried over unchanged: the files in `public/_astro/`, `public/assets/`, `public/styles/`, `public/fonts/` and `public/webgl/` are copies of the live site's, and lint and Prettier skip them. New styling goes in `src/styles/site.css`, never in those files. The components in `src/components/` emit the same markup and class names those files expect, with the text, links and lists coming from `src/content/` and `src/data/profile.ts`. Keep the class names (including the `astro-…` ones) as they are: the stylesheet and motion engine select on them.
 
-## Testing
+Changes made to the copied files, each covered by a test:
 
-```bash
-npm test              # full smoke suite (desktop + mobile projects)
-npm run test:desktop  # desktop only
-```
+- `public/assets/index-wQJ6Ws5X.js` (3D intro): fires `intro:ready` on its first rendered frame so the loader can hide, and its LinkedIn link and tab title name Harshit instead of the scene's original author.
+- `public/scripts/bridge.js`: shows a loader until `intro:ready` (or enters the site after 20 s or if the bundle fails), starts the portfolio intro only after page load (it stayed blank under Reduced Motion otherwise), restores the tab title and drops its Enter/Escape listener once the intro is gone.
+- `public/scripts/resume-dock.js`: the wheel scrolls the resume rather than the page, focus stays in the dock while it is open, Ctrl/Cmd-click on Resume opens a new tab, and an Open link shows the PDF full size.
 
-`tests/smoke.spec.js` drives the real handover — no mocks. Every assertion maps
-to something that has actually regressed in this repo: the site intro playing
-unseen beneath the 3D layer, the hero bleeding into the next section, the engine
-rendering forever after teardown, `NO_LCP` making Lighthouse unable to score,
-the reference author's content shipping in the DOM, duplicate `<h1>`, and the
-reduced-motion loader.
-
-Two things worth knowing before editing tests:
-
-- **`server.mjs` serves `../dist`, not `src/`.** Edits to `src/` have no effect
-  until `npm run build` has run. Mutation-testing an assertion without
-  rebuilding will silently pass and tell you nothing.
-- Assertions avoid machine-dependent thresholds. The engine check verifies the
-  `__introTornDown` kill switch is in the shipped bundle and set at runtime,
-  rather than sampling a frame rate — measured, the rAF rate *rises* after
-  teardown (45/s → 125/s) because the portfolio's own loops start then.
-
-CI runs the same command Cloudflare Pages does, asserts a deployable `dist/` was
-produced, diffs a second build against the first to catch non-idempotent patch
-guards, then runs the suite.
-
-## Measured
-
-Live, on the deployed site (Chrome trace, no throttling):
-
-| Metric | Value |
-| --- | --- |
-| LCP | 127 ms |
-| CLS | 0.00 |
-| Render-blocking savings | 0 ms (FCP and LCP) |
-| Lighthouse Accessibility / Best Practices / SEO | 100 / 100 / 100 |
+PP Editorial New and PP Fraktion Mono (Pangram Pangram) need a web licence for use on this site.

@@ -1,0 +1,39 @@
+---
+/**
+ * The binary strip between sections. Each group of `codes` is a run of
+ * letters written as 7-bit ASCII, with a blank cell between letters and the
+ * striped band after each group.
+ */
+interface Props {
+  class: string;
+  codes: string[];
+}
+
+const { class: className, codes } = Astro.props;
+
+const toBits = (letter: string) => letter.charCodeAt(0).toString(2).padStart(7, "0").split("");
+
+// One flat row of cells per group, so no whitespace lands between them.
+const groups = codes.map((code) =>
+  [...code].flatMap((letter, index) => [...(index > 0 ? ["blank"] : []), ...toBits(letter)]),
+);
+---
+
+<a-separator data-intersect="" class={className}>
+  <span class="a__triangle astro-rdpcjfuz"></span>
+  <span class="a__binaries astro-rdpcjfuz">
+    {groups.map((cells) => (
+      <>
+        <span class="a__code js-code astro-rdpcjfuz">
+          {cells.map((cell) => (
+            <span class={`a__char a__char--${cell} js-char astro-rdpcjfuz`}>
+              {cell === "blank" ? " " : ` ${cell} `}
+            </span>
+          ))}
+        </span>
+        <span class="a__stripes astro-rdpcjfuz"></span>
+      </>
+    ))}
+  </span>
+  <span class="a__triangle astro-rdpcjfuz"></span>
+</a-separator>
