@@ -99,6 +99,8 @@ test.describe("page contract", () => {
 
 test.describe("layout and accessibility", () => {
   test("has no axe violations", async ({ page }) => {
+    // Waits for the loader before scanning, which takes most of the default 30s on a slow runner.
+    test.setTimeout(60_000);
     await page.goto("/", { waitUntil: "networkidle" });
     // Not mid-way through the loader's exit animation, where fading type is
     // briefly low contrast. The loader itself is checked in the intro tests.
@@ -106,6 +108,21 @@ test.describe("layout and accessibility", () => {
     const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
     const summary = results.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`);
     expect(summary).toEqual([]);
+  });
+
+  test("never scrolls sideways on the narrowest phones", async ({ page }) => {
+    for (const width of [320, 340, 359]) {
+      await page.setViewportSize({ width, height: 700 });
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await page.goto("/", { waitUntil: "load" });
+      const toggle = await page.locator(".js-contrast").boundingBox();
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth),
+        `${width}px`,
+      ).toBeLessThanOrEqual(0);
+      // The last header cell must be fully on screen, not clipped.
+      expect((toggle?.x ?? 0) + (toggle?.width ?? 0), `${width}px toggle`).toBeLessThanOrEqual(width - 8);
+    }
   });
 
   test("never scrolls sideways", async ({ page }) => {
@@ -474,6 +491,53 @@ test.describe("input", () => {
     await page.mouse.move(400, 400);
     await page.mouse.wheel(0, 1200);
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(600);
+  });
+});
+
+test.describe("header and keyboard reach", () => {
+  test("the resume is one tap away wherever the header menu is hidden", async ({ page }) => {
+    await page.goto("/");
+    const menuHidden = await page.locator("header nav").isHidden();
+    const resume = page.locator(".sb-resume");
+    // Hidden on desktop, where the menu already has it; visible and working when the menu is gone.
+    await expect(resume).toBeVisible({ visible: menuHidden });
+    if (menuHidden) {
+      await resume.dispatchEvent("click");
+      await expect(page.locator("#resume-dock")).toBeVisible();
+    }
+  });
+
+  test("the contrast toggle announces whether it is on", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    const toggle = page.locator(".js-contrast");
+    await expect(toggle).toHaveAttribute("aria-pressed", "false");
+    await toggle.dispatchEvent("click");
+    await expect(toggle).toHaveAttribute("aria-pressed", "true", { timeout: 5_000 });
+  });
+
+  test("every project can be reached with the keyboard", async ({ page }) => {
+    // Reduced motion skips the intro, so Tab starts from the page itself.
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    const urls = await page
+      .locator(".work-keys a")
+      .evaluateAll((links) => links.map((a) => (a as HTMLAnchorElement).href));
+    expect(urls.length).toBeGreaterThan(5);
+
+    const reached = new Set<string>();
+    for (let i = 0; i < 60 && reached.size < urls.length; i++) {
+      await page.keyboard.press("Tab");
+      const href = await page.evaluate(() => {
+        const active = document.activeElement;
+        return active?.closest(".work-keys") ? (active as HTMLAnchorElement).href : "";
+      });
+      if (href) reached.add(href);
+    }
+    expect([...reached].sort()).toEqual([...urls].sort());
+    // Focus shows the list on screen instead of leaving it invisible.
+    const box = await page.locator(".work-keys").boundingBox();
+    expect(box?.width ?? 0).toBeGreaterThan(200);
   });
 });
 
