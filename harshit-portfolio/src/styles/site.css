@@ -4,93 +4,27 @@
 */
 
 /*
-  Shown on the red intro cover until the 3D scene has drawn its first frame.
-  Built from the design's own parts: the header's HC logo, the hero's binary
-  rulers and the console's mono captions.
+  Holds the slat-count loader on the red intro cover until the 3D scene has
+  drawn its first frame. The loader paints its own red; this only places it.
 */
 .intro-loader {
-  --ink: var(--color-secondary, #160000);
-
   position: absolute;
   inset: 0;
   /* Above the 3D scene's own page (z-index 100), which otherwise hides it. */
   z-index: 200;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 1.5rem;
-  color: var(--ink);
-  font-family: var(--font-family-fraktion, monospace);
-  font-size: 0.625rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  pointer-events: none;
-  /* Opaque, so the 3D scene drawing underneath never shows through. */
+  /* Opaque until React mounts, so the 3D scene drawing underneath never shows through. */
   background: #ff0b36;
   transition: opacity 0.4s ease;
 }
 
-.intro-loader p {
-  margin: 0;
+/* Once the count starts the blinds paint the red, so they can slide away. */
+.intro-loader:has(.scp-gate:not([data-phase="idle"])) {
+  background: transparent;
 }
 
-.intro-loader__logo {
-  width: clamp(4.5rem, 18vw, 6.5rem);
-  height: auto;
-  overflow: visible;
-}
-
-.intro-loader__logo path {
-  fill: var(--ink);
-  stroke: var(--ink);
-  stroke-width: 5;
-}
-
-.intro-loader__ghost {
-  fill-opacity: 0;
-  stroke-opacity: 0.3;
-}
-
-.intro-loader__trace {
-  fill-opacity: 0;
-  stroke-dasharray: var(--len);
-  stroke-dashoffset: var(--len);
-  animation: intro-loader-draw 3.2s ease-in-out infinite;
-}
-
-.intro-loader__strip {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  width: min(20rem, 78vw);
-  padding: 0.45rem 0;
-  border-block: 1px solid var(--ink);
-  white-space: nowrap;
-}
-
-.intro-loader__track {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
-}
-
-.intro-loader__bits {
-  flex: none;
-  animation: intro-loader-scroll 6s linear infinite;
-}
-
-/* One shared cycle: "", ".", "..", "..." */
-.intro-loader__dots span {
-  opacity: 0;
-  animation: intro-loader-dot1 1.6s steps(1) infinite;
-}
-
-.intro-loader__dots span:nth-child(2) {
-  animation-name: intro-loader-dot2;
-}
-
-.intro-loader__dots span:nth-child(3) {
-  animation-name: intro-loader-dot3;
+/* The loader's dimmed HUD type is 3.1:1 on this red; 0.85 keeps it AA (4.5:1). */
+.intro-loader .scp-dim {
+  opacity: 0.85;
 }
 
 .intro-loader.is-done {
@@ -100,67 +34,6 @@
 /* The swipe hint only makes sense once there is something to swipe. */
 html:not(.intro-ready) .intro-swipe-hint {
   visibility: hidden;
-}
-
-@keyframes intro-loader-draw {
-  0% {
-    stroke-dashoffset: var(--len);
-    fill-opacity: 0;
-  }
-  45% {
-    stroke-dashoffset: 0;
-    fill-opacity: 0;
-  }
-  60%,
-  80% {
-    stroke-dashoffset: 0;
-    fill-opacity: 1;
-  }
-  100% {
-    stroke-dashoffset: 0;
-    fill-opacity: 0;
-  }
-}
-
-@keyframes intro-loader-scroll {
-  to {
-    transform: translateX(-100%);
-  }
-}
-
-@keyframes intro-loader-dot1 {
-  25%,
-  99% {
-    opacity: 1;
-  }
-}
-
-@keyframes intro-loader-dot2 {
-  50%,
-  99% {
-    opacity: 1;
-  }
-}
-
-@keyframes intro-loader-dot3 {
-  75%,
-  99% {
-    opacity: 1;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .intro-loader__trace,
-  .intro-loader__bits,
-  .intro-loader__dots span {
-    animation: none;
-    opacity: 1;
-  }
-
-  .intro-loader__trace {
-    stroke-dashoffset: 0;
-    fill-opacity: 1;
-  }
 }
 
 /* GitHub mark in the header, in the same box the design gives its icons. */

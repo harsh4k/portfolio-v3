@@ -226,8 +226,13 @@ test.describe("intro", () => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
     const loader = page.locator(".js-intro-loader");
     await expect(loader).toBeVisible();
-    // Opaque, so the scene drawing underneath never shows through it.
-    await expect(loader).toHaveCSS("background-color", "rgb(255, 11, 54)");
+    // Opaque, so the scene drawing underneath never shows through it. The slat
+    // loader's blinds paint the red, so they can slide off at the end.
+    await expect(loader.locator(".scp-blind").first()).toHaveCSS("background-color", "rgb(255, 11, 54)");
+    // Hydrated: the count is running, not just the server-rendered frame.
+    await expect(loader.locator(".scp-gate")).toHaveAttribute("data-phase", /intro|count/);
+    // It waits short of 100 for the scene.
+    await expect(loader.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "90", { timeout: 10_000 });
     // Above the 3D scene's own page (z-index 100), which hid it before.
     await expect(loader).toHaveCSS("z-index", "200");
     // Nothing to swipe yet, so the phone swipe hint waits for the scene too.
@@ -235,9 +240,21 @@ test.describe("intro", () => {
     release();
     // The bundle fires intro:ready on its first rendered frame (patched in, see README).
     await page.evaluate(() => window.dispatchEvent(new Event("intro:ready")));
-    // It stays up for one full logo cycle (about 2.3s from page start) before fading.
+    // It counts to 100, holds, and opens its blinds before it goes.
+    await expect(loader.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "100");
     await expect(loader).toHaveCount(0, { timeout: 10_000 });
     await expect(page.locator("html")).toHaveClass(/intro-ready/);
+    // The 3D scene is still there to pull, not skipped.
+    await expect(page.locator("#intro-layer")).toHaveCount(1);
+  });
+
+  test("Skip intro on the loader goes straight to the site while the scene is still loading", async ({ page }) => {
+    await page.route("**/assets/index-wQJ6Ws5X.js", () => new Promise(() => {}));
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await page.locator(".js-intro-loader .scp-gate[data-phase='count']").waitFor();
+    await page.getByRole("button", { name: /Skip intro/ }).click();
+    await expect(page.locator("#intro-layer")).toHaveCount(0, { timeout: 10_000 });
+    await expect(page.locator(".site-head")).toHaveCSS("opacity", "1");
   });
 
   test("Enter skips the intro, shows the site and restores the tab title", async ({ page }) => {
