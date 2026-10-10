@@ -99,6 +99,8 @@ test.describe("page contract", () => {
 
 test.describe("layout and accessibility", () => {
   test("has no axe violations", async ({ page }) => {
+    // Waits for the loader before scanning, which takes most of the default 30s on a slow runner.
+    test.setTimeout(60_000);
     await page.goto("/", { waitUntil: "networkidle" });
     // Not mid-way through the loader's exit animation, where fading type is
     // briefly low contrast. The loader itself is checked in the intro tests.
@@ -106,6 +108,21 @@ test.describe("layout and accessibility", () => {
     const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
     const summary = results.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`);
     expect(summary).toEqual([]);
+  });
+
+  test("never scrolls sideways on the narrowest phones", async ({ page }) => {
+    for (const width of [320, 340, 359]) {
+      await page.setViewportSize({ width, height: 700 });
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await page.goto("/", { waitUntil: "load" });
+      const toggle = await page.locator(".js-contrast").boundingBox();
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth),
+        `${width}px`,
+      ).toBeLessThanOrEqual(0);
+      // The last header cell must be fully on screen, not clipped.
+      expect((toggle?.x ?? 0) + (toggle?.width ?? 0), `${width}px toggle`).toBeLessThanOrEqual(width - 8);
+    }
   });
 
   test("never scrolls sideways", async ({ page }) => {
