@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig } from "astro/config";
+import react from "@astrojs/react";
 
 export default defineConfig({
   site: "https://harshh.pages.dev",
@@ -7,6 +8,8 @@ export default defineConfig({
   outDir: "../dist",
   trailingSlash: "ignore",
   devToolbar: { enabled: false },
+  // React only for the intro preloader island (src/components/ui).
+  integrations: [react()],
   // Keep the whitespace between tags: the copied design has inline elements
   // whose spacing depends on it, exactly as the live page ships.
   compressHTML: false,

@@ -1,5 +1,6 @@
 ---
 import { profile } from "../data/profile";
+import IntroPreloader from "../components/IntroPreloader";
 import "../styles/site.css";
 
 interface Props {
@@ -89,49 +90,14 @@ const fonts = [
   </head>
   <body class="astro-j7pv25f6">
     <div id="intro-layer" class="intro-layer">
-      <div class="intro-loader js-intro-loader" role="status">
-        <!--
-          The header's HC logo: a faint outline that is always there, traced over
-          and filled in on a loop. --len is each path's length in viewBox units.
-        -->
-        <svg class="intro-loader__logo" viewBox="0 0 280 280" aria-hidden="true">
-          <path
-            class="intro-loader__ghost"
-            d="M0 0v280h39.755V158.4h59.65V280h39.756V0H99.411v118.8H39.755V0H0Z"
-          ></path>
-          <path class="intro-loader__ghost" d="M160.734 0v280H280V240.245h-79.51V39.755H280V0H160.734Z"></path>
-          <path
-            class="intro-loader__trace"
-            style="--len: 1320"
-            d="M0 0v280h39.755V158.4h59.65V280h39.756V0H99.411v118.8H39.755V0H0Z"
-          ></path>
-          <path
-            class="intro-loader__trace"
-            style="--len: 958"
-            d="M160.734 0v280H280V240.245h-79.51V39.755H280V0H160.734Z"
-          ></path>
-        </svg>
-        <!-- A ruler like the hero's; the bits spell "HC". Doubled so the scroll loops. -->
-        <p class="intro-loader__strip" aria-hidden="true">
-          <span>►</span>
-          <span class="intro-loader__track">
-            <span class="intro-loader__bits">
-              01001000 01000011 //////////// 01001000 01000011 //////////// 01001000 01000011 ////////////&nbsp;
-            </span>
-            <span class="intro-loader__bits">
-              01001000 01000011 //////////// 01001000 01000011 //////////// 01001000 01000011 ////////////&nbsp;
-            </span>
-          </span>
-          <span>◄</span>
-        </p>
-        <!-- set:html keeps "Loading..." free of the spaces formatting would add. -->
-        <p
-          class="intro-loader__label"
-          set:html={
-            'Loading<span class="intro-loader__dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span>'
-          }
-        />
-      </div>
+      <!--
+        The slat-count loader (src/components/IntroPreloader.tsx). Server-rendered,
+        so the red cover is there before any script runs, and hydrated by
+        scripts/intro-preloader.tsx. No whitespace inside the div: React hydrates
+        its whole content. bridge.js removes it.
+      -->
+      <!-- prettier-ignore -->
+      <div class="intro-loader js-intro-loader"><IntroPreloader /></div>
       <div id="app"></div>
     </div>
     <div class="site-wrapper js-site-wrapper astro-j7pv25f6">
@@ -143,6 +109,9 @@ const fonts = [
     <script>
       import "../scripts/warm-images";
       import "../scripts/reveal-highlights";
+    </script>
+    <script>
+      import "../scripts/intro-preloader";
     </script>
   </body>
 </html>

@@ -100,6 +100,9 @@ test.describe("page contract", () => {
 test.describe("layout and accessibility", () => {
   test("has no axe violations", async ({ page }) => {
     await page.goto("/", { waitUntil: "networkidle" });
+    // Not mid-way through the loader's exit animation, where fading type is
+    // briefly low contrast. The loader itself is checked in the intro tests.
+    await expect(page.locator(".js-intro-loader")).toHaveCount(0, { timeout: 15_000 });
     const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
     const summary = results.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`);
     expect(summary).toEqual([]);
@@ -216,6 +219,8 @@ test.describe("images", () => {
 
 test.describe("intro", () => {
   test("shows a loader on the red cover until the 3D scene has rendered", async ({ page }) => {
+    // The count runs on real timers (about 5s to its 90% wait), so give it room on a busy CI runner.
+    test.setTimeout(60_000);
     // Hold the 3D bundle back, as a slow phone network would.
     let release = () => {};
     const held = new Promise<void>((resolve) => (release = resolve));
@@ -226,8 +231,18 @@ test.describe("intro", () => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
     const loader = page.locator(".js-intro-loader");
     await expect(loader).toBeVisible();
-    // Opaque, so the scene drawing underneath never shows through it.
-    await expect(loader).toHaveCSS("background-color", "rgb(255, 11, 54)");
+    // Opaque, so the scene drawing underneath never shows through it. The slat
+    // loader's blinds paint the red, so they can slide off at the end.
+    await expect(loader.locator(".scp-blind").first()).toHaveCSS("background-color", "rgb(255, 11, 54)");
+    // Hydrated: the count is running, not just the server-rendered frame.
+    await expect(loader.locator(".scp-gate")).toHaveAttribute("data-phase", /intro|count/);
+    // It waits short of 100 for the scene.
+    await expect(loader.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "90", { timeout: 20_000 });
+    const loaderAxe = await new AxeBuilder({ page })
+      .include(".js-intro-loader")
+      .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+      .analyze();
+    expect(loaderAxe.violations.map((v) => v.id)).toEqual([]);
     // Above the 3D scene's own page (z-index 100), which hid it before.
     await expect(loader).toHaveCSS("z-index", "200");
     // Nothing to swipe yet, so the phone swipe hint waits for the scene too.
@@ -235,9 +250,50 @@ test.describe("intro", () => {
     release();
     // The bundle fires intro:ready on its first rendered frame (patched in, see README).
     await page.evaluate(() => window.dispatchEvent(new Event("intro:ready")));
-    // It stays up for one full logo cycle (about 2.3s from page start) before fading.
+    // It counts to 100, holds, and opens its blinds before it goes.
+    await expect(loader.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "100");
     await expect(loader).toHaveCount(0, { timeout: 10_000 });
     await expect(page.locator("html")).toHaveClass(/intro-ready/);
+    // The 3D scene is still there to pull, not skipped.
+    await expect(page.locator("#intro-layer")).toHaveCount(1);
+  });
+
+  test("the count shows every ten on its way to 100, even when the scene is ready at once", async ({ page }) => {
+    test.setTimeout(60_000);
+    await page.addInitScript(() => {
+      const seen: string[] = [];
+      (window as unknown as { __seen: string[] }).__seen = seen;
+      // Every value the progressbar takes, recorded as it changes.
+      new MutationObserver(() => {
+        const value = document.querySelector(".js-intro-loader [role=progressbar]")?.getAttribute("aria-valuenow");
+        if (value && seen.at(-1) !== value) seen.push(value);
+      }).observe(document, { subtree: true, childList: true, attributes: true, attributeFilter: ["aria-valuenow"] });
+      window.addEventListener("DOMContentLoaded", () => window.dispatchEvent(new Event("intro:ready")));
+    });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page.locator(".js-intro-loader")).toHaveCount(0, { timeout: 20_000 });
+    const seen = await page.evaluate(() => (window as unknown as { __seen: string[] }).__seen);
+    expect(seen).toEqual(["0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"]);
+  });
+
+  test("no page text shows through the HC loader after the intro", async ({ page }) => {
+    await page.goto("/", { waitUntil: "load" });
+    await page.keyboard.press("Escape");
+    await expect(page.locator("html")).toHaveClass(/intro-started/);
+    // While the engine's loader plays, the text below the hero stays hidden...
+    await expect(page.locator("#about .s__content p").first()).toBeHidden();
+    // ...and comes back once it is done and the page can scroll.
+    await expect(page.locator("html")).not.toHaveClass(/is-scroll-blocked/, { timeout: 15_000 });
+    await expect(page.locator("#about .s__content p").first()).toBeVisible();
+  });
+
+  test("Skip intro on the loader goes straight to the site while the scene is still loading", async ({ page }) => {
+    await page.route("**/assets/index-wQJ6Ws5X.js", () => new Promise(() => {}));
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await page.locator(".js-intro-loader .scp-gate[data-phase='count']").waitFor();
+    await page.getByRole("button", { name: /Skip intro/ }).click();
+    await expect(page.locator("#intro-layer")).toHaveCount(0, { timeout: 10_000 });
+    await expect(page.locator(".site-head")).toHaveCSS("opacity", "1");
   });
 
   test("Enter skips the intro, shows the site and restores the tab title", async ({ page }) => {
