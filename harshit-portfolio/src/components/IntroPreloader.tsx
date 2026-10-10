@@ -24,34 +24,46 @@ declare global {
 
 const SIMULATED_MS = 4200;
 const WAIT_AT = 90;
+const READY_RAMP_MS = 1500;
 
 export default function IntroPreloader() {
-  const [ready, setReady] = useState(false);
   const [progress, setProgress] = useState(0);
   const readyRef = useRef(false);
 
   useEffect(() => {
     const markReady = () => {
       readyRef.current = true;
-      setReady(true);
     };
     if (window.__introSceneReady) markReady();
     window.addEventListener("intro:ready", markReady, { once: true });
     return () => window.removeEventListener("intro:ready", markReady);
   }, []);
 
+  // Runs the simulated load up to WAIT_AT, then, once the scene is ready, ramps
+  // the rest of the way over READY_RAMP_MS so a fast load still shows a count
+  // instead of jumping straight to 100.
   useEffect(() => {
-    if (ready) return;
     const start = performance.now();
+    let readyAt = 0;
+    let readyFrom = 0;
     let frame = 0;
-    const step = () => {
-      const t = (performance.now() - start) / SIMULATED_MS;
-      setProgress(Math.min(WAIT_AT, scpSimulated(t) * 100));
-      if (t < 1) frame = window.requestAnimationFrame(step);
+    const step = (now: number) => {
+      const simulated = Math.min(WAIT_AT, scpSimulated((now - start) / SIMULATED_MS) * 100);
+      let value = simulated;
+      if (readyRef.current) {
+        if (!readyAt) {
+          readyAt = now;
+          readyFrom = simulated;
+        }
+        value = readyFrom + (100 - readyFrom) * Math.min(1, (now - readyAt) / READY_RAMP_MS);
+      }
+      // Whole numbers only: React skips the re-render when the value is unchanged.
+      setProgress(Math.floor(value));
+      if (value < 100) frame = window.requestAnimationFrame(step);
     };
     frame = window.requestAnimationFrame(step);
     return () => window.cancelAnimationFrame(frame);
-  }, [ready]);
+  }, []);
 
   const onComplete = () => {
     // Only "Skip intro" can finish the count before the scene is ready.
@@ -61,7 +73,7 @@ export default function IntroPreloader() {
 
   return (
     <SlatCountPreloader
-      progress={ready ? 100 : progress}
+      progress={progress}
       palette={{ background: "#ff0b36", ink: "#160000", accent: "#fff0eb" }}
       fontFamily='var(--font-family-fraktion, "Fraktion Mono", monospace)'
       label={`${profile.name} — ${profile.role}`}
