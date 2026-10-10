@@ -479,6 +479,44 @@ test.describe("input", () => {
   });
 });
 
+test.describe("header and keyboard reach", () => {
+  test("the resume is one tap away wherever the header menu is hidden", async ({ page }) => {
+    await page.goto("/");
+    const menuHidden = await page.locator("header nav").isHidden();
+    const resume = page.locator(".sb-resume");
+    // Hidden on desktop, where the menu already has it; visible and working when the menu is gone.
+    await expect(resume).toBeVisible({ visible: menuHidden });
+    if (menuHidden) {
+      await resume.dispatchEvent("click");
+      await expect(page.locator("#resume-dock")).toBeVisible();
+    }
+  });
+
+  test("every project can be reached with the keyboard", async ({ page }) => {
+    // Reduced motion skips the intro, so Tab starts from the page itself.
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    const urls = await page
+      .locator(".work-keys a")
+      .evaluateAll((links) => links.map((a) => (a as HTMLAnchorElement).href));
+    expect(urls.length).toBeGreaterThan(5);
+
+    const reached = new Set<string>();
+    for (let i = 0; i < 60 && reached.size < urls.length; i++) {
+      await page.keyboard.press("Tab");
+      const href = await page.evaluate(() => {
+        const active = document.activeElement;
+        return active?.closest(".work-keys") ? (active as HTMLAnchorElement).href : "";
+      });
+      if (href) reached.add(href);
+    }
+    expect([...reached].sort()).toEqual([...urls].sort());
+    // Focus shows the list on screen instead of leaving it invisible.
+    const box = await page.locator(".work-keys").boundingBox();
+    expect(box?.width ?? 0).toBeGreaterThan(200);
+  });
+});
+
 test.describe("service worker retirement", () => {
   test.use({ serviceWorkers: "allow" });
 
