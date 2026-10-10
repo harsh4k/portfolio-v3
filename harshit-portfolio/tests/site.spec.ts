@@ -492,6 +492,15 @@ test.describe("header and keyboard reach", () => {
     }
   });
 
+  test("the contrast toggle announces whether it is on", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    const toggle = page.locator(".js-contrast");
+    await expect(toggle).toHaveAttribute("aria-pressed", "false");
+    await toggle.dispatchEvent("click");
+    await expect(toggle).toHaveAttribute("aria-pressed", "true", { timeout: 5_000 });
+  });
+
   test("every project can be reached with the keyboard", async ({ page }) => {
     // Reduced motion skips the intro, so Tab starts from the page itself.
     await page.emulateMedia({ reducedMotion: "reduce" });
