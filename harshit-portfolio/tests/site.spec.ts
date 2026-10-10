@@ -341,30 +341,28 @@ test.describe("input", () => {
     await expect(page.locator(".s-hero")).toHaveCSS("opacity", "1");
   });
 
-  test("the hero's stardust scene fills the wave band as one still scene, with no loader parts", async ({ page }) => {
+  test("the hero's wire terrain fills the wave band and comes in with the hero", async ({ page }) => {
     const errors = watchForErrors(page);
     await page.goto("/", { waitUntil: "load" });
-    const scene = page.locator(".s-hero .js-stardust");
+    const scene = page.locator(".s-hero .js-wire-terrain");
     // Decoration only: hidden from assistive tech, nothing to press.
     await expect(scene).toHaveAttribute("aria-hidden", "true");
     await expect(scene).not.toHaveAttribute("role", /.+/);
-    // The wave lines it replaces are hidden, and the scene fills their band.
+    // The wave lines it replaces are hidden, and the terrain fills their band.
     await expect(page.locator(".s__waves .js-svg")).toBeHidden();
+    await expect(scene.locator("canvas")).toHaveCount(1);
     // Measured in one frame: the hero may still be sliding in, so two separate reads can disagree.
-    const [band, box] = await page.evaluate(() =>
-      [".s-hero .s__waves", ".s-hero .js-stardust"].map((s) => {
+    const [band, box, canvas] = await page.evaluate(() =>
+      [".s-hero .s__waves", ".s-hero .js-wire-terrain", ".s-hero .js-wire-terrain canvas"].map((s) => {
         const r = document.querySelector(s)?.getBoundingClientRect();
         return r ? { x: r.x, y: r.y, width: r.width, height: r.height } : null;
       }),
     );
     expect(box?.height).toBeGreaterThan(100);
     expect(box).toEqual(band);
+    // No 1200px minimum from the component pushing past the band on phones.
+    expect(canvas).toEqual(band);
 
-    // It shows once the hero is in, with its planets, and has no counter or rewind.
-    await expect(scene).toHaveAttribute("data-shown", "true");
-    expect(await scene.locator(".ssp-planet").count()).toBeGreaterThanOrEqual(2);
-    await expect(scene.locator(".ssp-count, .ssp-hint, .ssp-veil")).toHaveCount(0);
-    await scene.click();
     await expect(scene).toHaveAttribute("data-shown", "true");
     expect(errors).toEqual([]);
   });
