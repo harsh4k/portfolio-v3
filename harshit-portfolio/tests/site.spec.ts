@@ -258,6 +258,24 @@ test.describe("intro", () => {
     await expect(page.locator("#intro-layer")).toHaveCount(1);
   });
 
+  test("the count shows every ten on its way to 100, even when the scene is ready at once", async ({ page }) => {
+    test.setTimeout(60_000);
+    await page.addInitScript(() => {
+      const seen: string[] = [];
+      (window as unknown as { __seen: string[] }).__seen = seen;
+      // Every value the progressbar takes, recorded as it changes.
+      new MutationObserver(() => {
+        const value = document.querySelector(".js-intro-loader [role=progressbar]")?.getAttribute("aria-valuenow");
+        if (value && seen.at(-1) !== value) seen.push(value);
+      }).observe(document, { subtree: true, childList: true, attributes: true, attributeFilter: ["aria-valuenow"] });
+      window.addEventListener("DOMContentLoaded", () => window.dispatchEvent(new Event("intro:ready")));
+    });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page.locator(".js-intro-loader")).toHaveCount(0, { timeout: 20_000 });
+    const seen = await page.evaluate(() => (window as unknown as { __seen: string[] }).__seen);
+    expect(seen).toEqual(["0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"]);
+  });
+
   test("no page text shows through the HC loader after the intro", async ({ page }) => {
     await page.goto("/", { waitUntil: "load" });
     await page.keyboard.press("Escape");

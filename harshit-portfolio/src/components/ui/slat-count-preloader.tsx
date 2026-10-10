@@ -66,6 +66,11 @@ export interface SlatCountPreloaderProps {
   speed?: number;
   /** How often the count advances, in ms. Defaults to 720. */
   stepMs?: number;
+  /**
+   * Count in steps of this size (10 shows 000, 010, 020 … 100), rising at most
+   * one step per `stepMs` so no step is skipped. Percentage mode only.
+   */
+  step?: number;
   /** Hover to light a row, click to scatter. Defaults to true. */
   interactive?: boolean;
   /** How the gate leaves: horizontal blinds, or a plain fade. Defaults to "blinds". */
@@ -408,6 +413,7 @@ export default function SlatCountPreloader({
   slatRatio = 2,
   speed = 520,
   stepMs = 720,
+  step,
   interactive = true,
   exit = "blinds",
   fontFamily = MONO_STACK,
@@ -473,6 +479,7 @@ export default function SlatCountPreloader({
     const t0 = performance.now();
     let i = 0;
     let shown = 0;
+    let steppedAt = 0;
     const tick = () => {
       if (frames) {
         if (skipRef.current) i = frames.length - 1;
@@ -491,7 +498,18 @@ export default function SlatCountPreloader({
         : typeof real === "number"
           ? real
           : scpSimulated((performance.now() - t0) / Math.max(1, durationRef.current)) * 100;
-      shown = Math.max(shown, Math.min(100, Math.floor(p)));
+      const reached = Math.min(100, Math.floor(p));
+      // With `step`, climb one step per tick so every step is shown, even when progress jumps.
+      // Ticks a busy main thread fires back to back count as one, so React never merges two steps.
+      if (step && !skipRef.current) {
+        const now = performance.now();
+        if (now - steppedAt < stepMs * 0.75) return;
+        const next = Math.max(shown, Math.min(shown + step, reached - (reached % step)));
+        if (next !== shown) steppedAt = now;
+        shown = next;
+      } else {
+        shown = Math.max(shown, reached);
+      }
       setText(scpFormat(shown, slots, pad));
       setPct(shown);
       if (shown >= 100) setPhase("hold");
@@ -499,7 +517,7 @@ export default function SlatCountPreloader({
     tick();
     const id = window.setInterval(tick, stepMs);
     return () => window.clearInterval(id);
-  }, [phase, cycle, seqKey, slots, pad, stepMs]);
+  }, [phase, cycle, seqKey, slots, pad, stepMs, step]);
 
   React.useEffect(() => {
     if (phase !== "hold") return;
