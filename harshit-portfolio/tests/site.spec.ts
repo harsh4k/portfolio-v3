@@ -350,7 +350,15 @@ test.describe("input", () => {
     await expect(scene).not.toHaveAttribute("role", /.+/);
     // The wave lines it replaces are hidden, and the scene fills their band.
     await expect(page.locator(".s__waves .js-svg")).toBeHidden();
-    const [band, box] = await Promise.all([page.locator(".s__waves").boundingBox(), scene.boundingBox()]);
+    // Both boxes are read in the same frame: the hero is still settling on
+    // phones, so two separate reads can land a few pixels apart.
+    const { band, box } = await page.evaluate(() => {
+      const rect = (selector: string) => {
+        const r = document.querySelector(selector)?.getBoundingClientRect();
+        return r ? { x: r.x, y: r.y, width: r.width, height: r.height } : null;
+      };
+      return { band: rect(".s-hero .s__waves"), box: rect(".s-hero .js-stardust") };
+    });
     expect(box?.height).toBeGreaterThan(100);
     expect(box).toEqual(band);
 
