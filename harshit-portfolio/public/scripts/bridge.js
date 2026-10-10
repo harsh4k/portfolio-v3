@@ -337,9 +337,9 @@
     hideIntroLoader();
     revealPortfolio(true);
   }, INTRO_TIMEOUT_MS);
-  // The loader needs a few seconds to count out and open; if it never reports
+  // The loader needs up to ~8s to count every ten and open; if it never reports
   // back (it failed to load), uncover the ready scene anyway.
-  const LOADER_GRACE_MS = 8000;
+  const LOADER_GRACE_MS = 15000;
   window.addEventListener(
     "intro:ready",
     () => {
