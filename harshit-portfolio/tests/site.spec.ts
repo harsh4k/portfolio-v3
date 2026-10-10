@@ -285,6 +285,28 @@ test.describe("input", () => {
     await expect(page.locator(".s-hero")).toHaveCSS("opacity", "1");
   });
 
+  test("the hero's stardust scene fills the wave band as one still scene, with no loader parts", async ({ page }) => {
+    const errors = watchForErrors(page);
+    await page.goto("/", { waitUntil: "load" });
+    const scene = page.locator(".s-hero .js-stardust");
+    // Decoration only: hidden from assistive tech, nothing to press.
+    await expect(scene).toHaveAttribute("aria-hidden", "true");
+    await expect(scene).not.toHaveAttribute("role", /.+/);
+    // The wave lines it replaces are hidden, and the scene fills their band.
+    await expect(page.locator(".s__waves .js-svg")).toBeHidden();
+    const [band, box] = await Promise.all([page.locator(".s__waves").boundingBox(), scene.boundingBox()]);
+    expect(box?.height).toBeGreaterThan(100);
+    expect(box).toEqual(band);
+
+    // It shows once the hero is in, with its planets, and has no counter or rewind.
+    await expect(scene).toHaveAttribute("data-shown", "true");
+    expect(await scene.locator(".ssp-planet").count()).toBeGreaterThanOrEqual(2);
+    await expect(scene.locator(".ssp-count, .ssp-hint, .ssp-veil")).toHaveCount(0);
+    await scene.click();
+    await expect(scene).toHaveAttribute("data-shown", "true");
+    expect(errors).toEqual([]);
+  });
+
   test("Highlights tiles start uncovering as they come on screen, not half way", async ({ page }) => {
     await page.goto("/", { waitUntil: "load" });
     // Record how much of each tile is on screen when its wipe starts.

@@ -1,5 +1,6 @@
 ---
 import Separator from "./Separator.astro";
+import StardustStage from "./StardustStage.astro";
 import { profile } from "../data/profile";
 
 const [first, second] = profile.heroTitle;
@@ -7,8 +8,14 @@ const separatorClass = "style--primary s__separator js-separator astro-7dteeuzc 
 ---
 
 <div class="s-hero astro-7dteeuzc" data-intersect>
-  <a-waves data-intersect="" class="s__waves astro-7dteeuzc astro-opemy3db">
+  <!--
+    The engine's hero intro slides this element in and draws its lines, so it
+    stays; without data-intersect its lines never animate, and the stardust
+    scene fills it instead (their svg is hidden in StardustStage.astro).
+  -->
+  <a-waves class="s__waves astro-7dteeuzc astro-opemy3db">
     <svg class="js-svg astro-opemy3db"></svg>
+    <StardustStage />
   </a-waves>
   <div class="s__content js-content astro-7dteeuzc">
     <Separator class={separatorClass} codes={["Ant", "oi", "ne", "Wo", "dn", "ia", "ck"]} />
