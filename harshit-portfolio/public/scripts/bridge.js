@@ -320,6 +320,9 @@
   bindSwipeToEnter(document.getElementById("intro-layer"));
 
   // --- Loader on the red cover until the 3D scene draws its first frame ---
+  // The slat-count loader (src/components/IntroPreloader.tsx) runs its own
+  // count and exit. It finishes on intro:ready and reports back with
+  // intro:loader-done, or with intro:skip first when "Skip intro" was used.
   const INTRO_TIMEOUT_MS = 20000;
   const introLoader = document.querySelector(".js-intro-loader");
   const hideIntroLoader = () => {
@@ -330,33 +333,25 @@
     window.setTimeout(() => introLoader.remove(), 450);
   };
   // If the scene never renders (no WebGL, very slow network), go straight in.
-  const introTimeout = window.setTimeout(() => {
+  let introTimeout = window.setTimeout(() => {
     hideIntroLoader();
     revealPortfolio(true);
   }, INTRO_TIMEOUT_MS);
-  // Hide the loader at a moment the HC logo is fully drawn and filled (70% into
-  // its CSS cycle), and never before it has been drawn once: on a fast
-  // connection the scene is ready almost at once and the loader only flashed,
-  // or faded out half drawn.
-  const LOADER_FILLED_AT = 0.7;
-  const LOADER_MIN_MS = 2300;
-  const msUntilLogoFilled = () => {
-    const trace = introLoader?.querySelector(".intro-loader__trace");
-    const animation = trace?.getAnimations?.()[0];
-    const duration = animation?.effect?.getTiming().duration;
-    const time = animation?.currentTime;
-    if (typeof duration !== "number" || typeof time !== "number") {
-      return Math.max(0, LOADER_MIN_MS - performance.now());
-    }
-    const filled = duration * LOADER_FILLED_AT;
-    if (time < filled) return filled - time;
-    return (filled - (time % duration) + duration) % duration;
-  };
+  // The loader needs a few seconds to count out and open; if it never reports
+  // back (it failed to load), uncover the ready scene anyway.
+  const LOADER_GRACE_MS = 8000;
   window.addEventListener(
     "intro:ready",
-    () => window.setTimeout(hideIntroLoader, msUntilLogoFilled()),
+    () => {
+      // Remembered in case the scene is ready before the loader has hydrated.
+      window.__introSceneReady = true;
+      window.clearTimeout(introTimeout);
+      introTimeout = window.setTimeout(hideIntroLoader, LOADER_GRACE_MS);
+    },
     { once: true },
   );
+  window.addEventListener("intro:loader-done", hideIntroLoader, { once: true });
+  window.addEventListener("intro:skip", () => revealPortfolio(true), { once: true });
 
   import("/assets/index-wQJ6Ws5X.js")
     .then(() => {
@@ -396,6 +391,8 @@
 
   // --- Keyboard skip for accessibility (removed once the intro is gone) ---
   function onSkipKey(e) {
+    // Enter on the loader's own buttons (scatter, Skip intro) is theirs.
+    if (e.target instanceof Element && e.target.closest(".js-intro-loader")) return;
     if (e.key === "Escape" || e.key === "Enter") {
       observer.disconnect();
       revealPortfolio(true);
