@@ -15,43 +15,25 @@ interface Props {
 const { word, caption } = Astro.props;
 ---
 
-<div
-  class="ssp-root js-stardust"
-  data-phase="load"
-  role="button"
-  tabindex="0"
-  aria-label="Stardust scene. Press to rush the star."
->
+<div class="ssp-root js-stardust" aria-hidden="true">
   <div class="ssp-layer ssp-sky"></div>
-  <div class="ssp-layer ssp-nebula">
-    <div class="ssp-nebula-drift"></div>
-  </div>
-  <div class="ssp-layer js-ssp-sparks" aria-hidden="true"></div>
-  <div class="ssp-layer js-ssp-scene" aria-hidden="true"></div>
-  <canvas class="ssp-dots" aria-hidden="true"></canvas>
+  <div class="ssp-layer js-ssp-sparks"></div>
+  <div class="ssp-layer js-ssp-scene"></div>
+  <canvas class="ssp-dots"></canvas>
 
-  <div class="ssp-readout" aria-hidden="true">
-    <p class="ssp-count">000</p>
-    <p class="ssp-act"></p>
-  </div>
-
-  <div class="ssp-title" data-word={word} aria-hidden="true">
+  <div class="ssp-title" data-word={word}>
     <p class="ssp-word">
       {[...word].map((ch, i) => (
-        <span class="ssp-letter" style={`animation-delay: ${0.1 + i * 0.09}s`}>
+        <span class="ssp-letter" style={`animation-delay: ${0.6 + i * 0.09}s`}>
           {ch}
         </span>
       ))}
     </p>
     <p class="ssp-caption">{caption}</p>
-    <p class="ssp-hint"></p>
   </div>
 
   <div class="ssp-layer ssp-rain"></div>
-  <div class="ssp-layer ssp-vignette"></div>
   <div class="ssp-layer ssp-grain"></div>
-  <div class="ssp-veil" data-on="false"></div>
-  <span class="ssp-sr" aria-live="polite"></span>
 </div>
 
 <script>
@@ -76,7 +58,6 @@ const { word, caption } = Astro.props;
     --ssp-light: var(--color-white, #fff0eb);
     --ssp-mx: 0;
     --ssp-my: 0;
-    --ssp-p: 0;
 
     position: absolute;
     inset: 0;
@@ -85,15 +66,9 @@ const { word, caption } = Astro.props;
     background: var(--ssp-stage);
     color: var(--ssp-ink);
     font-family: var(--font-family-fraktion, monospace);
-    cursor: pointer;
-    outline: none;
     user-select: none;
     -webkit-user-select: none;
     -webkit-tap-highlight-color: transparent;
-  }
-
-  .ssp-root:focus-visible {
-    box-shadow: inset 0 0 0 2px var(--ssp-ink);
   }
 
   .ssp-root svg,
@@ -121,30 +96,6 @@ const { word, caption } = Astro.props;
     transform: translate3d(calc(var(--ssp-mx) * -8px), calc(var(--ssp-my) * -6px), 0);
   }
 
-  .ssp-nebula {
-    inset: -6%;
-    opacity: 0.3;
-    transform: translate3d(calc(var(--ssp-mx) * -16px), calc(var(--ssp-my) * -12px), 0) scale(1);
-    transition:
-      opacity 1.8s ease,
-      transform 2.6s cubic-bezier(0.55, 0, 0.2, 1);
-  }
-
-  .ssp-nebula-drift {
-    position: absolute;
-    inset: 0;
-    background-image: var(--ssp-nebula);
-    background-size: cover;
-    background-position: 50% 50%;
-    image-rendering: pixelated;
-    animation: ssp-nebula 60s ease-in-out infinite alternate;
-  }
-
-  .ssp-root:not([data-phase="load"]) .ssp-nebula {
-    opacity: 0;
-    transform: translate3d(calc(var(--ssp-mx) * -16px), calc(var(--ssp-my) * -12px), 0) scale(1.6);
-  }
-
   .ssp-spark {
     position: absolute;
     display: block;
@@ -157,89 +108,6 @@ const { word, caption } = Astro.props;
     transform: translate(-50%, -50%);
   }
 
-  /* ---- the cosmos: star, flares, planets ---- */
-  .ssp-rig {
-    position: absolute;
-    width: 0;
-    height: 0;
-    transition:
-      transform 2s cubic-bezier(0.65, 0, 0.25, 1) 0.1s,
-      opacity 1.2s ease 1.1s;
-  }
-
-  .ssp-root:not([data-phase="load"]) .ssp-rig {
-    transform: translate(var(--ssp-dx), var(--ssp-dy)) scale(0.35);
-    opacity: 0;
-  }
-
-  .ssp-glow {
-    position: absolute;
-    left: calc(var(--ssp-u) * -0.32);
-    top: calc(var(--ssp-u) * -0.32);
-    width: calc(var(--ssp-u) * 0.64);
-    height: calc(var(--ssp-u) * 0.64);
-    border-radius: 50%;
-    background: radial-gradient(
-      closest-side,
-      color-mix(in srgb, var(--ssp-light) 30%, transparent),
-      color-mix(in srgb, var(--ssp-light) 8%, transparent) 40%,
-      transparent
-    );
-    opacity: calc(0.35 + var(--ssp-p) * 0.65);
-  }
-
-  .ssp-flare {
-    position: absolute;
-    left: calc(var(--ssp-u) * -0.75);
-    top: -0.5px;
-    width: calc(var(--ssp-u) * 1.5);
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--ssp-ink) 47%, var(--ssp-ink) 53%, transparent);
-    opacity: 0.75;
-    transform: rotate(var(--a)) scaleX(calc(0.18 + var(--ssp-p) * 0.82));
-  }
-
-  .ssp-flare-b {
-    opacity: 0.4;
-  }
-
-  .ssp-core {
-    position: absolute;
-    left: calc(var(--ssp-u) * -0.06);
-    top: calc(var(--ssp-u) * -0.06);
-    width: calc(var(--ssp-u) * 0.12);
-    height: calc(var(--ssp-u) * 0.12);
-    animation: ssp-pulse 2.4s ease-in-out infinite;
-  }
-
-  .ssp-core svg {
-    display: block;
-    width: 100%;
-    height: 100%;
-    fill: var(--ssp-ink);
-    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--ssp-light) 90%, transparent))
-      drop-shadow(0 0 18px color-mix(in srgb, var(--ssp-light) 50%, transparent));
-  }
-
-  .ssp-orbit {
-    position: absolute;
-    left: calc(var(--ssp-u) * -0.2);
-    top: calc(var(--ssp-u) * -0.2);
-    width: calc(var(--ssp-u) * 0.4);
-    height: calc(var(--ssp-u) * 0.4);
-    animation: ssp-spin 16s linear infinite;
-  }
-
-  .ssp-moonlet {
-    position: absolute;
-    width: 5px;
-    height: 5px;
-    margin: -2.5px 0 0 -2.5px;
-    border-radius: 50%;
-    background: var(--ssp-ink);
-    box-shadow: 0 0 8px color-mix(in srgb, var(--ssp-light) 80%, transparent);
-  }
-
   .ssp-planet-par {
     position: absolute;
     width: 0;
@@ -247,43 +115,18 @@ const { word, caption } = Astro.props;
     transform: translate3d(calc(var(--ssp-mx) * var(--d) * -1px), calc(var(--ssp-my) * var(--d) * -1px), 0);
   }
 
+  /* Stippled like the moon and clouds; each fades in with the stage, then floats. */
   .ssp-planet {
     position: absolute;
-    transition:
-      transform 1.5s cubic-bezier(0.6, 0, 0.9, 0.4),
-      opacity 1.1s ease 0.25s;
-  }
-
-  .ssp-root:not([data-phase="load"]) .ssp-planet {
-    transform: translate(calc(var(--vx) * var(--ssp-u) * 0.9), calc(var(--vy) * var(--ssp-u) * 0.9)) scale(2.4);
+    background-size: 100% 100%;
     opacity: 0;
-  }
-
-  .ssp-planet img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    image-rendering: pixelated;
+    transition: opacity 1.6s ease;
     animation: ssp-float var(--f) ease-in-out infinite alternate;
   }
 
-  .ssp-rays {
-    position: absolute;
-    left: calc(var(--ssp-u) * -0.9);
-    top: calc(var(--ssp-u) * -0.9);
-    width: calc(var(--ssp-u) * 1.8);
-    height: calc(var(--ssp-u) * 1.8);
-    overflow: visible;
-    stroke: var(--ssp-ink);
-    stroke-width: 0.22;
-    stroke-linecap: round;
-    opacity: calc(0.12 + var(--ssp-p) * 0.6);
-    -webkit-mask-image: radial-gradient(closest-side, #000 30%, transparent 100%);
-    mask-image: radial-gradient(closest-side, #000 30%, transparent 100%);
-  }
-
-  .ssp-rays line {
-    animation: ssp-flow linear infinite;
+  .ssp-root[data-shown] .ssp-planet {
+    opacity: 1;
+    transition-delay: var(--w);
   }
 
   /* ---- the dots ---- */
@@ -329,7 +172,7 @@ const { word, caption } = Astro.props;
       transform 2.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .ssp-root:not([data-phase="load"]) .ssp-moon {
+  .ssp-root[data-shown] .ssp-moon {
     opacity: 1;
     transform: none;
     transition-delay: 1.5s;
@@ -348,7 +191,7 @@ const { word, caption } = Astro.props;
     transition: opacity 2s ease 1.6s;
   }
 
-  .ssp-root:not([data-phase="load"]) .ssp-moonglow {
+  .ssp-root[data-shown] .ssp-moonglow {
     opacity: 1;
   }
 
@@ -361,7 +204,7 @@ const { word, caption } = Astro.props;
       opacity 1.6s ease;
   }
 
-  .ssp-root:not([data-phase="load"]) .ssp-cloud {
+  .ssp-root[data-shown] .ssp-cloud {
     opacity: 1;
     transform: none;
     transition-delay: var(--w);
@@ -395,7 +238,7 @@ const { word, caption } = Astro.props;
     transition: stroke-dashoffset 2.4s cubic-bezier(0.65, 0, 0.35, 1);
   }
 
-  .ssp-root:not([data-phase="load"]) .ssp-draw {
+  .ssp-root[data-shown] .ssp-draw {
     stroke-dashoffset: 0;
     transition-delay: var(--w);
   }
@@ -405,7 +248,7 @@ const { word, caption } = Astro.props;
     transition: opacity 1.4s ease;
   }
 
-  .ssp-root:not([data-phase="load"]) .ssp-orn {
+  .ssp-root[data-shown] .ssp-orn {
     opacity: 1;
     transition-delay: 2s;
   }
@@ -420,7 +263,7 @@ const { word, caption } = Astro.props;
     transform: scaleX(-1);
   }
 
-  .ssp-root:not([data-phase="load"]) .ssp-curtain {
+  .ssp-root[data-shown] .ssp-curtain {
     clip-path: inset(0 0 0 0);
     transition-delay: 1.1s;
   }
@@ -440,7 +283,7 @@ const { word, caption } = Astro.props;
       transform 2s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .ssp-root:not([data-phase="load"]) .ssp-figure {
+  .ssp-root[data-shown] .ssp-figure {
     opacity: 1;
     transform: none;
     transition-delay: 2.1s;
@@ -459,7 +302,7 @@ const { word, caption } = Astro.props;
     transition: opacity 1.6s ease 1.9s;
   }
 
-  .ssp-root:not([data-phase="load"]) .ssp-pool {
+  .ssp-root[data-shown] .ssp-pool {
     opacity: 1;
   }
 
@@ -483,7 +326,7 @@ const { word, caption } = Astro.props;
     transition: opacity 1s ease;
   }
 
-  .ssp-root:not([data-phase="load"]) .ssp-stagespark {
+  .ssp-root[data-shown] .ssp-stagespark {
     opacity: 1;
     transition-delay: 2.4s;
   }
@@ -497,16 +340,8 @@ const { word, caption } = Astro.props;
     animation: ssp-rain 0.9s linear infinite;
   }
 
-  .ssp-root:not([data-phase="load"]) .ssp-rain {
+  .ssp-root[data-shown] .ssp-rain {
     opacity: 0.45;
-  }
-
-  .ssp-vignette {
-    background: radial-gradient(
-      ellipse at 50% 46%,
-      transparent 48%,
-      color-mix(in srgb, var(--ssp-ink) 38%, transparent) 100%
-    );
   }
 
   .ssp-grain {
@@ -519,38 +354,6 @@ const { word, caption } = Astro.props;
   }
 
   /* ---- read-outs ---- */
-  .ssp-readout {
-    position: absolute;
-    left: 0;
-    right: 0;
-    text-align: center;
-    pointer-events: none;
-    transition:
-      opacity 0.7s ease,
-      transform 1.1s cubic-bezier(0.6, 0, 0.3, 1);
-  }
-
-  .ssp-root:not([data-phase="load"]) .ssp-readout {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-
-  .ssp-count {
-    font-size: max(13px, calc(var(--ssp-u) * 0.026));
-    letter-spacing: 0.5em;
-    text-indent: 0.5em;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .ssp-root .ssp-act {
-    margin-top: calc(var(--ssp-u) * 0.012);
-    font-size: max(9px, calc(var(--ssp-u) * 0.0135));
-    letter-spacing: 0.34em;
-    text-indent: 0.34em;
-    text-transform: uppercase;
-    color: var(--ssp-dim);
-    animation: ssp-act-in 0.9s ease both;
-  }
 
   .ssp-title {
     position: absolute;
@@ -583,13 +386,13 @@ const { word, caption } = Astro.props;
     transform: translateY(0.35em) scale(1.15);
   }
 
-  .ssp-root[data-phase="reveal"] .ssp-letter {
+  .ssp-root[data-shown] .ssp-letter {
     animation: ssp-letter 1.4s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
   }
 
   .ssp-root .ssp-caption,
-  .ssp-root .ssp-hint {
-    margin-top: calc(var(--ssp-u) * 0.02);
+  .ssp-root .ssp-caption {
+    margin-top: calc(var(--ssp-u) * 0.018);
     font-size: max(9px, calc(var(--ssp-u) * 0.0145));
     letter-spacing: 0.34em;
     text-indent: 0.34em;
@@ -597,69 +400,13 @@ const { word, caption } = Astro.props;
     color: var(--ssp-dim);
     opacity: 0;
     transition:
-      opacity 1.2s ease 1s,
-      letter-spacing 2s cubic-bezier(0.2, 0.7, 0.2, 1) 1s;
+      opacity 1.2s ease 1.6s,
+      letter-spacing 2s cubic-bezier(0.2, 0.7, 0.2, 1) 1.6s;
   }
 
-  .ssp-root .ssp-hint {
-    font-size: max(8px, calc(var(--ssp-u) * 0.012));
-    transition-delay: 2.2s;
-  }
-
-  .ssp-root[data-phase="reveal"] .ssp-caption {
+  .ssp-root[data-shown] .ssp-caption {
     opacity: 1;
     letter-spacing: 0.44em;
-  }
-
-  .ssp-root[data-phase="reveal"] .ssp-hint {
-    opacity: 0.7;
-    animation: ssp-breathe 2.6s ease-in-out 3s infinite;
-  }
-
-  .ssp-veil {
-    position: absolute;
-    inset: 0;
-    z-index: 6;
-    background: var(--ssp-stage);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.75s ease;
-  }
-
-  .ssp-veil[data-on="true"] {
-    opacity: 1;
-  }
-
-  .ssp-sr {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-  }
-
-  @keyframes ssp-flow {
-    to {
-      stroke-dashoffset: -12;
-    }
-  }
-
-  @keyframes ssp-spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
-  @keyframes ssp-pulse {
-    0%,
-    100% {
-      transform: scale(0.88) rotate(0deg);
-    }
-
-    50% {
-      transform: scale(1.08) rotate(8deg);
-    }
   }
 
   @keyframes ssp-twinkle {
@@ -705,16 +452,6 @@ const { word, caption } = Astro.props;
     }
   }
 
-  @keyframes ssp-nebula {
-    from {
-      transform: translate3d(-1.5%, 1%, 0);
-    }
-
-    to {
-      transform: translate3d(1.5%, -1%, 0);
-    }
-  }
-
   @keyframes ssp-rain {
     from {
       background-position: 0 0;
@@ -755,34 +492,11 @@ const { word, caption } = Astro.props;
     }
   }
 
-  @keyframes ssp-act-in {
-    from {
-      opacity: 0;
-      filter: blur(6px);
-    }
-
-    to {
-      opacity: 1;
-      filter: blur(0);
-    }
-  }
-
-  @keyframes ssp-breathe {
-    50% {
-      opacity: 0.3;
-    }
-  }
-
   @media (prefers-reduced-motion: reduce) {
-    .ssp-nebula-drift,
-    .ssp-rays line,
-    .ssp-core,
-    .ssp-orbit,
-    .ssp-planet img,
+    .ssp-planet,
     .ssp-cloud-drift,
     .ssp-curtain-sway,
-    .ssp-grain,
-    .ssp-root .ssp-hint {
+    .ssp-grain {
       animation: none;
     }
 
@@ -795,8 +509,6 @@ const { word, caption } = Astro.props;
       display: none;
     }
 
-    .ssp-rig,
-    .ssp-planet,
     .ssp-cloud,
     .ssp-moon,
     .ssp-figure {
@@ -809,11 +521,6 @@ const { word, caption } = Astro.props;
 
     .ssp-draw {
       transition-duration: 0.01s;
-    }
-
-    .ssp-root:not([data-phase="load"]) .ssp-rig,
-    .ssp-root:not([data-phase="load"]) .ssp-planet {
-      transform: none;
     }
 
     .ssp-letter {
