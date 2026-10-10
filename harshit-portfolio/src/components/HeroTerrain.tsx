@@ -30,6 +30,9 @@ function readPalette(el: Element): Palette {
   };
 }
 
+/** How long the header and hero take to come in after the intro. */
+const ENTRANCE_MS = 2500;
+
 const still = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 const entered = () => still() || document.documentElement.classList.contains("intro-done");
 
@@ -49,13 +52,18 @@ export default function HeroTerrain({ mount }: { mount: HTMLElement }) {
     theme.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
 
     const show = () => setShown(true);
+    // After a skipped intro, wait out the header and hero entrance (as the old
+    // stardust scene did): on slow GPUs the terrain's first frames stall it.
+    let timer = 0;
+    const showLater = () => (timer = window.setTimeout(show, ENTRANCE_MS));
     const waves = mount.closest("a-waves");
     waves?.addEventListener("introend", show, { once: true });
-    window.addEventListener("portfolio:entered", show, { once: true });
+    window.addEventListener("portfolio:entered", showLater, { once: true });
     return () => {
       theme.disconnect();
+      window.clearTimeout(timer);
       waves?.removeEventListener("introend", show);
-      window.removeEventListener("portfolio:entered", show);
+      window.removeEventListener("portfolio:entered", showLater);
     };
   }, [mount]);
 
