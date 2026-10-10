@@ -2,8 +2,8 @@
  * The hero's stardust scene, in the band the wave lines used to fill. Drawn
  * from the "Stardust Stage Preloader" React component's final act, without its
  * loading parts: a stippled night with a moonlit proscenium stage in the
- * middle (moon and halo, arch, curtains, clouds, a lone figure, the wordmark in
- * the reflection) and stippled planets hung in the sky on either side, clear
+ * middle (moon and halo, arch, curtains, clouds, a lone figure and its reflection)
+ * and stippled planets hung in the sky on either side, clear
  * of the arch. When the hero comes in, the stage draws itself in once; after
  * that it only breathes. The pointer parts the dust and leans the camera.
  *
@@ -86,11 +86,11 @@ const RING_X = 1.9;
 const RING_Y = 0.62;
 
 // The stage box and everything placed in it, in root pixels. The stage
-// widens with the band and fills most of its height; the wordmark sits in the
-// reflection under the floor.
+// widens with the band and fills most of its height, with its reflection
+// under the floor.
 function layout(w: number, h: number) {
   const a = Math.min(1.75, Math.max(0.9, w / Math.max(1, h)));
-  let H = h * 0.86;
+  let H = h * 0.9;
   let W = H * a;
   if (W > w * 0.94) {
     W = w * 0.94;
@@ -98,8 +98,8 @@ function layout(w: number, h: number) {
   }
   const x0 = (w - W) / 2;
   // When the band is taller than the stage needs (phones), sit the stage low
-  // so the wordmark ends near the bottom and the room above is sky.
-  const y0 = Math.max(h * 0.03, h * 0.97 - H * 1.04);
+  // so the reflection ends near the bottom and the room above is sky.
+  const y0 = Math.max(h * 0.03, h * 0.98 - H * 0.98);
   const st = {
     w,
     h,
@@ -201,6 +201,10 @@ function ctx(c: HTMLCanvasElement) {
 
 // Scatter dots wherever a shape is, more of them where tone is high. The
 // shape is drawn in white onto a mask; tone gets (x, y, coverage), all 0–1.
+// Paint scale (device pixels per CSS pixel) for the textures being painted, so
+// a stipple dot is the same size on screen at any pixel density.
+let paintScale = 1;
+
 function stipple(
   w: number,
   h: number,
@@ -227,7 +231,7 @@ function stipple(
   }
   const rnd = rng(seed);
   g.fillStyle = ink;
-  const count = Math.round(w * h * density);
+  const count = Math.round((w * h * density) / (paintScale * paintScale));
   for (let k = 0; k < count; k++) {
     const x = rnd() * w;
     const y = rnd() * h;
@@ -235,9 +239,9 @@ function stipple(
     const b = rnd();
     if (a <= 0.004) continue;
     if (b > tone(x / w, y / h, a)) continue;
-    g.globalAlpha = 0.5 + rnd() * 0.5;
-    const s = rnd() > 0.93 ? 1.6 : 1;
-    g.fillRect(x, y, s, s);
+    g.globalAlpha = 0.8 + rnd() * 0.2;
+    const s = (rnd() > 0.9 ? 2 : 1.4) * paintScale;
+    g.fillRect(x - s / 2, y - s / 2, s, s);
   }
   g.globalAlpha = 1;
   return c;
@@ -534,6 +538,7 @@ const toUrl = (c: HTMLCanvasElement) => c.toDataURL("image/png");
 function paintAll(pal: Palette, st: Stage, q: number): Textures {
   const { ink, stage } = pal;
   const px = (v: number) => Math.max(8, Math.round(v * q));
+  paintScale = q;
   const profiles = [
     (x: number) => Math.pow(1 - Math.abs(x - 0.22) / 0.78, 1.6),
     (x: number) => Math.pow(1 - Math.abs(x - 0.78) / 0.78, 1.6),
@@ -651,7 +656,7 @@ function buildField(st: Stage, n: number): Dot[] {
       y,
       alpha: a,
       delay,
-      size: 0.9 + Math.pow(r4, 5) * 1.3,
+      size: 1.3 + Math.pow(r4, 5) * 1.5,
       depth: st.u * (role === 4 ? 0.012 + r4 * 0.014 : 0.008),
       ox: 0,
       oy: 0,
@@ -773,12 +778,12 @@ function buildScene(st: Stage, tex: Textures | null): Node[] {
         "svg",
         { class: "ssp-arch", width: st.W, height: st.H, viewBox: `0 0 ${st.W} ${st.H}`, "aria-hidden": "true" },
         [
-          draw(archOuter, 2.2, "0.4s"),
-          draw(archInner, 1, "0.7s", { opacity: 0.7 }),
-          svg("path", { class: "ssp-orn", d: scallops, "stroke-width": 1, "stroke-dasharray": "1.5 3", opacity: 0.65 }),
-          ...[L - col, Rt + col].map((x) => draw(`M${x} ${F}V${S + st.H * 0.02}`, 1, "0.9s", { opacity: 0.55 })),
+          draw(archOuter, 3, "0.4s"),
+          draw(archInner, 1.6, "0.7s", { opacity: 0.85 }),
+          svg("path", { class: "ssp-orn", d: scallops, "stroke-width": 1.4, "stroke-dasharray": "2 3", opacity: 0.85 }),
+          ...[L - col, Rt + col].map((x) => draw(`M${x} ${F}V${S + st.H * 0.02}`, 1.4, "0.9s", { opacity: 0.75 })),
           ...[L, Rt].map((x) =>
-            svg("g", { class: "ssp-orn", "stroke-width": 1.2 }, [
+            svg("g", { class: "ssp-orn", "stroke-width": 1.6 }, [
               svg("path", { d: `M${x - col * 1.6} ${S + st.H * 0.02}H${x + col * 1.6}` }),
               svg("path", { d: `M${x - col * 1.3} ${S + st.H * 0.035}H${x + col * 1.3}`, opacity: 0.6 }),
               svg("path", { d: `M${x - col * 1.7} ${F - 1}H${x + col * 1.7}` }),
@@ -794,7 +799,12 @@ function buildScene(st: Stage, tex: Textures | null): Node[] {
               }),
             ]),
           ),
-          svg("path", { class: "ssp-orn", d: `M${L - col * 2} ${F}H${Rt + col * 2}`, "stroke-width": 1, opacity: 0.5 }),
+          svg("path", {
+            class: "ssp-orn",
+            d: `M${L - col * 2} ${F}H${Rt + col * 2}`,
+            "stroke-width": 1.4,
+            opacity: 0.75,
+          }),
         ],
       ),
       el(
@@ -909,7 +919,6 @@ class StardustStage {
   private readonly canvas: HTMLCanvasElement;
   private readonly scene: HTMLElement;
   private readonly sky: HTMLElement;
-  private readonly title: HTMLElement | null;
   private readonly still = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   /** When the scene came in, or null while it waits for the hero's entrance. */
@@ -937,7 +946,6 @@ class StardustStage {
     this.canvas = canvasEl;
     this.scene = sceneEl;
     this.sky = skyEl;
-    this.title = root.querySelector<HTMLElement>(".ssp-title");
     this.st = layout(1280, 800);
 
     this.readPalette();
@@ -995,7 +1003,6 @@ class StardustStage {
     const n = Math.round(Math.min(3600, Math.max(1300, (w * h) / 260)) * (w < 768 ? 0.7 : 1));
     this.dots = buildField(this.st, n);
     this.root.style.setProperty("--ssp-u", px(this.st.u));
-    if (this.title) this.title.style.top = px(this.st.floor + this.st.H * 0.035);
     this.repaint();
   }
 

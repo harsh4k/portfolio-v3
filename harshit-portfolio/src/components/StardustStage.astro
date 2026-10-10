@@ -5,14 +5,6 @@
  * paints everything else, and these styles move it. The .ssp- class prefix
  * and the --ssp- custom properties keep it apart from the copied design.
  */
-interface Props {
-  /** Wordmark set under the stage. */
-  word: string;
-  /** Line under the wordmark. */
-  caption: string;
-}
-
-const { word, caption } = Astro.props;
 ---
 
 <div class="ssp-root js-stardust" aria-hidden="true">
@@ -20,17 +12,6 @@ const { word, caption } = Astro.props;
   <div class="ssp-layer js-ssp-sparks"></div>
   <div class="ssp-layer js-ssp-scene"></div>
   <canvas class="ssp-dots"></canvas>
-
-  <div class="ssp-title" data-word={word}>
-    <p class="ssp-word">
-      {[...word].map((ch, i) => (
-        <span class="ssp-letter" style={`animation-delay: ${0.6 + i * 0.09}s`}>
-          {ch}
-        </span>
-      ))}
-    </p>
-    <p class="ssp-caption">{caption}</p>
-  </div>
 
   <div class="ssp-layer ssp-rain"></div>
   <div class="ssp-layer ssp-grain"></div>
@@ -53,7 +34,6 @@ const { word, caption } = Astro.props;
   .ssp-root {
     --ssp-stage: var(--color-primary, #f40c3f);
     --ssp-ink: var(--color-secondary, #160000);
-    --ssp-dim: color-mix(in srgb, var(--ssp-ink) 62%, var(--ssp-stage));
     /* Highlights: the design's off-white, so glows read as light on the red. */
     --ssp-light: var(--color-white, #fff0eb);
     --ssp-mx: 0;
@@ -92,7 +72,7 @@ const { word, caption } = Astro.props;
     inset: -4%;
     background-image: var(--ssp-stars);
     background-size: 512px 512px;
-    opacity: 0.75;
+    opacity: 1;
     transform: translate3d(calc(var(--ssp-mx) * -8px), calc(var(--ssp-my) * -6px), 0);
   }
 
@@ -310,7 +290,7 @@ const { word, caption } = Astro.props;
     position: absolute;
     left: 0;
     overflow: hidden;
-    opacity: 0.32;
+    opacity: 0.4;
     filter: blur(0.6px);
     -webkit-mask-image: linear-gradient(to bottom, #000, transparent 75%);
     mask-image: linear-gradient(to bottom, #000, transparent 75%);
@@ -341,7 +321,7 @@ const { word, caption } = Astro.props;
   }
 
   .ssp-root[data-shown] .ssp-rain {
-    opacity: 0.45;
+    opacity: 0.3;
   }
 
   .ssp-grain {
@@ -351,62 +331,6 @@ const { word, caption } = Astro.props;
     background-image: var(--ssp-grain);
     background-size: 160px 160px;
     animation: ssp-grain 0.8s steps(5) infinite;
-  }
-
-  /* ---- read-outs ---- */
-
-  .ssp-title {
-    position: absolute;
-    left: 0;
-    right: 0;
-    z-index: 2;
-    text-align: center;
-    pointer-events: none;
-  }
-
-  .ssp-word {
-    font-family: var(--font-family-editorial, serif);
-    font-size: max(26px, calc(var(--ssp-u) * 0.072));
-    font-weight: 400;
-    letter-spacing: 0.3em;
-    text-indent: 0.3em;
-    line-height: 1;
-    text-transform: uppercase;
-    white-space: nowrap;
-  }
-
-  .ssp-letter {
-    display: inline-block;
-    color: transparent;
-    background: linear-gradient(180deg, var(--ssp-ink) 20%, var(--ssp-dim) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    opacity: 0;
-    filter: blur(12px);
-    transform: translateY(0.35em) scale(1.15);
-  }
-
-  .ssp-root[data-shown] .ssp-letter {
-    animation: ssp-letter 1.4s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
-  }
-
-  .ssp-root .ssp-caption,
-  .ssp-root .ssp-caption {
-    margin-top: calc(var(--ssp-u) * 0.018);
-    font-size: max(9px, calc(var(--ssp-u) * 0.0145));
-    letter-spacing: 0.34em;
-    text-indent: 0.34em;
-    text-transform: uppercase;
-    color: var(--ssp-dim);
-    opacity: 0;
-    transition:
-      opacity 1.2s ease 1.6s,
-      letter-spacing 2s cubic-bezier(0.2, 0.7, 0.2, 1) 1.6s;
-  }
-
-  .ssp-root[data-shown] .ssp-caption {
-    opacity: 1;
-    letter-spacing: 0.44em;
   }
 
   @keyframes ssp-twinkle {
@@ -484,14 +408,6 @@ const { word, caption } = Astro.props;
     }
   }
 
-  @keyframes ssp-letter {
-    to {
-      opacity: 1;
-      filter: blur(0);
-      transform: none;
-    }
-  }
-
   @media (prefers-reduced-motion: reduce) {
     .ssp-planet,
     .ssp-cloud-drift,
@@ -521,11 +437,6 @@ const { word, caption } = Astro.props;
 
     .ssp-draw {
       transition-duration: 0.01s;
-    }
-
-    .ssp-letter {
-      filter: none;
-      transform: none;
     }
   }
 </style>
