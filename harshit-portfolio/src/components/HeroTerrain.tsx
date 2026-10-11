@@ -1,0 +1,93 @@
+import { useEffect, useState } from "react";
+import { flushSync } from "react-dom";
+import WireTerrain from "@/components/ui/wire-terrain";
+
+/**
+ * The hero band's wire terrain (src/components/ui/wire-terrain.tsx, from
+ * Originkit), drawn in the page's colours: --color-primary for the ground and
+ * sky, --color-secondary for the wires, --color-shadow for the sun. The
+ * component needs real colour values, not var(), so they are read from the
+ * page and read again when the theme switch changes them. A theme can set
+ * --color-sun to give the sun its own colour.
+ *
+ * It waits for the hero's entrance before it starts moving, so it doesn't
+ * compete with the 3D intro for the GPU. Reduced Motion gets one still frame.
+ */
+
+interface Palette {
+  ground: string;
+  wire: string;
+  sun: string;
+}
+
+const FALLBACK: Palette = { ground: "#f40c3f", wire: "#160000", sun: "#540000" };
+
+function readPalette(el: Element): Palette {
+  const css = getComputedStyle(el);
+  const read = (name: string, fallback: string) => css.getPropertyValue(name).trim() || fallback;
+  return {
+    ground: read("--color-primary", FALLBACK.ground),
+    wire: read("--color-secondary", FALLBACK.wire),
+    sun: read("--color-sun", "") || read("--color-shadow", FALLBACK.sun),
+  };
+}
+
+/** How long the header and hero take to come in after the intro. */
+const ENTRANCE_MS = 2500;
+
+const still = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+const entered = () => still() || document.documentElement.classList.contains("intro-done");
+
+export default function HeroTerrain({ mount }: { mount: HTMLElement }) {
+  const [palette, setPalette] = useState(() => readPalette(mount));
+  const [shown, setShown] = useState(entered);
+
+  useEffect(() => {
+    // The theme switch swaps the colour variables through a class on <html>.
+    const theme = new MutationObserver(() => {
+      const next = readPalette(mount);
+      // Synchronously, so the terrain's next frame is already in the new
+      // colours when the theme wipe (scripts/theme-wipe.ts) snapshots it.
+      flushSync(() =>
+        setPalette((prev) =>
+          prev.ground === next.ground && prev.wire === next.wire && prev.sun === next.sun ? prev : next,
+        ),
+      );
+      if (entered()) setShown(true);
+    });
+    theme.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+
+    const show = () => setShown(true);
+    // After a skipped intro, wait out the header and hero entrance (as the old
+    // stardust scene did): on slow GPUs the terrain's first frames stall it.
+    let timer = 0;
+    const showLater = () => (timer = window.setTimeout(show, ENTRANCE_MS));
+    const waves = mount.closest("a-waves");
+    waves?.addEventListener("introend", show, { once: true });
+    window.addEventListener("portfolio:entered", showLater, { once: true });
+    return () => {
+      theme.disconnect();
+      window.clearTimeout(timer);
+      waves?.removeEventListener("introend", show);
+      window.removeEventListener("portfolio:entered", showLater);
+    };
+  }, [mount]);
+
+  useEffect(() => {
+    if (shown) mount.dataset["shown"] = "true";
+  }, [mount, shown]);
+
+  const reduced = still();
+  return (
+    <WireTerrain
+      background={palette.ground}
+      lineColor={palette.wire}
+      accent={palette.sun}
+      running={shown}
+      speed={reduced ? 0 : 100}
+      hover={reduced ? 0 : 200}
+      // The component's own 1200x800 minimum would overflow the band on phones.
+      style={{ minWidth: 0, minHeight: 0 }}
+    />
+  );
+}
