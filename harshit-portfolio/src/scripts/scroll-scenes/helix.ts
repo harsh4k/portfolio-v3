@@ -22,8 +22,6 @@ export const buildHelix: SceneBuilder = ({ three, scene, camera, section, palett
     materials.push(material);
     return material;
   };
-  // Solid tiles in the wire colour, so the stairs read as black slabs.
-  const fill = new three.MeshBasicMaterial({ color: palette.wire });
 
   const marks = [...section.querySelectorAll<HTMLElement>(".js-s3d-step .s3d__mark")].map(
     (el) => el.textContent?.trim() ?? "",
@@ -37,8 +35,7 @@ export const buildHelix: SceneBuilder = ({ three, scene, camera, section, palett
   core.position.y = (-total * DROP) / 2;
   scene.add(core);
 
-  const tileGeometry = new three.BoxGeometry(2.4, 0.08, 0.7);
-  const stepGeometry = new three.EdgesGeometry(tileGeometry);
+  const stepGeometry = new three.EdgesGeometry(new three.BoxGeometry(2.4, 0.08, 0.7));
   const plain = line(0.55);
   const marked = line(1);
   const handrail: ThreeModule.Vector3[] = [];
@@ -50,7 +47,6 @@ export const buildHelix: SceneBuilder = ({ three, scene, camera, section, palett
     const step = new three.LineSegments(stepGeometry, isStage ? marked : plain);
     step.position.set(Math.cos(angle) * 1.6, y, -Math.sin(angle) * 1.6);
     step.rotation.y = angle;
-    step.add(new three.Mesh(tileGeometry, fill));
     scene.add(step);
     handrail.push(new three.Vector3(Math.cos(angle) * 2.8, y + 0.9, -Math.sin(angle) * 2.8));
     if (isStage) {
@@ -78,7 +74,6 @@ export const buildHelix: SceneBuilder = ({ three, scene, camera, section, palett
     },
     recolor(next) {
       materials.forEach((material) => material.color.set(next.wire));
-      fill.color.set(next.wire);
       labels.forEach((label) => label.setColor(next.wire));
     },
   };

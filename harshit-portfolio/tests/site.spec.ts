@@ -874,10 +874,16 @@ test.describe("command menu and footer extras", () => {
     expect(await list.evaluate((el) => el.scrollHeight > el.clientHeight)).toBe(true);
   });
 
-  test("the footer copies the email address and says so", async ({ page, context }) => {
+  test("the command menu copies the email address and says so; the footer has no copy button", async ({
+    page,
+    context,
+  }) => {
     await context.grantPermissions(["clipboard-read", "clipboard-write"]);
     await enterSite(page);
-    await page.locator(".js-copy-email").click();
+    await expect(page.locator(".site-foot button")).toHaveCount(0);
+    await page.keyboard.press("Control+k");
+    await page.keyboard.type("copy email");
+    await page.keyboard.press("Enter");
     await expect(page.locator(".js-sn-toast")).toHaveText("Email copied");
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe("harshitsinhchauhan250@gmail.com");
   });
