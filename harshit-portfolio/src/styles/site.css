@@ -21,8 +21,8 @@
 
 /*
   The hero is about 110px shorter than the screen, so the top of About sits
-  inside the first viewport. Under the 3D intro and the logo reveal that follows
-  it, only the covers keep it hidden, and the logo reveal's cover turns
+  inside the first viewport. Under the 3D intro and the HC loader that follows
+  it, only the covers keep it hidden, and the HC loader's cover turns
   transparent while it draws, so the About text showed through at the bottom.
   Keep everything below the hero hidden until the engine unlocks scrolling.
 */
@@ -232,7 +232,8 @@ html.theme-contrasted {
   --color-sun: #9fe870;
 }
 
-/* The About stars are filled with the red theme's ink. */
+/* The HC logo and the About stars are filled with the red theme's ink. */
+html.theme-contrasted .js-logo path,
 html.theme-contrasted .s__award svg path[fill] {
   fill: var(--color-secondary);
 }
@@ -316,80 +317,4 @@ html.theme-wipe-back::view-transition-new(root) {
   to {
     clip-path: inset(0 0 0 0);
   }
-}
-
-/*
-  The logo: the intro's smirk face on a white disc (public/images/logo.svg).
-  It keeps its own black and white in both themes, like a sticker. The header
-  box was sized for an inline SVG, so the image takes the same size.
-*/
-.site-head.astro-5qrshpxv .sb-logo.astro-5qrshpxv img.site-logo {
-  display: block;
-  width: 3rem;
-  height: 3rem;
-}
-
-@media only screen and (max-width: 767px) and (orientation: landscape), only screen and (max-width: 576px) {
-  .site-head.astro-5qrshpxv .sb-logo.astro-5qrshpxv img.site-logo {
-    width: 1.875rem;
-    height: 1.875rem;
-  }
-}
-
-/*
-  Intro logo reveal (src/components/SiteChrome.astro): the logo in three
-  vertical slices. Each slice shows its third of a full-size logo, overlapping
-  its neighbour by a pixel so no seam shows while they scale.
-*/
-.site-intro.astro-j7pv25f6 .sb-logo.astro-j7pv25f6.js-logo {
-  --logo: 5rem;
-  width: var(--logo);
-  height: var(--logo);
-}
-
-@media only screen and (max-width: 767px) and (orientation: landscape), only screen and (max-width: 576px) {
-  .site-intro.astro-j7pv25f6 .sb-logo.astro-j7pv25f6.js-logo {
-    --logo: 3.75rem;
-  }
-}
-
-.site-intro.astro-j7pv25f6 .sb-logo.astro-j7pv25f6 .sb__slice.sb__path.astro-j7pv25f6 {
-  top: 0;
-  width: calc(var(--logo) / 3 + 1px);
-  height: 100%;
-  overflow: hidden;
-  background: none;
-  transform-origin: 50% 100%;
-}
-
-.site-intro.astro-j7pv25f6 .sb-logo.astro-j7pv25f6 .sb__slice--0.sb__path.astro-j7pv25f6 {
-  left: 0;
-}
-
-.site-intro.astro-j7pv25f6 .sb-logo.astro-j7pv25f6 .sb__slice--1.sb__path.astro-j7pv25f6 {
-  left: calc(var(--logo) / 3);
-}
-
-.site-intro.astro-j7pv25f6 .sb-logo.astro-j7pv25f6 .sb__slice--2.sb__path.astro-j7pv25f6 {
-  left: calc(var(--logo) * 2 / 3);
-}
-
-.site-intro .sb__slice img {
-  position: absolute;
-  top: 0;
-  max-width: none;
-  width: var(--logo);
-  height: var(--logo);
-}
-
-.site-intro .sb__slice--1 img {
-  left: calc(var(--logo) / -3);
-}
-
-.site-intro .sb__slice--2 img {
-  left: calc(var(--logo) * -2 / 3);
-}
-
-.site-intro.astro-j7pv25f6 .sb-logo.astro-j7pv25f6 .sb__path--h.sb__path.astro-j7pv25f6 {
-  display: none;
 }
