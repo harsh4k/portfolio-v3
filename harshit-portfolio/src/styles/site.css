@@ -4,28 +4,15 @@
 */
 
 /*
-  Holds the slat-count loader on the red intro cover until the 3D scene has
-  drawn its first frame. The loader paints its own red; this only places it.
+  The red cover over the 3D intro until the scene has drawn its first frame.
 */
 .intro-loader {
   position: absolute;
   inset: 0;
   /* Above the 3D scene's own page (z-index 100), which otherwise hides it. */
   z-index: 200;
-  /* Opaque until React mounts, so the 3D scene drawing underneath never shows through. */
   background: #ff0b36;
   transition: opacity 0.4s ease;
-}
-
-/* Once the count starts the blinds paint the red, so they can slide away. */
-.intro-loader:has(.scp-gate:not([data-phase="idle"])) {
-  background: transparent;
-}
-
-/* The loader's dimmed HUD type is 3.1:1 on this red; 0.85 keeps it AA (4.5:1). */
-.intro-loader .scp-dim,
-.intro-loader .scp-skip {
-  opacity: 0.85;
 }
 
 .intro-loader.is-done {
