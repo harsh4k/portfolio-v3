@@ -13,10 +13,10 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"
-        manifestPlaceholders["hostName"] = "harshitchauhan.dev"
-        manifestPlaceholders["defaultUrl"] = "https://harshitchauhan.dev/"
+        manifestPlaceholders["hostName"] = "harshh.pages.dev"
+        manifestPlaceholders["defaultUrl"] = "https://harshh.pages.dev/"
         manifestPlaceholders["assetStatements"] =
-            """[{"relation":["delegate_permission/common.handle_all_urls"],"target":{"namespace":"web","site":"https://harshitchauhan.dev"}}]"""
+            """[{"relation":["delegate_permission/common.handle_all_urls"],"target":{"namespace":"web","site":"https://harshh.pages.dev"}}]"""
     }
 
     buildTypes {
