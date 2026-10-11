@@ -384,6 +384,32 @@ test.describe("input", () => {
     expect(errors).toEqual([]);
   });
 
+  test("the footer spells HARSHIT CHAUHAN in the glyph wordmark, one line wide and two on phones", async ({ page }) => {
+    const errors = watchForErrors(page);
+    await page.goto("/", { waitUntil: "load" });
+    const marks = page.locator(".site-foot .sgf");
+    await expect(marks).toHaveCount(2);
+    // Only the variant for this width shows, and it spans the footer.
+    const shown = page.locator(".site-foot .js-wordmark:visible");
+    await expect(shown).toHaveCount(1);
+    const wide = (page.viewportSize()?.width ?? 0) >= 768;
+    await expect(shown).toHaveAttribute("data-variant", wide ? "wide" : "stacked");
+    // Screen readers get the name once; the drawing is hidden from them.
+    await expect(shown.locator(".sr-only")).toHaveText("Harshit Chauhan");
+    await expect(shown.locator("svg.sgf-svg")).toHaveAttribute("aria-hidden", "true");
+    // All 14 letters are drawn (each as two halves for the hover slice), plus the shutter's three blades.
+    await expect(shown.locator(".sgf-up")).toHaveCount(14);
+    await expect(shown.locator("polygon")).toHaveCount(3);
+    const foot = await page.locator(".site-foot").boundingBox();
+    const svg = await shown.locator(".sgf-svg").boundingBox();
+    expect(svg?.height).toBeGreaterThan(20);
+    expect(svg?.x).toBeGreaterThanOrEqual(foot?.x ?? 0);
+    expect((svg?.x ?? 0) + (svg?.width ?? 0)).toBeLessThanOrEqual((foot?.x ?? 0) + (foot?.width ?? 0));
+    // Under Reduced Motion the letters are in place, not waiting to rise.
+    await expect(shown.locator(".sgf")).toHaveAttribute("data-in", "true");
+    expect(errors).toEqual([]);
+  });
+
   test("Highlights tiles start uncovering as they come on screen, not half way", async ({ page }) => {
     await page.goto("/", { waitUntil: "load" });
     // Record how much of each tile is on screen when its wipe starts.
