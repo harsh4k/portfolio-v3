@@ -64,6 +64,7 @@ export const highlights = [
     kind: "text",
     lines: ["Local AI & Voice Tools", "Tauri, Rust & Node Pipelines"],
   },
+  { slot: "CSSDA2016", burst: "bug", kind: "text", lines: [`Based in ${profile.location}`, profile.availability] },
   {
     slot: "CSSDA2015",
     burst: "face",
