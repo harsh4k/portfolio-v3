@@ -515,9 +515,11 @@ test.describe("input", () => {
     // Screen readers get the name once; the letters are hidden from them.
     await expect(mark.locator(".sr-only")).toHaveText("Harshit Chauhan");
     await expect(mark.locator(".sgf-line")).toHaveAttribute("aria-hidden", "true");
-    // All 14 letters (each set twice for the hover slice) and the shutter's three blades.
+    // All 14 letters (each set twice for the hover slice), with a plain gap between the
+    // names and no shutter mark.
     await expect(mark.locator(".sgf-up")).toHaveCount(14);
-    await expect(mark.locator("polygon")).toHaveCount(3);
+    await expect(mark.locator(".sgf-gap")).toHaveCount(1);
+    await expect(mark.locator("svg")).toHaveCount(0);
     // The self-hosted font is the one in use, and the line fits inside the footer.
     const loaded = await page.evaluate(async () => {
       await document.fonts.load('16px "Audiowide"');
