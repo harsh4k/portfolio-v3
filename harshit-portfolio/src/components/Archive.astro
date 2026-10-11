@@ -52,7 +52,11 @@ const catchLines = ["Building", "with intent", "since", String(profile.since)];
   </div>
   <div class="s__catcher astro-fiibiggq">
     {["distorted", "normal"].map((variant) => (
-      <div class={`s__catcher__${variant}-wrapper astro-fiibiggq`}>
+      // The distorted copy is a visual double of the normal one, so it is read once.
+      <div
+        class={`s__catcher__${variant}-wrapper astro-fiibiggq`}
+        aria-hidden={variant === "distorted" ? "true" : undefined}
+      >
         <div class={`s__catcher__${variant} astro-fiibiggq`}>
           <div class={`s__catcher__text s__catcher__text--${variant} astro-fiibiggq`}>
             {catchLines.map((line, index) => (
