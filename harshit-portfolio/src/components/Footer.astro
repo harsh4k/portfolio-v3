@@ -1,26 +1,41 @@
 ---
-import { profile } from "../data/profile";
+import FooterWordmark from "./FooterWordmark";
 ---
 
-<footer class="site-foot astro-75cegwoc">
-  <div class="site-foot__logo astro-75cegwoc">
-    <a href="/" class="astro-75cegwoc">
-      <svg
-        width="280"
-        height="280"
-        viewBox="0 0 280 280"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        class="astro-75cegwoc"
-      >
-        <path
-          d="M0 0v280h39.755V158.4h59.65V280h39.756V0H99.411v118.8H39.755V0H0Z"
-          fill="#160000"
-          class="astro-75cegwoc"
-        ></path>
-        <path d="M160.734 0v280H280V240.245h-79.51V39.755H280V0H160.734Z" fill="#160000" class="astro-75cegwoc"></path>
-      </svg>
-      <span class="u-sr-only astro-75cegwoc">{profile.name}</span>
-    </a>
-  </div>
+<footer class="site-foot site-foot--wordmark astro-75cegwoc">
+  <!--
+    HARSHIT CHAUHAN in Audiowide with the shutter-glyph animations
+    (src/components/FooterWordmark.tsx). Server-rendered, then hydrated by
+    scripts/footer-wordmark.tsx. No whitespace inside the div: React hydrates
+    its whole content.
+  -->
+  <!-- prettier-ignore -->
+  <div class="site-foot__mark js-wordmark"><FooterWordmark /></div>
 </footer>
+
+<script>
+  import "../scripts/footer-wordmark";
+</script>
+
+<style is:global>
+  /* Audiowide by Brian J. Bonislawsky (Astigmatic), SIL Open Font License 1.1.
+     Self-hosted, latin subset: the CSP's font-src only allows this origin. */
+  @font-face {
+    font-family: "Audiowide";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("/fonts/Audiowide-Regular.woff2") format("woff2");
+  }
+
+  .site-foot--wordmark {
+    --sgf-ink: var(--color-secondary, #160000);
+    padding: clamp(1rem, 2.4vw, 1.75rem) 1rem;
+  }
+
+  .site-foot__mark {
+    max-width: 100%;
+    font-family: "Audiowide", var(--font-family-fraktion, sans-serif);
+    font-size: clamp(1.25rem, 5.4vw, 2.75rem);
+  }
+</style>
