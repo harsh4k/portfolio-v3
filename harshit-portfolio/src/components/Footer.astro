@@ -4,23 +4,18 @@ import { profile } from "../data/profile";
 ---
 
 <footer class="site-foot site-foot--wordmark astro-75cegwoc">
-  <div class="site-foot__meta">
-    <p class="site-foot__status">
-      <span>{profile.location}</span>
-      <span aria-hidden="true">·</span>
-      <span>
-        <time class="js-local-time" data-zone={profile.timeZone}>
-          IST
-        </time>{" "}
-        local time
-      </span>
-      <span aria-hidden="true">·</span>
-      <span>{profile.availability}</span>
-    </p>
-    <button type="button" class="site-foot__copy js-copy-email">
-      Copy email
-    </button>
-  </div>
+  <p class="site-foot__status">
+    <span>{profile.location}</span>
+    <span aria-hidden="true">·</span>
+    <span>
+      <time class="js-local-time" data-zone={profile.timeZone}>
+        IST
+      </time>{" "}
+      local time
+    </span>
+    <span aria-hidden="true">·</span>
+    <span>{profile.availability}</span>
+  </p>
   <!--
     HARSHIT CHAUHAN in Audiowide with the shutter-glyph animations
     (src/components/FooterWordmark.tsx). Server-rendered, then hydrated by
@@ -48,64 +43,44 @@ import { profile } from "../data/profile";
   }
 
   /*
-    Status above the wordmark. Two classes to beat the design's flex row on
-    .site-foot. The bottom padding keeps the corner Jump button (SiteNav.astro)
-    off the wordmark.
+    The status line centred over the wordmark, in a thin strip. Two classes to
+    beat the design's flex row on .site-foot. Below 988px the wordmark spans
+    the width, so the bottom padding keeps the corner Jump button
+    (SiteNav.astro) off it.
   */
   .site-foot.site-foot--wordmark {
     --sgf-ink: var(--color-secondary, #160000);
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    align-items: end;
-    gap: 1.5rem 3rem;
-    padding: clamp(1rem, 2.4vw, 1.75rem) 1rem calc(4rem + env(safe-area-inset-bottom, 0px));
+    justify-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
   }
 
-  .site-foot__meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem 1.5rem;
-    margin: 0;
-    color: var(--color-secondary);
-    font: 400 12px/1.5 var(--font-family-fraktion);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+  @media only screen and (max-width: 987px) {
+    .site-foot.site-foot--wordmark {
+      padding-bottom: calc(3.75rem + env(safe-area-inset-bottom, 0px));
+    }
   }
 
   .site-foot__status {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     gap: 0.25rem 0.6rem;
     margin: 0;
     min-width: 0;
+    color: var(--color-secondary);
+    font: 400 12px/1.5 var(--font-family-fraktion);
+    letter-spacing: 0.06em;
+    text-align: center;
+    text-transform: uppercase;
   }
 
   .site-foot__status time {
     font-variant-numeric: tabular-nums;
   }
 
-  .site-foot__copy {
-    padding: 0.4rem 0.75rem;
-    border: 1px solid var(--color-secondary);
-    background: transparent;
-    color: inherit;
-    font: 700 12px/1 var(--font-family-fraktion);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    cursor: pointer;
-  }
-
-  .site-foot__copy:hover,
-  .site-foot__copy:focus-visible {
-    background: var(--color-secondary);
-    color: var(--color-primary);
-  }
-
   .site-foot__mark {
-    grid-column: 1 / -1;
-    justify-self: center;
     max-width: 100%;
     font-family: "Audiowide", var(--font-family-fraktion, sans-serif);
     font-size: clamp(1.25rem, 5.4vw, 2.75rem);
