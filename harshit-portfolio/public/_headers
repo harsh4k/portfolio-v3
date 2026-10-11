@@ -5,12 +5,20 @@
   Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   Cross-Origin-Opener-Policy: same-origin
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-eval' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://cloudflareinsights.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
 
 # The same policy the live site sends. No inline script can run (script-src has
 # no 'unsafe-inline'). The copied design sets inline style attributes and uses
 # blob: workers and images; 'unsafe-eval' is kept as live has it until the
 # engine is confirmed not to need it.
+# The two cloudflareinsights.com hosts are Cloudflare Web Analytics: Pages
+# injects its beacon script, which reports either to this origin or to
+# cloudflareinsights.com depending on how the project is served.
+
+# The /via/ links in _redirects serve the home page under a second path, so
+# keep search engines from listing them (the page's canonical is / as well).
+/via/*
+  X-Robots-Tag: noindex
 
 /
   Cache-Control: no-cache
