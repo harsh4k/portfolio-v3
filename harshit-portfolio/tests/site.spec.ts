@@ -570,8 +570,36 @@ test.describe("header and keyboard reach", () => {
     expect(vars).toEqual(["#0f3324", "#e3f4d7", "#9fe870"]);
     // The logo is hardcoded to the red theme's ink, so it is recoloured.
     await expect(page.locator(".js-logo path").first()).toHaveCSS("fill", "rgb(227, 244, 215)");
+    // So is the hero star, an <img>, which is painted through a mask instead.
+    await expect(page.locator(".s-hero .js-star")).toHaveCSS("background-color", "rgb(227, 244, 215)");
     const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
     expect(results.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`)).toEqual([]);
+  });
+
+  test("switching themes wipes between snapshots, and the design's late class change can't undo it", async ({
+    page,
+  }) => {
+    await page.route("**/assets/index-wQJ6Ws5X.js", (route) => route.abort());
+    await page.goto("/", { waitUntil: "load" });
+    await page.keyboard.press("Escape");
+    await expect(page.locator(".site-head")).toHaveCSS("opacity", "1", { timeout: 15_000 });
+    const html = page.locator("html");
+    await expect(html).toHaveClass(/has-theme-wipe/);
+    // The design's red mask, which let the old theme show through, stays hidden.
+    await expect(page.locator(".js-contrast-mask")).toHaveCSS("visibility", "hidden");
+    const toggle = page.locator(".js-contrast");
+    await toggle.click();
+    await expect(html).toHaveClass(/theme-contrasted/);
+    // The terrain is redrawn in the new colours as part of the switch.
+    await expect(page.locator(".js-wire-terrain > div")).toHaveCSS("background-color", "rgb(15, 51, 36)");
+    // Past the design's own 1s wipe, which sets the class again when it ends.
+    await page.waitForTimeout(1_500);
+    await expect(html).toHaveClass(/theme-contrasted/);
+    await toggle.click();
+    await expect(html).not.toHaveClass(/theme-contrasted/);
+    await page.waitForTimeout(1_500);
+    await expect(html).not.toHaveClass(/theme-contrasted/);
+    await expect(page.locator(".js-wire-terrain > div")).toHaveCSS("background-color", "rgb(244, 12, 63)");
   });
 
   test("every project can be reached with the keyboard", async ({ page }) => {
