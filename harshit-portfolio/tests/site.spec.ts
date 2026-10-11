@@ -90,6 +90,47 @@ test.describe("page contract", () => {
     expect(csp).toContain("frame-ancestors 'none'");
   });
 
+  test("the CSP lets Cloudflare Web Analytics load and report, and nothing else", () => {
+    const headers = readFileSync(new URL("../public/_headers", import.meta.url), "utf8");
+    const csp = headers.match(/Content-Security-Policy: (.+)/)?.[1] ?? "";
+    const directive = (name: string) =>
+      csp
+        .split(";")
+        .map((part) => part.trim())
+        .find((part) => part.startsWith(`${name} `));
+    expect(directive("script-src")).toBe("script-src 'self' 'unsafe-eval' https://static.cloudflareinsights.com");
+    expect(directive("connect-src")).toBe("connect-src 'self' https://cloudflareinsights.com");
+  });
+
+  test("link previews have a title, description and a 1200x630 image", async ({ page, request }) => {
+    await page.goto("/");
+    const meta = (selector: string) => page.locator(`head meta[${selector}]`).getAttribute("content");
+    for (const key of ["og:title", "og:description", "og:image:alt"]) {
+      expect(await meta(`property="${key}"`), key).toBeTruthy();
+    }
+    for (const key of ["twitter:title", "twitter:description", "twitter:image:alt"]) {
+      expect(await meta(`name="${key}"`), key).toBeTruthy();
+    }
+    expect(await meta('name="twitter:card"')).toBe("summary_large_image");
+
+    // Crawlers need an absolute URL on the live host; fetch the same path locally.
+    const image = new URL((await meta('property="og:image"')) ?? "");
+    expect(image.href).toBe("https://harshh.pages.dev/images/og-image.png");
+    expect(await meta('name="twitter:image"')).toBe(image.href);
+    const res = await request.get(image.pathname);
+    expect(res.status()).toBe(200);
+    const png = await res.body();
+    // PNG IHDR: width and height are big-endian at bytes 16 and 20.
+    expect([png.readUInt32BE(16), png.readUInt32BE(20)]).toEqual([1200, 630]);
+  });
+
+  test("the /via/ social links serve the home page and stay out of search", () => {
+    const redirects = readFileSync(new URL("../public/_redirects", import.meta.url), "utf8");
+    expect(redirects).toMatch(/^\/via\/\*\s+\/\s+200$/m);
+    const headers = readFileSync(new URL("../public/_headers", import.meta.url), "utf8");
+    expect(headers).toMatch(/^\/via\/\*\n\s+X-Robots-Tag: noindex$/m);
+  });
+
   test("unknown paths get the 404 page", async ({ page }) => {
     const res = await page.goto("/does-not-exist");
     expect(res?.status()).toBe(404);
