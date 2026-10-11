@@ -1,29 +1,6 @@
 ---
 import FooterWordmark from "./FooterWordmark";
-import { getContributions } from "../data/github";
 import { profile } from "../data/profile";
-
-const [github] = profile.socials;
-const contributions = github ? await getContributions(github.handle) : null;
-
-// The graph as GitHub draws it: a column per week (Sunday at the top), shaded by GitHub's level.
-const CELL = 10;
-const GAP = 3;
-const weeks: { x: number; y: number; level: number; date: string }[] = [];
-if (contributions) {
-  const firstDay = new Date(`${contributions.days[0]?.date}T00:00:00Z`).getUTCDay();
-  contributions.days.forEach((day, index) => {
-    const slot = index + firstDay;
-    weeks.push({
-      x: Math.floor(slot / 7) * (CELL + GAP),
-      y: (slot % 7) * (CELL + GAP),
-      level: day.level,
-      date: day.date,
-    });
-  });
-}
-const graphWidth = weeks.length ? Math.max(...weeks.map((cell) => cell.x)) + CELL : 0;
-const graphHeight = 7 * (CELL + GAP) - GAP;
 ---
 
 <footer class="site-foot site-foot--wordmark astro-75cegwoc">
@@ -44,26 +21,6 @@ const graphHeight = 7 * (CELL + GAP) - GAP;
       Copy email
     </button>
   </div>
-  {github && contributions && (
-    <a class="site-foot__graph" href={github.url} target="_blank" rel="noopener noreferrer">
-      <svg
-        viewBox={`0 0 ${graphWidth} ${graphHeight}`}
-        width={graphWidth}
-        height={graphHeight}
-        preserveAspectRatio="xMaxYMid meet"
-        aria-hidden="true"
-      >
-        {weeks.map((cell) => (
-          <rect x={cell.x} y={cell.y} width={CELL} height={CELL} data-level={cell.level} />
-        ))}
-      </svg>
-      <span class="site-foot__graph-label">
-        {contributions.total === undefined
-          ? "GitHub activity, last year"
-          : `${contributions.total.toLocaleString("en-US")} contributions on GitHub in the last year`}
-      </span>
-    </a>
-  )}
   <!--
     HARSHIT CHAUHAN in Audiowide with the shutter-glyph animations
     (src/components/FooterWordmark.tsx). Server-rendered, then hydrated by
@@ -91,23 +48,17 @@ const graphHeight = 7 * (CELL + GAP) - GAP;
   }
 
   /*
-    Status and the GitHub graph side by side above the wordmark; stacked on
-    narrow screens. Two classes to beat the design's flex row on .site-foot.
-    The bottom padding keeps the corner Jump button (SiteNav.astro) off the wordmark.
+    Status above the wordmark. Two classes to beat the design's flex row on
+    .site-foot. The bottom padding keeps the corner Jump button (SiteNav.astro)
+    off the wordmark.
   */
   .site-foot.site-foot--wordmark {
     --sgf-ink: var(--color-secondary, #160000);
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr);
     align-items: end;
     gap: 1.5rem 3rem;
     padding: clamp(1rem, 2.4vw, 1.75rem) 1rem calc(4rem + env(safe-area-inset-bottom, 0px));
-  }
-
-  @media only screen and (max-width: 987px) {
-    .site-foot.site-foot--wordmark {
-      grid-template-columns: minmax(0, 1fr);
-    }
   }
 
   .site-foot__meta {
@@ -150,56 +101,6 @@ const graphHeight = 7 * (CELL + GAP) - GAP;
   .site-foot__copy:focus-visible {
     background: var(--color-secondary);
     color: var(--color-primary);
-  }
-
-  .site-foot__graph {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    min-width: 0;
-    margin: 0;
-    color: var(--color-secondary);
-    text-decoration: none;
-  }
-
-  /* Wide enough for every week on a desktop; on a phone, the latest weeks, right-aligned. */
-  .site-foot__graph svg {
-    display: block;
-    width: 100%;
-    height: auto;
-    max-height: 7rem;
-  }
-
-  .site-foot__graph rect {
-    fill: var(--color-secondary);
-    fill-opacity: 0.1;
-  }
-
-  .site-foot__graph rect[data-level="1"] {
-    fill-opacity: 0.35;
-  }
-
-  .site-foot__graph rect[data-level="2"] {
-    fill-opacity: 0.55;
-  }
-
-  .site-foot__graph rect[data-level="3"] {
-    fill-opacity: 0.78;
-  }
-
-  .site-foot__graph rect[data-level="4"] {
-    fill-opacity: 1;
-  }
-
-  .site-foot__graph-label {
-    font: 400 12px/1.4 var(--font-family-fraktion);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-
-  .site-foot__graph:hover .site-foot__graph-label,
-  .site-foot__graph:focus-visible .site-foot__graph-label {
-    text-decoration: underline;
   }
 
   .site-foot__mark {

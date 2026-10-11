@@ -74,16 +74,16 @@ export const highlights = [
 ] as const;
 
 /**
- * The gates in the Build Rail section (src/components/BuildRail.astro), in
- * order along the track. Only facts already on the site: the start year, the
- * degree, the internship, the hackathon and the projects count.
+ * The gates in the Toolkit section (src/components/ScrollScene.astro, rail
+ * scene), in order along the track: the areas of the stack, so it doesn't
+ * repeat the About highlights.
  */
-export const milestones = [
-  { mark: String(profile.since), title: "Started building", detail: "Building digital products" },
-  { mark: "NMIMS", title: "B.Tech Computer Engineering", detail: profile.school },
-  { mark: "Summer 2025", title: "Junior developer intern", detail: "Synapical" },
-  { mark: "2026", title: "Hackathon winner", detail: "NamasteDev Hackathon" },
-  { mark: "Now", title: "11 projects shipped", detail: "In production" },
+export const toolkit = [
+  { mark: "Frontend", title: "React · Next.js · TypeScript", detail: "Typed interfaces, styled with Tailwind" },
+  { mark: "Motion", title: "GSAP · Three.js", detail: "Scroll-led motion and WebGL scenes" },
+  { mark: "Backend", title: "Supabase · Node", detail: "Auth, data and APIs behind the apps" },
+  { mark: "AI tools", title: "Python · Tauri · Rust", detail: "Local-first AI and voice tools" },
+  { mark: "Delivery", title: "Git · CI · Playwright", detail: "Checked and tested on every push" },
 ] as const;
 
 /** The steps of the Helix Dive section (src/components/HelixDive.astro), top to bottom. */

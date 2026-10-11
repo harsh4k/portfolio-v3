@@ -2,6 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
 import { readFileSync } from "node:fs";
+import { parseContributions } from "../src/data/github";
 
 /** Sections the Android app shortcuts and the header nav link to. */
 const SECTIONS = ["about", "work", "contact"];
@@ -806,7 +807,7 @@ async function enterSite(page: Page) {
 test.describe("scroll scenes", () => {
   for (const [id, first, last] of [
     ["process", "Idea", "Ship"],
-    ["track-record", "2024", "Now"],
+    ["toolkit", "Frontend", "Delivery"],
   ] as const) {
     test(`#${id} draws once near, and scrolling through it moves through its steps`, async ({ page }) => {
       const errors = watchForErrors(page);
@@ -834,7 +835,7 @@ test.describe("scroll scenes", () => {
   test("all steps are in the page for screen readers", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator("#process .js-s3d-step")).toHaveCount(5);
-    await expect(page.locator("#track-record .js-s3d-step")).toHaveCount(5);
+    await expect(page.locator("#toolkit .js-s3d-step")).toHaveCount(5);
   });
 });
 
@@ -844,12 +845,12 @@ test.describe("command menu and footer extras", () => {
     await page.keyboard.press("Control+k");
     const menu = page.getByRole("dialog", { name: "Command menu" });
     await expect(menu).toBeVisible();
-    await page.keyboard.type("track rec");
+    await page.keyboard.type("toolkit");
     await expect(menu.getByRole("option")).toHaveCount(1);
     await page.keyboard.press("Enter");
     await expect(menu).toBeHidden();
     await expect
-      .poll(() => page.locator("#track-record").evaluate((el) => Math.abs(el.getBoundingClientRect().top)))
+      .poll(() => page.locator("#toolkit").evaluate((el) => Math.abs(el.getBoundingClientRect().top)))
       .toBeLessThan(2);
   });
 
@@ -860,6 +861,17 @@ test.describe("command menu and footer extras", () => {
     await expect(page.getByRole("dialog", { name: "Command menu" })).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(button).toBeFocused();
+  });
+
+  test("only the result list scrolls, not the menu around it", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 600 });
+    await enterSite(page);
+    await page.locator(".js-sn-open").click();
+    const menu = page.getByRole("dialog", { name: "Command menu" });
+    await expect(menu).toBeVisible();
+    expect(await menu.evaluate((el) => getComputedStyle(el).overflowY)).toBe("hidden");
+    const list = menu.getByRole("listbox");
+    expect(await list.evaluate((el) => el.scrollHeight > el.clientHeight)).toBe(true);
   });
 
   test("the footer copies the email address and says so", async ({ page, context }) => {
@@ -898,5 +910,50 @@ test.describe("project pages", () => {
     const sitemap = await (await request.get("/sitemap.xml")).text();
     for (const project of projects) expect(sitemap).toContain(`/work/${project.id}/`);
     expect(sitemap).not.toContain("[");
+  });
+});
+
+test.describe("GitHub section", () => {
+  /** A year of GitHub's calendar markup: cells with ids, and tooltips pointing at them. */
+  const calendar = (days: number) => {
+    let html = "<p>1,234 contributions in the last year</p><table>";
+    for (let i = 0; i < days; i++) {
+      const date = new Date(Date.UTC(2025, 9, 12) + i * 86_400_000).toISOString().slice(0, 10);
+      const count = i % 9;
+      const text = count === 0 ? "No contributions" : count === 1 ? "1 contribution" : `${count} contributions`;
+      html += `<td data-date="${date}" id="contribution-day-component-${i % 7}-${Math.floor(i / 7)}" data-level="${Math.min(4, count)}" class="ContributionCalendar-day"></td>`;
+      html += `<tool-tip id="tooltip-${i}" for="contribution-day-component-${i % 7}-${Math.floor(i / 7)}" popover="manual" class="sr-only position-absolute">${text} on October ${i}th.</tool-tip>`;
+    }
+    return `${html}</table>`;
+  };
+
+  test("reads each day's count from GitHub's calendar markup", () => {
+    const parsed = parseContributions(calendar(371));
+    expect(parsed?.days).toHaveLength(371);
+    expect(parsed?.total).toBe(1234);
+    expect(parsed?.days.slice(0, 3)).toEqual([
+      { date: "2025-10-12", level: 0, count: 0 },
+      { date: "2025-10-13", level: 1, count: 1 },
+      { date: "2025-10-14", level: 2, count: 2 },
+    ]);
+  });
+
+  test("leaves the section out when the markup isn't recognised", () => {
+    expect(parseContributions(calendar(100))).toBeNull();
+    expect(parseContributions(calendar(371).replaceAll(/<tool-tip[^>]*>[^<]*<\/tool-tip>/g, ""))).toBeNull();
+    expect(parseContributions("<html>rate limited</html>")).toBeNull();
+  });
+
+  test("when the build reached GitHub, the skyline draws and the footer has no graph", async ({ page }) => {
+    const errors = watchForErrors(page);
+    await enterSite(page);
+    await expect(page.locator(".site-foot__graph")).toHaveCount(0);
+    const section = page.locator("#github");
+    test.skip((await section.count()) === 0, "this build could not reach GitHub");
+    await section.scrollIntoViewIfNeeded();
+    await expect(section.locator("canvas")).toHaveCount(1);
+    await expect(section.getByRole("button", { name: "3D skyline" })).toBeVisible();
+    await expect(section.locator(".skyline__title")).toContainText("contributions in the last year");
+    expect(errors).toEqual([]);
   });
 });
