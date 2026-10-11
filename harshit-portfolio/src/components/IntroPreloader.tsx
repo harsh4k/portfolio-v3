@@ -29,6 +29,7 @@ const WAIT_AT = 90;
 export default function IntroPreloader() {
   const [progress, setProgress] = useState(0);
   const readyRef = useRef(false);
+  const intervalRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     const startedAt = performance.now();
@@ -36,22 +37,24 @@ export default function IntroPreloader() {
       const simulated = scpSimulated((performance.now() - startedAt) / SIMULATED_MS) * 100;
       const value = readyRef.current ? 100 : Math.floor(Math.min(WAIT_AT, simulated));
       setProgress(value);
-      if (value >= 100) window.clearInterval(interval);
+      if (value >= 100) window.clearInterval(intervalRef.current);
     };
     const markReady = () => {
       readyRef.current = true;
       update();
     };
-    const interval = window.setInterval(update, 200);
+    intervalRef.current = window.setInterval(update, 200);
     if (window.__introSceneReady) markReady();
     window.addEventListener("intro:ready", markReady, { once: true });
     return () => {
-      window.clearInterval(interval);
+      window.clearInterval(intervalRef.current);
       window.removeEventListener("intro:ready", markReady);
     };
   }, []);
 
   const onComplete = () => {
+    // The loader is gone either way, so its count has nothing left to drive.
+    window.clearInterval(intervalRef.current);
     // Only "Skip intro" can finish the count before the scene is ready.
     if (!readyRef.current) window.dispatchEvent(new CustomEvent("intro:skip"));
     window.dispatchEvent(new CustomEvent("intro:loader-done"));
