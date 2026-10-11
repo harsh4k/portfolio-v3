@@ -2,6 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
 import { readFileSync } from "node:fs";
+import { parseContributions } from "../src/data/github";
 
 /** Sections the Android app shortcuts and the header nav link to. */
 const SECTIONS = ["about", "work", "contact"];
@@ -793,5 +794,172 @@ test.describe("service worker retirement", () => {
         { timeout: 15_000 },
       )
       .toEqual({ caches: 0, workers: 0 });
+  });
+});
+
+/** Skips the 3D intro and waits until the page can scroll. */
+async function enterSite(page: Page) {
+  await page.goto("/", { waitUntil: "load" });
+  await page.keyboard.press("Escape");
+  await expect(page.locator("html")).not.toHaveClass(/is-scroll-blocked/, { timeout: 15_000 });
+}
+
+test.describe("scroll scenes", () => {
+  for (const [id, first, last] of [
+    ["process", "Idea", "Ship"],
+    ["toolkit", "Frontend", "Delivery"],
+  ] as const) {
+    test(`#${id} draws once near, and scrolling through it moves through its steps`, async ({ page }) => {
+      const errors = watchForErrors(page);
+      await enterSite(page);
+      const section = page.locator(`#${id}`);
+      // Laid out as a tall block straight away, so the page doesn't change length later.
+      await expect(section).toHaveAttribute("data-s3d", "live");
+      await section.evaluate((el) => el.scrollIntoView());
+      await expect(section.locator("canvas")).toHaveCount(1);
+
+      const scrollTo = (fraction: number) =>
+        section.evaluate((el, f) => {
+          const top = el.getBoundingClientRect().top + window.scrollY;
+          window.scrollTo(0, top + ((el as HTMLElement).offsetHeight - window.innerHeight) * f);
+        }, fraction);
+      const active = section.locator(".js-s3d-step[data-active] .s3d__mark");
+      await scrollTo(0.02);
+      await expect(active).toHaveText(first);
+      await scrollTo(0.98);
+      await expect(active).toHaveText(last);
+      expect(errors).toEqual([]);
+    });
+  }
+
+  test("all steps are in the page for screen readers", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("#process .js-s3d-step")).toHaveCount(5);
+    await expect(page.locator("#toolkit .js-s3d-step")).toHaveCount(5);
+  });
+});
+
+test.describe("command menu and footer extras", () => {
+  test("Ctrl+K opens the menu, typing filters it, Enter jumps to the section", async ({ page }) => {
+    await enterSite(page);
+    await page.keyboard.press("Control+k");
+    const menu = page.getByRole("dialog", { name: "Command menu" });
+    await expect(menu).toBeVisible();
+    await page.keyboard.type("toolkit");
+    await expect(menu.getByRole("option")).toHaveCount(1);
+    await page.keyboard.press("Enter");
+    await expect(menu).toBeHidden();
+    await expect
+      .poll(() => page.locator("#toolkit").evaluate((el) => Math.abs(el.getBoundingClientRect().top)))
+      .toBeLessThan(2);
+  });
+
+  test("the Jump button opens the menu, and Escape returns focus to it", async ({ page }) => {
+    await enterSite(page);
+    const button = page.locator(".js-sn-open");
+    await button.click();
+    await expect(page.getByRole("dialog", { name: "Command menu" })).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(button).toBeFocused();
+  });
+
+  test("only the result list scrolls, not the menu around it", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 600 });
+    await enterSite(page);
+    await page.locator(".js-sn-open").click();
+    const menu = page.getByRole("dialog", { name: "Command menu" });
+    await expect(menu).toBeVisible();
+    expect(await menu.evaluate((el) => getComputedStyle(el).overflowY)).toBe("hidden");
+    const list = menu.getByRole("listbox");
+    expect(await list.evaluate((el) => el.scrollHeight > el.clientHeight)).toBe(true);
+  });
+
+  test("the command menu copies the email address and says so; the footer has no copy button", async ({
+    page,
+    context,
+  }) => {
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    await enterSite(page);
+    await expect(page.locator(".site-foot button")).toHaveCount(0);
+    await page.keyboard.press("Control+k");
+    await page.keyboard.type("copy email");
+    await page.keyboard.press("Enter");
+    await expect(page.locator(".js-sn-toast")).toHaveText("Email copied");
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe("harshitsinhchauhan250@gmail.com");
+  });
+
+  test("the footer shows the time in Mumbai", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator(".js-local-time")).toHaveText(/^\d{2}:\d{2} IST$/);
+  });
+});
+
+test.describe("project pages", () => {
+  const projects = JSON.parse(readFileSync(new URL("../src/content/projects.json", import.meta.url), "utf8")) as {
+    id: string;
+    title: string;
+    url: string;
+  }[];
+
+  test("every project has a page with its title, live link and neighbours, and no errors", async ({ page }) => {
+    for (const project of projects) {
+      const errors = watchForErrors(page);
+      await page.goto(`/work/${project.id}/`);
+      await expect(page.locator("h1")).toHaveText(project.title);
+      await expect(page.locator(`a[href="${project.url}"]`)).toHaveCount(1);
+      await expect(page.locator('a[rel="prev"], a[rel="next"]')).toHaveCount(2);
+      expect(errors).toEqual([]);
+    }
+  });
+
+  test("project pages are in the sitemap", async ({ request }) => {
+    const sitemap = await (await request.get("/sitemap.xml")).text();
+    for (const project of projects) expect(sitemap).toContain(`/work/${project.id}/`);
+    expect(sitemap).not.toContain("[");
+  });
+});
+
+test.describe("GitHub section", () => {
+  /** A year of GitHub's calendar markup: cells with ids, and tooltips pointing at them. */
+  const calendar = (days: number) => {
+    let html = "<p>1,234 contributions in the last year</p><table>";
+    for (let i = 0; i < days; i++) {
+      const date = new Date(Date.UTC(2025, 9, 12) + i * 86_400_000).toISOString().slice(0, 10);
+      const count = i % 9;
+      const text = count === 0 ? "No contributions" : count === 1 ? "1 contribution" : `${count} contributions`;
+      html += `<td data-date="${date}" id="contribution-day-component-${i % 7}-${Math.floor(i / 7)}" data-level="${Math.min(4, count)}" class="ContributionCalendar-day"></td>`;
+      html += `<tool-tip id="tooltip-${i}" for="contribution-day-component-${i % 7}-${Math.floor(i / 7)}" popover="manual" class="sr-only position-absolute">${text} on October ${i}th.</tool-tip>`;
+    }
+    return `${html}</table>`;
+  };
+
+  test("reads each day's count from GitHub's calendar markup", () => {
+    const parsed = parseContributions(calendar(371));
+    expect(parsed?.days).toHaveLength(371);
+    expect(parsed?.total).toBe(1234);
+    expect(parsed?.days.slice(0, 3)).toEqual([
+      { date: "2025-10-12", level: 0, count: 0 },
+      { date: "2025-10-13", level: 1, count: 1 },
+      { date: "2025-10-14", level: 2, count: 2 },
+    ]);
+  });
+
+  test("leaves the section out when the markup isn't recognised", () => {
+    expect(parseContributions(calendar(100))).toBeNull();
+    expect(parseContributions(calendar(371).replaceAll(/<tool-tip[^>]*>[^<]*<\/tool-tip>/g, ""))).toBeNull();
+    expect(parseContributions("<html>rate limited</html>")).toBeNull();
+  });
+
+  test("when the build reached GitHub, the skyline draws and the footer has no graph", async ({ page }) => {
+    const errors = watchForErrors(page);
+    await enterSite(page);
+    await expect(page.locator(".site-foot__graph")).toHaveCount(0);
+    const section = page.locator("#github");
+    test.skip((await section.count()) === 0, "this build could not reach GitHub");
+    await section.scrollIntoViewIfNeeded();
+    await expect(section.locator("canvas")).toHaveCount(1);
+    await expect(section.getByRole("button", { name: "3D skyline" })).toBeVisible();
+    await expect(section.locator(".skyline__title")).toContainText("contributions in the last year");
+    expect(errors).toEqual([]);
   });
 });

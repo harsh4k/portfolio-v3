@@ -26,6 +26,11 @@ const projects = defineCollection({
     url: httpsUrl,
     image: publicImage,
     summary: z.string().trim().min(1).max(120).optional(),
+    /** Optional case-study lines for the project's own page (src/pages/work/[id].astro); each shows only when set. */
+    role: z.string().trim().min(1).max(120).optional(),
+    stack: z.array(z.string().trim().min(1).max(30)).max(12).optional(),
+    problem: z.string().trim().min(1).max(600).optional(),
+    outcome: z.string().trim().min(1).max(600).optional(),
   }),
 });
 

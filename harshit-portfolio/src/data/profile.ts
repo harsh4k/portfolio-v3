@@ -64,11 +64,32 @@ export const highlights = [
     kind: "text",
     lines: ["Local AI & Voice Tools", "Tauri, Rust & Node Pipelines"],
   },
-  { slot: "CSSDA2016", burst: "bug", kind: "text", lines: ["Open Source Contributor", "github.com/harsh4k"] },
   {
     slot: "CSSDA2015",
     burst: "face",
     kind: "text",
     lines: ["Building Considered Digital Products", `Since ${profile.since}`],
   },
+] as const;
+
+/**
+ * The gates in the Toolkit section (src/components/ScrollScene.astro, rail
+ * scene), in order along the track: the areas of the stack, so it doesn't
+ * repeat the About highlights.
+ */
+export const toolkit = [
+  { mark: "Frontend", title: "React · Next.js · TypeScript", detail: "Typed interfaces, styled with Tailwind" },
+  { mark: "Motion", title: "GSAP · Three.js", detail: "Scroll-led motion and WebGL scenes" },
+  { mark: "Backend", title: "Supabase · Node", detail: "Auth, data and APIs behind the apps" },
+  { mark: "AI tools", title: "Python · Tauri · Rust", detail: "Local-first AI and voice tools" },
+  { mark: "Delivery", title: "Git · CI · Playwright", detail: "Checked and tested on every push" },
+] as const;
+
+/** The steps of the Helix Dive section (src/components/HelixDive.astro), top to bottom. */
+export const workSteps = [
+  { mark: "Idea", detail: "Find the real problem and who has it" },
+  { mark: "Design", detail: "Sketch the flow, the motion and the system" },
+  { mark: "Build", detail: "Typed, tested code in small steps" },
+  { mark: "Test", detail: "On real phones, slow networks and screen readers" },
+  { mark: "Ship", detail: "Deploy, measure, and keep improving" },
 ] as const;
