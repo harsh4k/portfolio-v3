@@ -469,6 +469,8 @@ test.describe("intro", () => {
     expect(bundle).toContain('window.dispatchEvent(new Event("intro:ready"))');
     expect(bundle).not.toContain("adrien-lamy");
     expect(bundle).not.toContain("frank leboeuf");
+    // Its intro panel and screen-reader title say "software developer", like the rest of the site.
+    expect(bundle.toLowerCase()).not.toContain("creative developer");
   });
 });
 
@@ -769,6 +771,41 @@ test.describe("header and keyboard reach", () => {
     // Focus shows the list on screen instead of leaving it invisible.
     const box = await page.locator(".work-keys").boundingBox();
     expect(box?.width ?? 0).toBeGreaterThan(200);
+  });
+
+  test("Tab reaches the contact email from the top of the page, and it shows when focused", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    // The design hides the contact block while it is off screen; Tab still has to land on it.
+    let reached = false;
+    for (let i = 0; i < 80 && !reached; i++) {
+      await page.keyboard.press("Tab");
+      reached = await page.evaluate(() => document.activeElement?.classList.contains("s__cta__link") ?? false);
+    }
+    expect(reached).toBe(true);
+    const link = page.locator(".s__cta__link");
+    await expect(link).toHaveAttribute("href", /^mailto:/);
+    await expect(link).toHaveCSS("opacity", "1");
+    await expect(link).toBeInViewport();
+    // Its ring is in the ground colour, not the circle's ink.
+    const [outline, ink] = await link.evaluate((a) => [
+      getComputedStyle(a).outlineColor,
+      getComputedStyle(a.closest(".s__cta") ?? a).backgroundColor,
+    ]);
+    expect(outline).not.toBe(ink);
+  });
+
+  test("the page has one main landmark and a heading for every section", async ({ page }) => {
+    // Reduced motion skips the 3D intro, whose own <main> is gone once it closes.
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/", { waitUntil: "load" });
+    await expect(page.locator("main")).toHaveCount(1);
+    for (const id of ["about", "process", "work", "toolkit", "since", "contact"]) {
+      const section = page.locator(`main section:has(#${id}), main section#${id}`).first();
+      await expect(section.locator("h2")).not.toHaveCount(0);
+    }
+    const results = await new AxeBuilder({ page }).withRules(["landmark-one-main", "region"]).analyze();
+    expect(results.violations).toEqual([]);
   });
 });
 
