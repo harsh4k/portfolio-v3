@@ -201,3 +201,13 @@ html {
   font: 400 14px/1.4 var(--font-family-fraktion);
   text-transform: uppercase;
 }
+
+/* Read by screen readers and search engines, never shown. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

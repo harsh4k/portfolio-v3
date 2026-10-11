@@ -1,5 +1,7 @@
 ---
 import { profile } from "../data/profile";
+import { getOrdered } from "../data/collections";
+import { structuredData } from "../data/seo";
 import IntroPreloader from "../components/IntroPreloader";
 import "../styles/site.css";
 
@@ -12,16 +14,8 @@ const { title, description } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL("/images/og-image.png", Astro.site);
 
-const personSchema = {
-  "@context": "https://schema.org",
-  "@type": "Person",
-  name: profile.name,
-  jobTitle: profile.role,
-  url: Astro.site?.href,
-  email: profile.email,
-  alumniOf: { "@type": "CollegeOrUniversity", name: "NMIMS Mumbai" },
-  sameAs: profile.socials.map((social) => social.url),
-};
+const projects = await getOrdered("projects");
+const schema = Astro.site ? structuredData(Astro.site, projects) : undefined;
 
 // The design's fonts, preloaded because the intro and hero render with them first.
 const fonts = [
@@ -86,7 +80,8 @@ const fonts = [
     <link rel="stylesheet" href="/styles/integration.css" />
     <!-- Must run before the engine: it calls play()/pause() on the card images. -->
     <script is:inline src="/scripts/img-media.js"></script>
-    <script type="application/ld+json" set:html={JSON.stringify(personSchema)} />
+    <!-- A data block, not a script, so the CSP's script-src does not apply to it. -->
+    {schema && <script type="application/ld+json" set:html={JSON.stringify(schema).replaceAll("<", "\\u003c")} />}
   </head>
   <body class="astro-j7pv25f6">
     <div id="intro-layer" class="intro-layer">
