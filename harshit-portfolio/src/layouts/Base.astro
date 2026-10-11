@@ -2,7 +2,6 @@
 import { profile } from "../data/profile";
 import { getOrdered } from "../data/collections";
 import { structuredData } from "../data/seo";
-import IntroPreloader from "../components/IntroPreloader";
 import "../styles/site.css";
 
 interface Props {
@@ -12,7 +11,9 @@ interface Props {
 
 const { title, description } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+// Regenerate with `npm run og-image` when the name, role or location changes.
 const ogImage = new URL("/images/og-image.png", Astro.site);
+const ogImageAlt = `${profile.name}, ${profile.role} — ${profile.location}`;
 
 const projects = await getOrdered("projects");
 const schema = Astro.site ? structuredData(Astro.site, projects) : undefined;
@@ -59,8 +60,13 @@ const fonts = [
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:alt" content={ogImageAlt} />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={ogImageAlt} />
 
     {fonts.map((font) => (
       <link rel="preload" href={`/fonts/${font}.woff2`} as="font" type="font/woff2" crossorigin />
@@ -86,13 +92,10 @@ const fonts = [
   <body class="astro-j7pv25f6">
     <div id="intro-layer" class="intro-layer">
       <!--
-        The slat-count loader (src/components/IntroPreloader.tsx). Server-rendered,
-        so the red cover is there before any script runs, and hydrated by
-        scripts/intro-preloader.tsx. No whitespace inside the div: React hydrates
-        its whole content. bridge.js removes it.
+        Plain red cover over the 3D scene until it draws its first frame, so a
+        half-built scene never shows. bridge.js fades it out and removes it.
       -->
-      <!-- prettier-ignore -->
-      <div class="intro-loader js-intro-loader"><IntroPreloader /></div>
+      <div class="intro-loader js-intro-loader" aria-hidden="true"></div>
       <div id="app"></div>
     </div>
     <div class="site-wrapper js-site-wrapper astro-j7pv25f6">
@@ -105,9 +108,7 @@ const fonts = [
       import "../scripts/warm-images";
       import "../scripts/reveal-highlights";
       import "../scripts/contrast-state";
-    </script>
-    <script>
-      import "../scripts/intro-preloader";
+      import "../scripts/theme-wipe";
     </script>
   </body>
 </html>

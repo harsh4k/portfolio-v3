@@ -321,10 +321,9 @@
 
   bindSwipeToEnter(document.getElementById("intro-layer"));
 
-  // --- Loader on the red cover until the 3D scene draws its first frame ---
-  // The slat-count loader (src/components/IntroPreloader.tsx) runs its own
-  // count and exit. It finishes on intro:ready and reports back with
-  // intro:loader-done, or with intro:skip first when "Skip intro" was used.
+  // --- Red cover until the 3D scene draws its first frame ---
+  // The scene fires intro:ready on its first rendered frame; the cover then
+  // fades out and is removed.
   const INTRO_TIMEOUT_MS = 20000;
   const introLoader = document.querySelector(".js-intro-loader");
   const hideIntroLoader = () => {
@@ -339,21 +338,7 @@
     hideIntroLoader();
     revealPortfolio(true);
   }, INTRO_TIMEOUT_MS);
-  // The loader needs up to ~8s to count every ten and open; if it never reports
-  // back (it failed to load), uncover the ready scene anyway.
-  const LOADER_GRACE_MS = 15000;
-  window.addEventListener(
-    "intro:ready",
-    () => {
-      // Remembered in case the scene is ready before the loader has hydrated.
-      window.__introSceneReady = true;
-      window.clearTimeout(introTimeout);
-      introTimeout = window.setTimeout(hideIntroLoader, LOADER_GRACE_MS);
-    },
-    { once: true },
-  );
-  window.addEventListener("intro:loader-done", hideIntroLoader, { once: true });
-  window.addEventListener("intro:skip", () => revealPortfolio(true), { once: true });
+  window.addEventListener("intro:ready", hideIntroLoader, { once: true });
 
   import("/assets/index-wQJ6Ws5X.js")
     .then(() => {
@@ -393,8 +378,6 @@
 
   // --- Keyboard skip for accessibility (removed once the intro is gone) ---
   function onSkipKey(e) {
-    // Enter on the loader's own buttons (scatter, Skip intro) is theirs.
-    if (e.target instanceof Element && e.target.closest(".js-intro-loader")) return;
     if (e.key === "Escape" || e.key === "Enter") {
       revealPortfolio(true);
     }
