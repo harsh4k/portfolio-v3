@@ -587,6 +587,21 @@ test.describe("header and keyboard reach", () => {
     await expect(html).toHaveClass(/has-theme-wipe/);
     // The design's red mask, which let the old theme show through, stays hidden.
     await expect(page.locator(".js-contrast-mask")).toHaveCSS("visibility", "hidden");
+    // Record how each transition ends: one that waits on animation frames in
+    // its update times out after 4s and is skipped, so no wipe plays.
+    await page.evaluate(() => {
+      const w = window as unknown as { __vt: string[] };
+      w.__vt = [];
+      const start = document.startViewTransition.bind(document);
+      document.startViewTransition = (update) => {
+        const transition = start(update);
+        transition.ready.then(
+          () => w.__vt.push("ready"),
+          (error: Error) => w.__vt.push(error.name),
+        );
+        return transition;
+      };
+    });
     const toggle = page.locator(".js-contrast");
     await toggle.click();
     await expect(html).toHaveClass(/theme-contrasted/);
@@ -600,6 +615,7 @@ test.describe("header and keyboard reach", () => {
     await page.waitForTimeout(1_500);
     await expect(html).not.toHaveClass(/theme-contrasted/);
     await expect(page.locator(".js-wire-terrain > div")).toHaveCSS("background-color", "rgb(244, 12, 63)");
+    expect(await page.evaluate(() => (window as unknown as { __vt: string[] }).__vt)).toEqual(["ready", "ready"]);
   });
 
   test("every project can be reached with the keyboard", async ({ page }) => {
