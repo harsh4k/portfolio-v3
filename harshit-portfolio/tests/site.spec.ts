@@ -99,11 +99,9 @@ test.describe("page contract", () => {
 
 test.describe("layout and accessibility", () => {
   test("has no axe violations", async ({ page }) => {
-    // Waits for the loader before scanning, which takes most of the default 30s on a slow runner.
     test.setTimeout(60_000);
     await page.goto("/", { waitUntil: "networkidle" });
-    // Not mid-way through the loader's exit animation, where fading type is
-    // briefly low contrast. The loader itself is checked in the intro tests.
+    // Once the red cover has made way for the 3D scene.
     await expect(page.locator(".js-intro-loader")).toHaveCount(0, { timeout: 15_000 });
     const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
     const summary = results.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`);
@@ -252,9 +250,7 @@ test.describe("images", () => {
 });
 
 test.describe("intro", () => {
-  test("shows a loader on the red cover until the 3D scene has rendered", async ({ page }) => {
-    // The count runs on real timers (about 5s to its 90% wait), so give it room on a busy CI runner.
-    test.setTimeout(60_000);
+  test("covers the 3D scene in plain red, with no loader, until it has rendered", async ({ page }) => {
     // Hold the 3D bundle back, as a slow phone network would.
     let release = () => {};
     const held = new Promise<void>((resolve) => (release = resolve));
@@ -263,51 +259,22 @@ test.describe("intro", () => {
       await route.continue();
     });
     await page.goto("/", { waitUntil: "domcontentloaded" });
-    const loader = page.locator(".js-intro-loader");
-    await expect(loader).toBeVisible();
-    // Opaque, so the scene drawing underneath never shows through it. The slat
-    // loader's blinds paint the red, so they can slide off at the end.
-    await expect(loader.locator(".scp-blind").first()).toHaveCSS("background-color", "rgb(255, 11, 54)");
-    // Hydrated: the count is running, not just the server-rendered frame.
-    await expect(loader.locator(".scp-gate")).toHaveAttribute("data-phase", /intro|count/);
-    // It waits short of 100 for the scene.
-    await expect(loader.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "90", { timeout: 20_000 });
-    const loaderAxe = await new AxeBuilder({ page })
-      .include(".js-intro-loader")
-      .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
-      .analyze();
-    expect(loaderAxe.violations.map((v) => v.id)).toEqual([]);
-    // Above the 3D scene's own page (z-index 100), which hid it before.
-    await expect(loader).toHaveCSS("z-index", "200");
+    const cover = page.locator(".js-intro-loader");
+    await expect(cover).toBeVisible();
+    // Opaque, and above the 3D scene's own page (z-index 100), so a half-built scene never shows.
+    await expect(cover).toHaveCSS("background-color", "rgb(255, 11, 54)");
+    await expect(cover).toHaveCSS("z-index", "200");
+    // Just the red: no counter, text or buttons.
+    await expect(cover).toBeEmpty();
     // Nothing to swipe yet, so the phone swipe hint waits for the scene too.
     await expect(page.locator("html")).not.toHaveClass(/intro-ready/);
     release();
     // The bundle fires intro:ready on its first rendered frame (patched in, see README).
     await page.evaluate(() => window.dispatchEvent(new Event("intro:ready")));
-    // It counts to 100, holds, and opens its blinds before it goes.
-    await expect(loader.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "100");
-    await expect(loader).toHaveCount(0, { timeout: 10_000 });
+    await expect(cover).toHaveCount(0);
     await expect(page.locator("html")).toHaveClass(/intro-ready/);
     // The 3D scene is still there to pull, not skipped.
     await expect(page.locator("#intro-layer")).toHaveCount(1);
-  });
-
-  test("the count shows every ten on its way to 100, even when the scene is ready at once", async ({ page }) => {
-    test.setTimeout(60_000);
-    await page.addInitScript(() => {
-      const seen: string[] = [];
-      (window as unknown as { __seen: string[] }).__seen = seen;
-      // Every value the progressbar takes, recorded as it changes.
-      new MutationObserver(() => {
-        const value = document.querySelector(".js-intro-loader [role=progressbar]")?.getAttribute("aria-valuenow");
-        if (value && seen.at(-1) !== value) seen.push(value);
-      }).observe(document, { subtree: true, childList: true, attributes: true, attributeFilter: ["aria-valuenow"] });
-      window.addEventListener("DOMContentLoaded", () => window.dispatchEvent(new Event("intro:ready")));
-    });
-    await page.goto("/", { waitUntil: "domcontentloaded" });
-    await expect(page.locator(".js-intro-loader")).toHaveCount(0, { timeout: 20_000 });
-    const seen = await page.evaluate(() => (window as unknown as { __seen: string[] }).__seen);
-    expect(seen).toEqual(["0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"]);
   });
 
   test("no page text shows through the HC loader after the intro", async ({ page }) => {
@@ -321,11 +288,11 @@ test.describe("intro", () => {
     await expect(page.locator("#about .s__content p").first()).toBeVisible();
   });
 
-  test("Skip intro on the loader goes straight to the site while the scene is still loading", async ({ page }) => {
+  test("Escape goes straight to the site while the scene is still loading", async ({ page }) => {
     await page.route("**/assets/index-wQJ6Ws5X.js", () => new Promise(() => {}));
     await page.goto("/", { waitUntil: "domcontentloaded" });
-    await page.locator(".js-intro-loader .scp-gate[data-phase='count']").waitFor();
-    await page.getByRole("button", { name: /Skip intro/ }).click();
+    await expect(page.locator(".js-intro-loader")).toBeVisible();
+    await page.keyboard.press("Escape");
     await expect(page.locator("#intro-layer")).toHaveCount(0, { timeout: 10_000 });
     await expect(page.locator(".site-head")).toHaveCSS("opacity", "1");
   });
@@ -404,31 +371,56 @@ test.describe("input", () => {
     await expect(page.locator(".s-hero")).toHaveCSS("opacity", "1");
   });
 
-  test("the hero's stardust scene fills the wave band as one still scene, with no loader parts", async ({ page }) => {
+  test("the hero's wire terrain fills the wave band and comes in with the hero", async ({ page }) => {
     const errors = watchForErrors(page);
     await page.goto("/", { waitUntil: "load" });
-    const scene = page.locator(".s-hero .js-stardust");
+    const scene = page.locator(".s-hero .js-wire-terrain");
     // Decoration only: hidden from assistive tech, nothing to press.
     await expect(scene).toHaveAttribute("aria-hidden", "true");
     await expect(scene).not.toHaveAttribute("role", /.+/);
-    // The wave lines it replaces are hidden, and the scene fills their band.
+    // The wave lines it replaces are hidden, and the terrain fills their band.
     await expect(page.locator(".s__waves .js-svg")).toBeHidden();
+    await expect(scene.locator("canvas")).toHaveCount(1);
     // Measured in one frame: the hero may still be sliding in, so two separate reads can disagree.
-    const [band, box] = await page.evaluate(() =>
-      [".s-hero .s__waves", ".s-hero .js-stardust"].map((s) => {
+    const [band, box, canvas] = await page.evaluate(() =>
+      [".s-hero .s__waves", ".s-hero .js-wire-terrain", ".s-hero .js-wire-terrain canvas"].map((s) => {
         const r = document.querySelector(s)?.getBoundingClientRect();
         return r ? { x: r.x, y: r.y, width: r.width, height: r.height } : null;
       }),
     );
     expect(box?.height).toBeGreaterThan(100);
     expect(box).toEqual(band);
+    // No 1200px minimum from the component pushing past the band on phones.
+    expect(canvas).toEqual(band);
 
-    // It shows once the hero is in, with its planets, and has no counter or rewind.
     await expect(scene).toHaveAttribute("data-shown", "true");
-    expect(await scene.locator(".ssp-planet").count()).toBeGreaterThanOrEqual(2);
-    await expect(scene.locator(".ssp-count, .ssp-hint, .ssp-veil")).toHaveCount(0);
-    await scene.click();
-    await expect(scene).toHaveAttribute("data-shown", "true");
+    expect(errors).toEqual([]);
+  });
+
+  test("the footer spells HARSHIT CHAUHAN in Audiowide, on one line that fits", async ({ page }) => {
+    const errors = watchForErrors(page);
+    await page.goto("/", { waitUntil: "load" });
+    const mark = page.locator(".site-foot .sgf");
+    await expect(mark).toHaveCount(1);
+    // Screen readers get the name once; the letters are hidden from them.
+    await expect(mark.locator(".sr-only")).toHaveText("Harshit Chauhan");
+    await expect(mark.locator(".sgf-line")).toHaveAttribute("aria-hidden", "true");
+    // All 14 letters (each set twice for the hover slice) and the shutter's three blades.
+    await expect(mark.locator(".sgf-up")).toHaveCount(14);
+    await expect(mark.locator("polygon")).toHaveCount(3);
+    // The self-hosted font is the one in use, and the line fits inside the footer.
+    const loaded = await page.evaluate(async () => {
+      await document.fonts.load('16px "Audiowide"');
+      return [...document.fonts].some((f) => f.family.includes("Audiowide") && f.status === "loaded");
+    });
+    expect(loaded).toBe(true);
+    const foot = await page.locator(".site-foot").boundingBox();
+    const line = await mark.locator(".sgf-line").boundingBox();
+    expect(line?.height).toBeGreaterThan(15);
+    expect(line?.x).toBeGreaterThanOrEqual(foot?.x ?? 0);
+    expect((line?.x ?? 0) + (line?.width ?? 0)).toBeLessThanOrEqual((foot?.x ?? 0) + (foot?.width ?? 0));
+    // Under Reduced Motion the letters are in place, not waiting to rise.
+    await expect(mark).toHaveAttribute("data-in", "true");
     expect(errors).toEqual([]);
   });
 
@@ -562,6 +554,68 @@ test.describe("header and keyboard reach", () => {
     await expect(toggle).toHaveAttribute("aria-pressed", "false");
     await toggle.dispatchEvent("click");
     await expect(toggle).toHaveAttribute("aria-pressed", "true", { timeout: 5_000 });
+  });
+
+  test("the contrast toggle switches to the dark green theme, with the logo and sun in its colours", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/", { waitUntil: "load" });
+    await page.locator(".js-contrast").dispatchEvent("click");
+    await expect(page.locator("html")).toHaveClass(/theme-contrasted/, { timeout: 5_000 });
+    const vars = await page.evaluate(() => {
+      const css = getComputedStyle(document.documentElement);
+      return ["primary", "secondary", "sun"].map((n) => css.getPropertyValue(`--color-${n}`).trim());
+    });
+    expect(vars).toEqual(["#0f3324", "#e3f4d7", "#9fe870"]);
+    // The logo is hardcoded to the red theme's ink, so it is recoloured.
+    await expect(page.locator(".js-logo path").first()).toHaveCSS("fill", "rgb(227, 244, 215)");
+    // So is the hero star, an <img>, which is painted through a mask instead.
+    await expect(page.locator(".s-hero .js-star")).toHaveCSS("background-color", "rgb(227, 244, 215)");
+    const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
+    expect(results.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`)).toEqual([]);
+  });
+
+  test("switching themes wipes between snapshots, and the design's late class change can't undo it", async ({
+    page,
+  }) => {
+    await page.route("**/assets/index-wQJ6Ws5X.js", (route) => route.abort());
+    await page.goto("/", { waitUntil: "load" });
+    await page.keyboard.press("Escape");
+    await expect(page.locator(".site-head")).toHaveCSS("opacity", "1", { timeout: 15_000 });
+    const html = page.locator("html");
+    await expect(html).toHaveClass(/has-theme-wipe/);
+    // The design's red mask, which let the old theme show through, stays hidden.
+    await expect(page.locator(".js-contrast-mask")).toHaveCSS("visibility", "hidden");
+    // Record how each transition ends: one that waits on animation frames in
+    // its update times out after 4s and is skipped, so no wipe plays.
+    await page.evaluate(() => {
+      const w = window as unknown as { __vt: string[] };
+      w.__vt = [];
+      const start = document.startViewTransition.bind(document);
+      document.startViewTransition = (update) => {
+        const transition = start(update);
+        transition.ready.then(
+          () => w.__vt.push("ready"),
+          (error: Error) => w.__vt.push(error.name),
+        );
+        return transition;
+      };
+    });
+    const toggle = page.locator(".js-contrast");
+    await toggle.click();
+    await expect(html).toHaveClass(/theme-contrasted/);
+    // The terrain is redrawn in the new colours as part of the switch.
+    await expect(page.locator(".js-wire-terrain > div")).toHaveCSS("background-color", "rgb(15, 51, 36)");
+    // Past the design's own 1s wipe, which sets the class again when it ends.
+    await page.waitForTimeout(1_500);
+    await expect(html).toHaveClass(/theme-contrasted/);
+    await toggle.click();
+    await expect(html).not.toHaveClass(/theme-contrasted/);
+    await page.waitForTimeout(1_500);
+    await expect(html).not.toHaveClass(/theme-contrasted/);
+    await expect(page.locator(".js-wire-terrain > div")).toHaveCSS("background-color", "rgb(244, 12, 63)");
+    expect(await page.evaluate(() => (window as unknown as { __vt: string[] }).__vt)).toEqual(["ready", "ready"]);
   });
 
   test("every project can be reached with the keyboard", async ({ page }) => {

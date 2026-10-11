@@ -1,0 +1,50 @@
+---
+/**
+ * The hero's wire terrain, in the band the wave lines used to fill. An empty
+ * mount here; src/scripts/hero-terrain.tsx renders src/components/HeroTerrain.tsx
+ * into it. Until then (or without WebGL) the band shows the page's red.
+ */
+---
+
+<div class="wts-root js-wire-terrain" aria-hidden="true"></div>
+
+<script>
+  import "../scripts/hero-terrain";
+</script>
+
+<style is:global>
+  /* The terrain replaces the wave lines: their element stays for the hero's intro timeline, undrawn. */
+  .s-hero .s__waves {
+    position: relative;
+  }
+
+  .s-hero .s__waves .js-svg {
+    display: none;
+  }
+
+  .wts-root {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background: var(--color-primary, #f40c3f);
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Fades in as the hero arrives, so it isn't spent behind the 3D intro. */
+  .wts-root > * {
+    opacity: 0;
+    transition: opacity 1.6s ease;
+  }
+
+  .wts-root[data-shown] > * {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wts-root > * {
+      transition: none;
+    }
+  }
+</style>
