@@ -4361,9 +4361,12 @@ void main() {
   float spritePosX = currentCol / uSpriteColCount;
   float spritePosY = currentRow / uSpriteRowCount;
 
+  // Keep samples a few texels inside the cell so the repeat wrap and
+  // mipmaps can't pull in the neighbouring cell's edge (stray line).
+  vec2 cellUv = clamp(vUv, vec2(0.008), vec2(0.992));
   vec2 spriteUv = vec2(
-    spritePosX + vUv.x / uSpriteColCount,
-    spritePosY + vUv.y / uSpriteRowCount
+    spritePosX + cellUv.x / uSpriteColCount,
+    spritePosY + cellUv.y / uSpriteRowCount
   );
 
   vec4 texDiffuse = texture2D(uTexMap, spriteUv);
