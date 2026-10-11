@@ -384,29 +384,30 @@ test.describe("input", () => {
     expect(errors).toEqual([]);
   });
 
-  test("the footer spells HARSHIT CHAUHAN in the glyph wordmark, one line wide and two on phones", async ({ page }) => {
+  test("the footer spells HARSHIT CHAUHAN in Audiowide, on one line that fits", async ({ page }) => {
     const errors = watchForErrors(page);
     await page.goto("/", { waitUntil: "load" });
-    const marks = page.locator(".site-foot .sgf");
-    await expect(marks).toHaveCount(2);
-    // Only the variant for this width shows, and it spans the footer.
-    const shown = page.locator(".site-foot .js-wordmark:visible");
-    await expect(shown).toHaveCount(1);
-    const wide = (page.viewportSize()?.width ?? 0) >= 768;
-    await expect(shown).toHaveAttribute("data-variant", wide ? "wide" : "stacked");
-    // Screen readers get the name once; the drawing is hidden from them.
-    await expect(shown.locator(".sr-only")).toHaveText("Harshit Chauhan");
-    await expect(shown.locator("svg.sgf-svg")).toHaveAttribute("aria-hidden", "true");
-    // All 14 letters are drawn (each as two halves for the hover slice), plus the shutter's three blades.
-    await expect(shown.locator(".sgf-up")).toHaveCount(14);
-    await expect(shown.locator("polygon")).toHaveCount(3);
+    const mark = page.locator(".site-foot .sgf");
+    await expect(mark).toHaveCount(1);
+    // Screen readers get the name once; the letters are hidden from them.
+    await expect(mark.locator(".sr-only")).toHaveText("Harshit Chauhan");
+    await expect(mark.locator(".sgf-line")).toHaveAttribute("aria-hidden", "true");
+    // All 14 letters (each set twice for the hover slice) and the shutter's three blades.
+    await expect(mark.locator(".sgf-up")).toHaveCount(14);
+    await expect(mark.locator("polygon")).toHaveCount(3);
+    // The self-hosted font is the one in use, and the line fits inside the footer.
+    const loaded = await page.evaluate(async () => {
+      await document.fonts.load('16px "Audiowide"');
+      return [...document.fonts].some((f) => f.family.includes("Audiowide") && f.status === "loaded");
+    });
+    expect(loaded).toBe(true);
     const foot = await page.locator(".site-foot").boundingBox();
-    const svg = await shown.locator(".sgf-svg").boundingBox();
-    expect(svg?.height).toBeGreaterThan(20);
-    expect(svg?.x).toBeGreaterThanOrEqual(foot?.x ?? 0);
-    expect((svg?.x ?? 0) + (svg?.width ?? 0)).toBeLessThanOrEqual((foot?.x ?? 0) + (foot?.width ?? 0));
+    const line = await mark.locator(".sgf-line").boundingBox();
+    expect(line?.height).toBeGreaterThan(15);
+    expect(line?.x).toBeGreaterThanOrEqual(foot?.x ?? 0);
+    expect((line?.x ?? 0) + (line?.width ?? 0)).toBeLessThanOrEqual((foot?.x ?? 0) + (foot?.width ?? 0));
     // Under Reduced Motion the letters are in place, not waiting to rise.
-    await expect(shown.locator(".sgf")).toHaveAttribute("data-in", "true");
+    await expect(mark).toHaveAttribute("data-in", "true");
     expect(errors).toEqual([]);
   });
 

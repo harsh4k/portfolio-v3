@@ -4,15 +4,13 @@ import FooterWordmark from "./FooterWordmark";
 
 <footer class="site-foot site-foot--wordmark astro-75cegwoc">
   <!--
-    HARSHIT CHAUHAN in the shutter-glyph lettering (src/components/FooterWordmark.tsx).
-    Server-rendered, then hydrated by scripts/footer-wordmark.tsx. One line on
-    wide screens, two on phones; only one of the two is shown. No whitespace
-    inside the divs: React hydrates their whole content.
+    HARSHIT CHAUHAN in Audiowide with the shutter-glyph animations
+    (src/components/FooterWordmark.tsx). Server-rendered, then hydrated by
+    scripts/footer-wordmark.tsx. No whitespace inside the div: React hydrates
+    its whole content.
   -->
   <!-- prettier-ignore -->
-  <div class="site-foot__mark site-foot__mark--wide js-wordmark" data-variant="wide"><FooterWordmark variant="wide" /></div>
-  <!-- prettier-ignore -->
-  <div class="site-foot__mark site-foot__mark--stacked js-wordmark" data-variant="stacked"><FooterWordmark variant="stacked" /></div>
+  <div class="site-foot__mark js-wordmark"><FooterWordmark /></div>
 </footer>
 
 <script>
@@ -20,26 +18,24 @@ import FooterWordmark from "./FooterWordmark";
 </script>
 
 <style is:global>
+  /* Audiowide by Brian J. Bonislawsky (Astigmatic), SIL Open Font License 1.1.
+     Self-hosted, latin subset: the CSP's font-src only allows this origin. */
+  @font-face {
+    font-family: "Audiowide";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("/fonts/Audiowide-Regular.woff2") format("woff2");
+  }
+
   .site-foot--wordmark {
     --sgf-ink: var(--color-secondary, #160000);
-    padding: clamp(1.25rem, 3vw, 2.5rem) clamp(1rem, 2.6vw, 2.5rem);
+    padding: clamp(1rem, 2.4vw, 1.75rem) 1rem;
   }
 
   .site-foot__mark {
-    width: 100%;
-  }
-
-  .site-foot__mark--stacked {
-    display: none;
-  }
-
-  @media (max-width: 47.99em) {
-    .site-foot__mark--wide {
-      display: none;
-    }
-
-    .site-foot__mark--stacked {
-      display: block;
-    }
+    max-width: 100%;
+    font-family: "Audiowide", var(--font-family-fraktion, sans-serif);
+    font-size: clamp(1.25rem, 5.4vw, 2.75rem);
   }
 </style>
