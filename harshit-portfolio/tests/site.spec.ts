@@ -387,7 +387,7 @@ test.describe("intro", () => {
     await expect(page.locator("#intro-layer")).toHaveCount(1);
   });
 
-  test("no page text shows through the logo reveal after the intro", async ({ page }) => {
+  test("no page text shows through the HC loader after the intro", async ({ page }) => {
     await page.goto("/", { waitUntil: "load" });
     await page.keyboard.press("Escape");
     await expect(page.locator("html")).toHaveClass(/intro-started/);
@@ -668,7 +668,7 @@ test.describe("header and keyboard reach", () => {
     await expect(toggle).toHaveAttribute("aria-pressed", "true", { timeout: 5_000 });
   });
 
-  test("the contrast toggle switches to the dark green theme, with the sun and star in its colours", async ({
+  test("the contrast toggle switches to the dark green theme, with the logo and sun in its colours", async ({
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
@@ -680,9 +680,9 @@ test.describe("header and keyboard reach", () => {
       return ["primary", "secondary", "sun"].map((n) => css.getPropertyValue(`--color-${n}`).trim());
     });
     expect(vars).toEqual(["#0f3324", "#e3f4d7", "#9fe870"]);
-    // The logo is a black-and-white sticker, the same in both themes.
-    await expect(page.locator(".site-head img.js-logo")).toHaveAttribute("src", "/images/logo.svg");
-    // The hero star, an <img> drawn in the red theme's ink, is painted through a mask.
+    // The logo is hardcoded to the red theme's ink, so it is recoloured.
+    await expect(page.locator(".js-logo path").first()).toHaveCSS("fill", "rgb(227, 244, 215)");
+    // So is the hero star, an <img>, which is painted through a mask instead.
     await expect(page.locator(".s-hero .js-star")).toHaveCSS("background-color", "rgb(227, 244, 215)");
     const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
     expect(results.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`)).toEqual([]);
