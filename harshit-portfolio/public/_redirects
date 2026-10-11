@@ -1,0 +1,7 @@
+# Tagged links to post on social profiles, e.g. https://harshh.pages.dev/via/linkedin
+# Each one serves the home page (a rewrite, not a redirect, so the address
+# stays), and Cloudflare Web Analytics lists the visit under that path. That is
+# how visits get credited to each network: Web Analytics ignores ?utm_ query
+# strings, and apps like LinkedIn and Instagram often send no referrer.
+# Any name works after /via/, so a new network needs no change here.
+/via/*  /  200

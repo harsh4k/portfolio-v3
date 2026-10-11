@@ -4,28 +4,15 @@
 */
 
 /*
-  Holds the slat-count loader on the red intro cover until the 3D scene has
-  drawn its first frame. The loader paints its own red; this only places it.
+  The red cover over the 3D intro until the scene has drawn its first frame.
 */
 .intro-loader {
   position: absolute;
   inset: 0;
   /* Above the 3D scene's own page (z-index 100), which otherwise hides it. */
   z-index: 200;
-  /* Opaque until React mounts, so the 3D scene drawing underneath never shows through. */
   background: #ff0b36;
   transition: opacity 0.4s ease;
-}
-
-/* Once the count starts the blinds paint the red, so they can slide away. */
-.intro-loader:has(.scp-gate:not([data-phase="idle"])) {
-  background: transparent;
-}
-
-/* The loader's dimmed HUD type is 3.1:1 on this red; 0.85 keeps it AA (4.5:1). */
-.intro-loader .scp-dim,
-.intro-loader .scp-skip {
-  opacity: 0.85;
 }
 
 .intro-loader.is-done {
@@ -52,6 +39,34 @@ html:not(.intro-ready) .intro-swipe-hint {
 .sb__icon.sb__icon--github {
   width: 20px;
   height: 20px;
+}
+
+/*
+  The About doodle: two frames side by side in one alpha mask, drawn in the
+  section's ink colour so it follows the theme. It kicks and blinks by
+  stepping between the frames; reduced motion keeps the first frame.
+*/
+.about-doodle {
+  width: min(100%, 26rem);
+  aspect-ratio: 800 / 572;
+  margin: 0 auto 2.5rem;
+  background: var(--color-secondary);
+  -webkit-mask: url(/images/about-doodle.webp) 0 0 / 200% 100% no-repeat;
+  mask: url(/images/about-doodle.webp) 0 0 / 200% 100% no-repeat;
+  animation: about-doodle 1.2s steps(1) infinite;
+}
+
+@keyframes about-doodle {
+  50% {
+    -webkit-mask-position: 100% 0;
+    mask-position: 100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-doodle {
+    animation: none;
+  }
 }
 
 /*
@@ -202,12 +217,104 @@ html {
   text-transform: uppercase;
 }
 
-/* Read by screen readers and search engines, never shown. */
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
+/*
+  The second theme (the design's contrast button): dark green instead of the
+  original off-white. The design paints with these four variables, so most of
+  the page follows them; the rules below cover what it hardcodes.
+  --color-sun is ours: the hero terrain's sun, which otherwise uses
+  --color-shadow, gets a brighter green so it reads on the dark ground.
+*/
+html.theme-contrasted {
+  --color-primary: #0f3324;
+  --color-secondary: #e3f4d7;
+  --color-shadow: #061d13;
+  --color-white: #f1faea;
+  --color-sun: #9fe870;
+}
+
+/* The HC logo and the About stars are filled with the red theme's ink. */
+html.theme-contrasted .js-logo path,
+html.theme-contrasted .s__award svg path[fill] {
+  fill: var(--color-secondary);
+}
+
+/*
+  The star (asset-star.svg) is drawn in the red theme's ink too, so here it
+  is painted in this theme's ink through the same shape as a mask. The hero
+  one is an <img>, whose own picture is moved out of view.
+*/
+html.theme-contrasted .s-hero .js-star {
+  object-position: -9999px 0;
+  background: var(--color-secondary);
+  mask: url(/images/asset-star.svg) center / contain no-repeat;
+}
+
+html.theme-contrasted .s-my-way.astro-fiibiggq .a-object--star.astro-fiibiggq::before,
+html.theme-contrasted .s-my-way.astro-fiibiggq .a-object--star.astro-fiibiggq::after {
+  background: var(--color-secondary);
+  mask: url(/images/asset-star.svg) center / cover no-repeat;
+}
+
+/* The awards hatching, redrawn in this theme's colours. */
+html.theme-contrasted .s-about .s__awards {
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 1px,
+    var(--color-secondary) 1.5px,
+    var(--color-secondary) 2.5px,
+    transparent 3px,
+    var(--color-primary) 11px
+  );
+}
+
+/*
+  The contrast wipe is red with mix-blend-mode: darken, so dark ink shows
+  through it on the light theme. Over dark green, darken mixes the two into
+  navy; lighten keeps the wipe red and lets the light ink show through.
+*/
+html.theme-contrasted .site-contrast-mask {
+  mix-blend-mode: lighten;
+}
+
+/*
+  The theme switch's wipe, where the browser has view transitions
+  (src/scripts/theme-wipe.ts): the new theme is revealed over a snapshot of
+  the old one, in the design's directions (right to left into the green
+  theme, left to right back to red), curve and timing.
+*/
+html.has-theme-wipe .site-contrast-mask {
+  visibility: hidden;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-new(root) {
+  animation: theme-wipe-in 1s cubic-bezier(0.87, 0, 0.13, 1) both;
+}
+
+html.theme-wipe-back::view-transition-new(root) {
+  animation-name: theme-wipe-back;
+}
+
+@keyframes theme-wipe-in {
+  from {
+    clip-path: inset(0 0 0 100%);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes theme-wipe-back {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
 }

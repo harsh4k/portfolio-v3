@@ -32,7 +32,7 @@ export default defineConfig(
     languageOptions: { globals: { ...globals.serviceworker } },
   },
   {
-    files: ["*.config.{js,mjs,ts}", "tests/**"],
+    files: ["*.config.{js,mjs,ts}", "tests/**", "scripts/**"],
     languageOptions: { globals: { ...globals.node } },
   },
 );
