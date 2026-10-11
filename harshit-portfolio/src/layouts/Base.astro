@@ -11,7 +11,7 @@ interface Props {
 
 const { title, description } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
-// Regenerate with `npm run og-image` when the logo, name, role or location changes.
+// Regenerate with `npm run og-image` when the HC monogram, name, role or location changes.
 const ogImage = new URL("/images/og-image.png", Astro.site);
 const ogImageAlt = `${profile.name}, ${profile.role} — ${profile.location}`;
 

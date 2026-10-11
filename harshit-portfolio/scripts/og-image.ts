@@ -2,8 +2,8 @@
  * Renders public/images/og-image.png, the 1200x630 preview card that LinkedIn,
  * X, WhatsApp, Slack and Discord show when the site's link is shared.
  *
- * Run `npm run og-image` after changing the logo (public/images/logo.svg) or
- * the name, role or location in src/data/profile.ts. Uses the site's own
+ * Run `npm run og-image` after changing the HC monogram or the name, role or
+ * location in src/data/profile.ts. Uses the site's own
  * fonts and colours, and the Chromium that Playwright already installs for the tests
  * (PLAYWRIGHT_CHROMIUM_PATH overrides it).
  */
@@ -18,8 +18,11 @@ const font = (file: string) =>
   `data:font/woff2;base64,${readFileSync(new URL(`public/fonts/${file}`, root)).toString("base64")}`;
 const out = fileURLToPath(new URL("public/images/og-image.png", root));
 const host = new URL("https://harshh.pages.dev").host;
-// The site logo (the smirk face on a white disc), drawn as-is: the brand kit keeps it black and white.
-const logo = `data:image/svg+xml;base64,${readFileSync(new URL("public/images/logo.svg", root)).toString("base64")}`;
+// The HC monogram, the same paths as the header logo in src/components/Header.astro.
+const monogram = `<svg viewBox="0 0 280 280" fill="#160000" xmlns="http://www.w3.org/2000/svg">
+  <path d="M0 0v280h39.755V158.4h59.65V280h39.756V0H99.411v118.8H39.755V0H0Z" />
+  <path d="M160.734 0v280H280V240.245h-79.51V39.755H280V0H160.734Z" />
+</svg>`;
 
 const html = `<!doctype html>
 <html>
@@ -39,7 +42,7 @@ const html = `<!doctype html>
   .row { display: flex; justify-content: space-between; align-items: baseline; }
   .name { font: 26px/1 Wordmark; letter-spacing: 0.06em; }
   .middle { display: flex; justify-content: space-between; align-items: center; }
-  .middle img { width: 300px; height: 300px; margin-right: -8px; }
+  .middle svg { width: 250px; height: 250px; }
   h1 {
     font: 400 200px/0.86 Display; letter-spacing: -0.01em; text-transform: uppercase;
   }
@@ -50,7 +53,7 @@ const html = `<!doctype html>
   <div class="row"><span class="name">${profile.name}</span><span>Since ${profile.since}</span></div>
   <div class="middle">
     <h1>${profile.heroTitle.join("<br />")}</h1>
-    <img src="${logo}" alt="" />
+    ${monogram}
   </div>
   <div>
     <div class="rule"></div>
