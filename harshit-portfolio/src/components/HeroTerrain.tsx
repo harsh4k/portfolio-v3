@@ -10,8 +10,11 @@ import WireTerrain from "@/components/ui/wire-terrain";
  * page and read again when the theme switch changes them. A theme can set
  * --color-sun to give the sun its own colour.
  *
- * It waits for the hero's entrance before it starts moving, so it doesn't
- * compete with the 3D intro for the GPU. Reduced Motion gets one still frame.
+ * It starts drawing only once the visitor leaves the 3D intro, so the two
+ * don't compete for the GPU. It draws one hidden frame under the HC loader
+ * that follows, so its shaders are ready, then fades in and moves as the
+ * title and header arrive, not ahead of them. Reduced Motion gets one still
+ * frame.
  */
 
 interface Palette {
@@ -32,15 +35,34 @@ function readPalette(el: Element): Palette {
   };
 }
 
-/** How long the header and hero take to come in after the intro. */
-const ENTRANCE_MS = 2500;
+/**
+ * After leaving the intro, when to draw the hidden warm-up frame under the HC
+ * loader: late enough to stay off the intro's way out, early enough that the
+ * shader compile is done before the hero shows. Only one frame, so the loader
+ * keeps the GPU to itself.
+ */
+const WARMUP_MS = 1000;
+/**
+ * Fallback only: the most the hero's entrance should take after the visitor
+ * leaves the intro. Normally the scroll unlock or the waves' introend shows
+ * the terrain first.
+ */
+const ENTRANCE_MAX_MS = 8000;
 
 const still = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
-const entered = () => still() || document.documentElement.classList.contains("intro-done");
+/**
+ * The hero is on screen once the intro is over and the engine has unlocked
+ * scrolling, which it does as the title comes in after the HC loader.
+ */
+const entered = () => {
+  const html = document.documentElement.classList;
+  return still() || (html.contains("intro-done") && !html.contains("is-scroll-blocked"));
+};
 
 export default function HeroTerrain({ mount }: { mount: HTMLElement }) {
   const [palette, setPalette] = useState(() => readPalette(mount));
   const [shown, setShown] = useState(entered);
+  const [warm, setWarm] = useState(false);
 
   useEffect(() => {
     // The theme switch swaps the colour variables through a class on <html>.
@@ -58,15 +80,27 @@ export default function HeroTerrain({ mount }: { mount: HTMLElement }) {
     theme.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
 
     const show = () => setShown(true);
-    // After a skipped intro, wait out the header and hero entrance (as the old
-    // stardust scene did): on slow GPUs the terrain's first frames stall it.
+    // The class watcher above shows it on the scroll unlock; the long timer
+    // only covers an engine that never unlocks.
+    let warmTimer = 0;
+    let warmFrame = 0;
     let timer = 0;
-    const showLater = () => (timer = window.setTimeout(show, ENTRANCE_MS));
+    const warmUp = () => {
+      setWarm(true);
+      // Two frames: one for React to pass running down, one for the draw.
+      warmFrame = requestAnimationFrame(() => (warmFrame = requestAnimationFrame(() => setWarm(false))));
+    };
+    const showLater = () => {
+      warmTimer = window.setTimeout(warmUp, WARMUP_MS);
+      timer = window.setTimeout(show, ENTRANCE_MAX_MS);
+    };
     const waves = mount.closest("a-waves");
     waves?.addEventListener("introend", show, { once: true });
     window.addEventListener("portfolio:entered", showLater, { once: true });
     return () => {
       theme.disconnect();
+      window.clearTimeout(warmTimer);
+      cancelAnimationFrame(warmFrame);
       window.clearTimeout(timer);
       waves?.removeEventListener("introend", show);
       window.removeEventListener("portfolio:entered", showLater);
@@ -83,7 +117,7 @@ export default function HeroTerrain({ mount }: { mount: HTMLElement }) {
       background={palette.ground}
       lineColor={palette.wire}
       accent={palette.sun}
-      running={shown}
+      running={shown || warm}
       speed={reduced ? 0 : 100}
       hover={reduced ? 0 : 200}
       // The component's own 1200x800 minimum would overflow the band on phones.
