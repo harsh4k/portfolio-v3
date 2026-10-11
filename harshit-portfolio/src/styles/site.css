@@ -210,6 +210,23 @@ html.theme-contrasted .s__award svg path[fill] {
   fill: var(--color-secondary);
 }
 
+/*
+  The star (asset-star.svg) is drawn in the red theme's ink too, so here it
+  is painted in this theme's ink through the same shape as a mask. The hero
+  one is an <img>, whose own picture is moved out of view.
+*/
+html.theme-contrasted .s-hero .js-star {
+  object-position: -9999px 0;
+  background: var(--color-secondary);
+  mask: url(/images/asset-star.svg) center / contain no-repeat;
+}
+
+html.theme-contrasted .s-my-way.astro-fiibiggq .a-object--star.astro-fiibiggq::before,
+html.theme-contrasted .s-my-way.astro-fiibiggq .a-object--star.astro-fiibiggq::after {
+  background: var(--color-secondary);
+  mask: url(/images/asset-star.svg) center / cover no-repeat;
+}
+
 /* The awards hatching, redrawn in this theme's colours. */
 html.theme-contrasted .s-about .s__awards {
   background: repeating-linear-gradient(
@@ -230,4 +247,32 @@ html.theme-contrasted .s-about .s__awards {
 */
 html.theme-contrasted .site-contrast-mask {
   mix-blend-mode: lighten;
+}
+
+/*
+  The theme switch's wipe, where the browser has view transitions
+  (src/scripts/theme-wipe.ts): the new theme is revealed left to right over a
+  snapshot of the old one, on the design's curve and timing.
+*/
+html.has-theme-wipe .site-contrast-mask {
+  visibility: hidden;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-new(root) {
+  animation: theme-wipe 1s cubic-bezier(0.87, 0, 0.13, 1) both;
+}
+
+@keyframes theme-wipe {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
 }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { flushSync } from "react-dom";
 import WireTerrain from "@/components/ui/wire-terrain";
 
 /**
@@ -67,8 +68,12 @@ export default function HeroTerrain({ mount }: { mount: HTMLElement }) {
     // The theme switch swaps the colour variables through a class on <html>.
     const theme = new MutationObserver(() => {
       const next = readPalette(mount);
-      setPalette((prev) =>
-        prev.ground === next.ground && prev.wire === next.wire && prev.sun === next.sun ? prev : next,
+      // Synchronously, so the terrain's next frame is already in the new
+      // colours when the theme wipe (scripts/theme-wipe.ts) snapshots it.
+      flushSync(() =>
+        setPalette((prev) =>
+          prev.ground === next.ground && prev.wire === next.wire && prev.sun === next.sun ? prev : next,
+        ),
       );
       if (entered()) setShown(true);
     });
