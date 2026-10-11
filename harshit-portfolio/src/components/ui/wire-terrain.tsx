@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 
 const DEPTH = 60;
 const HALF_X = 64;
@@ -247,6 +247,10 @@ export default function WireTerrain(props: WireTerrainProps) {
   // Restarts the loop (or draws one still frame) after a prop change, e.g. new colours.
   const kickRef = useRef<() => void>(() => {});
   useEffect(() => kickRef.current());
+  // New colours are drawn during the commit, not on the next animation frame,
+  // so a view transition's snapshot (which holds frames back) already has them.
+  const redrawRef = useRef<() => void>(() => {});
+  useLayoutEffect(() => redrawRef.current(), [props.background, props.lineColor, props.accent]);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -492,6 +496,11 @@ export default function WireTerrain(props: WireTerrainProps) {
       raf = requestAnimationFrame(frame);
     };
     kickRef.current = kick;
+    redrawRef.current = () => {
+      cancelAnimationFrame(raf);
+      raf = 0;
+      frame(performance.now());
+    };
     const io = new IntersectionObserver(([entry]) => {
       onScreen = Boolean(entry?.isIntersecting);
       kick();
@@ -517,6 +526,7 @@ export default function WireTerrain(props: WireTerrainProps) {
       cancelAnimationFrame(raf);
       raf = 0;
       kickRef.current = () => {};
+      redrawRef.current = () => {};
       ro.disconnect();
       io.disconnect();
       document.removeEventListener("visibilitychange", kick);
