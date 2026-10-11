@@ -188,3 +188,46 @@ html {
   font: 400 14px/1.4 var(--font-family-fraktion);
   text-transform: uppercase;
 }
+
+/*
+  The second theme (the design's contrast button): dark green instead of the
+  original off-white. The design paints with these four variables, so most of
+  the page follows them; the rules below cover what it hardcodes.
+  --color-sun is ours: the hero terrain's sun, which otherwise uses
+  --color-shadow, gets a brighter green so it reads on the dark ground.
+*/
+html.theme-contrasted {
+  --color-primary: #0f3324;
+  --color-secondary: #e3f4d7;
+  --color-shadow: #061d13;
+  --color-white: #f1faea;
+  --color-sun: #9fe870;
+}
+
+/* The HC logo and the About stars are filled with the red theme's ink. */
+html.theme-contrasted .js-logo path,
+html.theme-contrasted .s__award svg path[fill] {
+  fill: var(--color-secondary);
+}
+
+/* The awards hatching, redrawn in this theme's colours. */
+html.theme-contrasted .s-about .s__awards {
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 1px,
+    var(--color-secondary) 1.5px,
+    var(--color-secondary) 2.5px,
+    transparent 3px,
+    var(--color-primary) 11px
+  );
+}
+
+/*
+  The contrast wipe is red with mix-blend-mode: darken, so dark ink shows
+  through it on the light theme. Over dark green, darken mixes the two into
+  navy; lighten keeps the wipe red and lets the light ink show through.
+*/
+html.theme-contrasted .site-contrast-mask {
+  mix-blend-mode: lighten;
+}
