@@ -19,7 +19,8 @@ const groups = codes.map((code) =>
 );
 ---
 
-<a-separator data-intersect="" class={className}>
+<!-- Decorative 0s and 1s, so screen readers skip it. -->
+<a-separator data-intersect="" class={className} aria-hidden="true">
   <span class="a__triangle astro-rdpcjfuz"></span>
   <span class="a__binaries astro-rdpcjfuz">
     {groups.map((cells) => (

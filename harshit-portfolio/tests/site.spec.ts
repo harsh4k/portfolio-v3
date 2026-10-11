@@ -141,7 +141,7 @@ test.describe("page contract", () => {
 test.describe("layout and accessibility", () => {
   test("the hero heading reads as plain words once its letters are split", async ({ page }) => {
     await page.goto("/", { waitUntil: "networkidle" });
-    await expect(page.getByRole("heading", { level: 1 })).toHaveAccessibleName("Software Developer");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveAccessibleName("Harshit Chauhan, Software Developer");
     // The split letters are hidden from assistive tech, so nothing spells the words out.
     await expect(page.locator("h1 .js-word")).toHaveCount(2);
     for (const word of await page.locator("h1 .js-word").all())
@@ -231,6 +231,66 @@ test.describe("layout and accessibility", () => {
     await expect(page.locator("#work a-work")).toHaveCount(11);
     await expect(page.locator("#contact a[href^='mailto:']")).toContainText("harshitsinhchauhan250@gmail.com");
     await context.close();
+  });
+});
+
+test.describe("search and AI visibility", () => {
+  const SITE = "https://harshh.pages.dev/";
+
+  test("the head carries a title, description and canonical URL", async ({ page }) => {
+    await page.goto("/");
+    await expect(page).toHaveTitle("Harshit Chauhan — Software Developer");
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /software developer/);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", SITE);
+    await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
+  });
+
+  test("the h1 in the served HTML names Harshit, not only his role", async ({ request }) => {
+    // Read the HTML crawlers get, before any script runs.
+    const html = await (await request.get("/")).text();
+    const h1 = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/)?.[1] ?? "";
+    const plain = h1.match(/<span class="u-sr-only[^"]*">([\s\S]*?)<\/span>/)?.[1] ?? "";
+    expect(plain.replace(/\s+/g, " ").trim()).toBe("Harshit Chauhan, Software Developer");
+  });
+
+  test("the JSON-LD describes Harshit and every project", async ({ page }) => {
+    await page.goto("/");
+    const blocks = await page.locator('script[type="application/ld+json"]').allTextContents();
+    expect(blocks).toHaveLength(1);
+    const graph = (JSON.parse(blocks[0] ?? "") as { "@graph": Record<string, unknown>[] })["@graph"];
+    const person = graph.find((node) => node["@type"] === "Person");
+    expect(person).toMatchObject({ name: "Harshit Chauhan", jobTitle: "Software Developer", url: SITE });
+    expect(person?.sameAs).toContain("https://github.com/harsh4k");
+    expect(graph.find((node) => node["@type"] === "ProfilePage")).toMatchObject({
+      mainEntity: person && { "@id": person["@id"] },
+    });
+    expect(graph.filter((node) => node["@type"] === "CreativeWork")).toHaveLength(11);
+  });
+
+  test("robots.txt allows crawling and points at the sitemap", async ({ request }) => {
+    const res = await request.get("/robots.txt");
+    expect(res.status()).toBe(200);
+    const body = await res.text();
+    expect(body).toContain("Allow: /");
+    expect(body).not.toMatch(/Disallow: \/\s*$/m);
+    expect(body).toContain(`Sitemap: ${SITE}sitemap.xml`);
+  });
+
+  test("the sitemap lists the home page and leaves out the 404", async ({ request }) => {
+    const res = await request.get("/sitemap.xml");
+    expect(res.status()).toBe(200);
+    const body = await res.text();
+    expect(body).toContain(`<loc>${SITE}</loc>`);
+    expect(body).not.toContain("404");
+  });
+
+  test("llms.txt summarises Harshit with every project", async ({ request }) => {
+    const res = await request.get("/llms.txt");
+    expect(res.status()).toBe(200);
+    const body = await res.text();
+    expect(body).toMatch(/^# Harshit Chauhan\n/);
+    expect(body.match(/^- \[.+\]\(https:\/\/.+\)/gm)?.length).toBeGreaterThanOrEqual(11 + 2);
+    expect(body.toLowerCase()).not.toContain("creative developer");
   });
 });
 
