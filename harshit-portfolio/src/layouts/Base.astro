@@ -10,7 +10,9 @@ interface Props {
 
 const { title, description } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+// Regenerate with `npm run og-image` when the name, role or location changes.
 const ogImage = new URL("/images/og-image.png", Astro.site);
+const ogImageAlt = `${profile.name}, ${profile.role} — ${profile.location}`;
 
 const personSchema = {
   "@context": "https://schema.org",
@@ -65,8 +67,13 @@ const fonts = [
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:alt" content={ogImageAlt} />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={ogImageAlt} />
 
     {fonts.map((font) => (
       <link rel="preload" href={`/fonts/${font}.woff2`} as="font" type="font/woff2" crossorigin />
