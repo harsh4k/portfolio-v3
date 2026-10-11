@@ -33,25 +33,39 @@ export const hireMe = `mailto:${profile.email}?subject=${encodeURIComponent("Hel
 /**
  * The Highlights grid. Each `slot` is the modifier class the design's
  * stylesheet uses to place that cell, so the order and slots must stay paired.
+ * `burst` picks the doodle a cell throws on hover or tap
+ * (public/images/burst/<burst>.svg).
  */
 export const highlights = [
   {
     slot: "webby2025",
+    burst: "spark",
     kind: "text",
     lines: ["NamasteDev Hackathon 2026 Winner", "GetCited AEO & GEO Website Platform"],
   },
-  { slot: "awwwards", kind: "counter", name: "SHIPPED", counters: ["11 Projects", "Production"] },
-  { slot: "netMag2016", kind: "text", lines: ["Synapical Junior Dev Intern", "Summer 2025"] },
-  { slot: "fwa", kind: "counter", name: "INTERN", counters: ["Synapical", "Junior Dev"] },
+  { slot: "awwwards", burst: "face", kind: "counter", name: "SHIPPED", counters: ["11 Projects", "Production"] },
+  { slot: "netMag2016", burst: "code", kind: "text", lines: ["Synapical Junior Dev Intern", "Summer 2025"] },
+  { slot: "fwa", burst: "code", kind: "counter", name: "INTERN", counters: ["Synapical", "Junior Dev"] },
   {
     slot: "commArt2017",
+    burst: "code",
     kind: "text",
     lines: ["Stack: React · TypeScript · Next.js · Three.js · GSAP · Tailwind · Supabase · Python"],
   },
   { kind: "blank" },
-  { slot: "cssda", kind: "counter", name: "DEGREE", counters: ["NMIMS Mumbai", "B.Tech CE"] },
-  { slot: "gsapOct2024", kind: "text", lines: ["3D & WebGL Experiences", "Interactive Canvas Motion"] },
-  { slot: "gsapNov2024", kind: "text", lines: ["Local AI & Voice Tools", "Tauri, Rust & Node Pipelines"] },
-  { slot: "CSSDA2016", kind: "text", lines: ["Open Source Contributor", "github.com/harsh4k"] },
-  { slot: "CSSDA2015", kind: "text", lines: ["Building Considered Digital Products", `Since ${profile.since}`] },
+  { slot: "cssda", burst: "spark", kind: "counter", name: "DEGREE", counters: ["NMIMS Mumbai", "B.Tech CE"] },
+  { slot: "gsapOct2024", burst: "spark", kind: "text", lines: ["3D & WebGL Experiences", "Interactive Canvas Motion"] },
+  {
+    slot: "gsapNov2024",
+    burst: "bug",
+    kind: "text",
+    lines: ["Local AI & Voice Tools", "Tauri, Rust & Node Pipelines"],
+  },
+  { slot: "CSSDA2016", burst: "bug", kind: "text", lines: ["Open Source Contributor", "github.com/harsh4k"] },
+  {
+    slot: "CSSDA2015",
+    burst: "face",
+    kind: "text",
+    lines: ["Building Considered Digital Products", `Since ${profile.since}`],
+  },
 ] as const;
