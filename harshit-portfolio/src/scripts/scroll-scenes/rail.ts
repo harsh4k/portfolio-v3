@@ -48,7 +48,7 @@ export const buildRail: SceneBuilder = ({ three, scene, camera, section, palette
   }
   const landscape = new three.BufferGeometry();
   landscape.setAttribute("position", new three.Float32BufferAttribute(grid, 3));
-  scene.add(new three.LineSegments(landscape, line(0.32)));
+  scene.add(new three.LineSegments(landscape, line(0.55)));
 
   // The track: two rails and sleepers, raised a little off the ground.
   const curve = new three.CatmullRomCurve3(PATH.map(([x, z]) => new three.Vector3(x, ground(x, z) + 0.35, z)));

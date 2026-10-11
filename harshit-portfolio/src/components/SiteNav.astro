@@ -8,20 +8,25 @@
  * Behaviour lives in src/scripts/site-nav.ts.
  */
 import { getOrdered } from "../data/collections";
+import { getContributions } from "../data/github";
 import { profile } from "../data/profile";
+
+const [github, linkedin] = profile.socials;
+// The GitHub section is left out when the build couldn't reach GitHub (GithubSection.astro).
+const hasGithubSection = github ? (await getContributions(github.handle)) !== null : false;
 
 const sections = [
   { id: "top", label: "Home" },
   { id: "about", label: "About" },
   { id: "process", label: "How I work" },
   { id: "work", label: "Work" },
-  { id: "track-record", label: "Track record" },
+  { id: "toolkit", label: "Toolkit" },
+  ...(hasGithubSection ? [{ id: "github", label: "GitHub" }] : []),
   { id: "since", label: "Since 2024" },
   { id: "contact", label: "Contact" },
 ];
 
 const projects = await getOrdered("projects");
-const [github, linkedin] = profile.socials;
 
 interface Command {
   label: string;
@@ -238,6 +243,8 @@ const commands: Command[] = [
     max-height: min(32rem, calc(100svh - 4rem));
     margin: 12svh auto auto;
     padding: 0;
+    /* Only the list scrolls; the dialog itself never does. */
+    overflow: hidden;
     border: 1px solid var(--color-secondary);
     background: var(--color-primary);
     color: var(--color-secondary);
@@ -273,6 +280,7 @@ const commands: Command[] = [
 
   .sn-menu__list {
     flex: 1;
+    min-height: 0;
     margin: 0;
     padding: 0.5rem 0;
     overflow-y: auto;

@@ -1,0 +1,428 @@
+---
+/**
+ * The GitHub section: the last year of contributions as the Contribution
+ * Skyline (src/components/ui/contribution-skyline.tsx), a heat map that rises
+ * into a 3D skyline when it scrolls into view. The year is fetched when the
+ * site builds (src/data/github.ts); if GitHub can't be reached the section is
+ * left out. Mounted by scripts/github-skyline.tsx, since the CSP blocks
+ * Astro's inline island loader.
+ */
+import { getContributions } from "../data/github";
+import { profile } from "../data/profile";
+
+const [github] = profile.socials;
+const contributions = github ? await getContributions(github.handle) : null;
+const days = contributions?.days.map(({ date, count }) => ({ date, count }));
+---
+
+{github && contributions && days && (
+  <section id="github" class="gh" aria-labelledby="github-title">
+    <h2 id="github-title" class="gh__title">
+      GitHub
+    </h2>
+    <div class="gh__body">
+      <div class="gh__chart js-skyline" data-days={JSON.stringify(days)}>
+        <p class="gh__fallback">
+          {contributions.total === undefined
+            ? "GitHub activity over the last year"
+            : `${contributions.total.toLocaleString("en-US")} contributions on GitHub in the last year`}
+        </p>
+      </div>
+      <a class="gh__link" href={github.url} target="_blank" rel="noopener noreferrer">
+        github.com/{github.handle} ↗
+      </a>
+    </div>
+  </section>
+)}
+
+<script>
+  import "../scripts/github-skyline";
+</script>
+
+<style is:global>
+  .gh {
+    /* The names the skyline reads, mapped to the site's two colours. */
+    --color-background: var(--color-primary);
+    --color-foreground: var(--color-secondary);
+    --color-border: color-mix(in srgb, var(--color-secondary) 45%, transparent);
+    --color-muted-foreground: color-mix(in srgb, var(--color-secondary) 70%, var(--color-primary));
+    border-top: 1px solid var(--color-secondary);
+    background: var(--color-primary);
+    color: var(--color-secondary);
+  }
+
+  .gh__title {
+    margin: 0;
+    padding: 0 0 2px;
+    background: var(--color-secondary);
+    color: var(--color-primary);
+    font: 700 12px/24px var(--font-family-fraktion);
+    letter-spacing: 0.1em;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  .gh__body {
+    display: grid;
+    gap: 1rem;
+    max-width: 68rem;
+    margin: 0 auto;
+    padding: clamp(1.5rem, 5vw, 4rem) 1rem;
+  }
+
+  .gh__fallback {
+    margin: 0;
+    font: 400 14px/1.5 var(--font-family-fraktion);
+  }
+
+  .gh__link {
+    justify-self: end;
+    color: inherit;
+    font: 700 12px/1.4 var(--font-family-fraktion);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* The skyline's own layout. Its markup came with Tailwind classes; this project has no Tailwind, so they are plain CSS here. */
+  .skyline {
+    position: relative;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid;
+    font-family: var(--font-family-fraktion);
+  }
+
+  .skyline *,
+  .skyline *::before,
+  .skyline *::after {
+    box-sizing: border-box;
+  }
+
+  .skyline-stat {
+    min-width: 0;
+  }
+
+  .skyline-stat__label,
+  .skyline-corner__label {
+    font-size: 13px;
+    line-height: 1.25;
+  }
+
+  .skyline-stat__row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.375rem;
+    margin-top: 0.25rem;
+  }
+
+  .skyline-stat__value,
+  .skyline-corner__value {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    transition: color 0.5s;
+  }
+
+  .skyline-stat__unit {
+    font-size: 14px;
+  }
+
+  .skyline-stat__sub {
+    margin-top: 0.125rem;
+    overflow: hidden;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .skyline-corner {
+    display: grid;
+    grid-template-columns: auto auto;
+    align-items: end;
+    column-gap: 0.5rem;
+  }
+
+  .skyline-corner__label--end,
+  .skyline-corner__value {
+    text-align: right;
+  }
+
+  .skyline-corner__label--wide {
+    grid-column: span 2;
+  }
+
+  .skyline-corner__text {
+    padding-bottom: 0.15em;
+    line-height: 1.25;
+  }
+
+  .skyline-corner__unit {
+    font-size: 15px;
+  }
+
+  .skyline-corner__sub {
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .skyline__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .skyline__title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.375;
+  }
+
+  .skyline__total {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .skyline__toggle {
+    position: relative;
+    display: inline-flex;
+    padding: 2px;
+    border: 1px solid;
+  }
+
+  .skyline__thumb {
+    position: absolute;
+    top: 2px;
+    bottom: 2px;
+    left: 2px;
+    width: 2rem;
+    transition: transform 0.5s;
+  }
+
+  .skyline__view {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 1.75rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    transition: color 0.5s;
+  }
+
+  .skyline__view:focus-visible,
+  .skyline__swatch:focus-visible {
+    outline: 2px solid;
+    outline-offset: 2px;
+  }
+
+  .skyline__frame {
+    position: relative;
+    border: 1px solid;
+  }
+
+  .skyline__inner {
+    position: relative;
+    padding: 0.75rem 0.75rem 0;
+  }
+
+  .skyline__stage {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    outline-offset: 4px;
+  }
+
+  .skyline__stage:has(:focus-visible) {
+    outline-width: 2px;
+    outline-style: solid;
+  }
+
+  .skyline__canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    outline: none;
+  }
+
+  .skyline__corners {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    pointer-events: none;
+    transition-property: opacity, transform;
+  }
+
+  .skyline__corners--top {
+    top: 0.25rem;
+    right: 0.25rem;
+    align-items: flex-end;
+  }
+
+  .skyline__corners--bottom {
+    bottom: 0.25rem;
+    left: 0.25rem;
+    align-items: flex-start;
+  }
+
+  .skyline__tip {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: 20;
+    padding: 0.375rem 0.625rem;
+    font-size: 12px;
+    line-height: 1;
+    white-space: nowrap;
+    pointer-events: none;
+    box-shadow: 0 6px 16px rgb(0 0 0 / 25%);
+    transition: opacity 0.15s;
+  }
+
+  .skyline__tip-count {
+    font-weight: 700;
+  }
+
+  .skyline__tip-date {
+    opacity: 0.75;
+  }
+
+  .skyline__tip-arrow {
+    position: absolute;
+    top: 100%;
+    width: 0;
+    height: 0;
+  }
+
+  .skyline__stats {
+    display: grid;
+    transition-property: grid-template-rows, opacity;
+  }
+
+  .skyline__stats-clip {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .skyline__stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    padding: 1rem 0.75rem 0.25rem;
+  }
+
+  .skyline__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    padding: 0.75rem;
+    font-size: 12px;
+  }
+
+  .skyline__hints {
+    position: relative;
+    display: grid;
+    flex: 1;
+  }
+
+  .skyline__hint {
+    grid-area: 1 / 1;
+    transition: opacity 0.5s;
+  }
+
+  .skyline__note {
+    flex: 1;
+  }
+
+  .skyline__legend {
+    display: flex;
+    align-items: center;
+  }
+
+  .skyline__less {
+    margin-right: 0.125rem;
+  }
+
+  .skyline__more {
+    margin-left: 0.125rem;
+  }
+
+  /* An 11px swatch inside a 24px button, the smallest target WCAG 2.2 allows. The colour is set inline, so clipping it to the content box needs !important. */
+  .skyline__swatch {
+    width: 24px;
+    height: 24px;
+    padding: 6.5px;
+    border: 0;
+    border-radius: 0;
+    background-clip: content-box !important;
+    box-shadow: none !important;
+    cursor: pointer;
+    transition:
+      background-color 0.5s,
+      transform 0.5s;
+  }
+
+  .skyline__swatch:hover {
+    transform: scale(1.25);
+  }
+
+  .skyline__swatch:focus-visible {
+    outline-offset: -4px;
+  }
+
+  .skyline__sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (min-width: 640px) {
+    .skyline {
+      padding: 1.25rem;
+    }
+
+    .skyline__inner {
+      padding: 1rem 1rem 0;
+    }
+
+    .skyline__stats-grid,
+    .skyline__foot {
+      padding-right: 1rem;
+      padding-left: 1rem;
+    }
+
+    .skyline__tip {
+      top: 1rem;
+      left: 1rem;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .skyline__stats-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .skyline,
+    .skyline * {
+      transition: none !important;
+    }
+  }
+</style>
