@@ -186,6 +186,69 @@ test.describe("layout and accessibility", () => {
   });
 });
 
+test.describe("search and AI visibility", () => {
+  const SITE = "https://harshh.pages.dev/";
+
+  test("the head carries a title, description and canonical URL", async ({ page }) => {
+    await page.goto("/");
+    await expect(page).toHaveTitle("Harshit Chauhan — Software Developer");
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /software developer/);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", SITE);
+    await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
+  });
+
+  test("the h1 in the served HTML names Harshit, not only his role", async ({ request }) => {
+    // Read the HTML crawlers get: once running, the engine splits the hero words into letters.
+    const html = await (await request.get("/")).text();
+    const h1 = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/)?.[1] ?? "";
+    const text = h1
+      .replace(/<!--[\s\S]*?-->|<[^>]+>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    expect(text).toBe("Harshit Chauhan, Software Developer");
+  });
+
+  test("the JSON-LD describes Harshit and every project", async ({ page }) => {
+    await page.goto("/");
+    const blocks = await page.locator('script[type="application/ld+json"]').allTextContents();
+    expect(blocks).toHaveLength(1);
+    const graph = (JSON.parse(blocks[0] ?? "") as { "@graph": Record<string, unknown>[] })["@graph"];
+    const person = graph.find((node) => node["@type"] === "Person");
+    expect(person).toMatchObject({ name: "Harshit Chauhan", jobTitle: "Software Developer", url: SITE });
+    expect(person?.sameAs).toContain("https://github.com/harsh4k");
+    expect(graph.find((node) => node["@type"] === "ProfilePage")).toMatchObject({
+      mainEntity: person && { "@id": person["@id"] },
+    });
+    expect(graph.filter((node) => node["@type"] === "CreativeWork")).toHaveLength(11);
+  });
+
+  test("robots.txt allows crawling and points at the sitemap", async ({ request }) => {
+    const res = await request.get("/robots.txt");
+    expect(res.status()).toBe(200);
+    const body = await res.text();
+    expect(body).toContain("Allow: /");
+    expect(body).not.toMatch(/Disallow: \/\s*$/m);
+    expect(body).toContain(`Sitemap: ${SITE}sitemap.xml`);
+  });
+
+  test("the sitemap lists the home page and leaves out the 404", async ({ request }) => {
+    const res = await request.get("/sitemap.xml");
+    expect(res.status()).toBe(200);
+    const body = await res.text();
+    expect(body).toContain(`<loc>${SITE}</loc>`);
+    expect(body).not.toContain("404");
+  });
+
+  test("llms.txt summarises Harshit with every project", async ({ request }) => {
+    const res = await request.get("/llms.txt");
+    expect(res.status()).toBe(200);
+    const body = await res.text();
+    expect(body).toMatch(/^# Harshit Chauhan\n/);
+    expect(body.match(/^- \[.+\]\(https:\/\/.+\)/gm)?.length).toBeGreaterThanOrEqual(11 + 2);
+    expect(body.toLowerCase()).not.toContain("creative developer");
+  });
+});
+
 test.describe("personal links", () => {
   test("every Hire me link is a well-formed mailto with an encoded subject", async ({ page }) => {
     await page.goto("/");
