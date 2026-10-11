@@ -111,7 +111,10 @@ const attendo = linked("attendo");
               </svg>
             </li>
           ) : (
-            <li class={`s__award s__award--${item.kind} s__award--${item.slot} js-award astro-am7g2yfn`}>
+            <li
+              class={`s__award s__award--${item.kind} s__award--${item.slot} js-award astro-am7g2yfn`}
+              data-burst={item.burst}
+            >
               <span class="s__award__inner astro-am7g2yfn">
                 {item.kind === "text" ? (
                   <span class="s__award__text astro-am7g2yfn">
