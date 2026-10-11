@@ -30,6 +30,18 @@ html.is-scroll-blocked .s-hero ~ * {
   visibility: hidden;
 }
 
+/*
+  The smileys' vanish mask (a 150 KB sprite) is only seen in Highlights, far
+  below the hero, but the design puts it on every smiley from the start, so
+  the browser fetched it alongside the 3D intro. Hold it back until the
+  engine unlocks scrolling. !important because the design's own rule carries
+  more classes than this one.
+*/
+html.is-scroll-blocked .s-my-way .a-object::before {
+  -webkit-mask: none !important;
+  mask: none !important;
+}
+
 /* The swipe hint only makes sense once there is something to swipe. */
 html:not(.intro-ready) .intro-swipe-hint {
   visibility: hidden;
