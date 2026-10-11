@@ -13,8 +13,9 @@ export const profile = {
   since: 2024,
   school: "NMIMS Mumbai",
   stack: ["React", "TypeScript", "Next.js", "Three.js", "GSAP", "Tailwind", "Supabase", "Python"],
+  /** Search results cut descriptions at about 155 characters; a test keeps it under that. */
   description:
-    "Harshit Chauhan — Computer Engineering student at NMIMS Mumbai and software developer building production web applications, motion-led sites and local-first AI tools.",
+    "Software developer and Computer Engineering student at NMIMS Mumbai, building production web apps, motion-led sites and local-first AI tools.",
   socials: [
     { label: "GitHub", handle: "harsh4k", url: "https://github.com/harsh4k" },
     {

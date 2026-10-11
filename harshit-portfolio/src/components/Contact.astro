@@ -23,8 +23,10 @@ const star = `<svg class="s__cta__star astro-25kxajgh" width="49" height="49" vi
         </div>
       </div>
       <div class="s__cta js-cta astro-25kxajgh">
+        <!-- Each letter is drawn four times as slices; the plain words stand in for them. -->
+        <span class="u-sr-only astro-25kxajgh">Let's rock</span>
         {lines.map((line) => (
-          <div class={`s__cta__line s__cta__line--${line.position} astro-25kxajgh`}>
+          <div class={`s__cta__line s__cta__line--${line.position} astro-25kxajgh`} aria-hidden="true">
             <div class="s__cta__text astro-25kxajgh">
               {line.chars.map((char) => (
                 <span class="s__cta__char astro-25kxajgh">
