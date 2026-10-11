@@ -6,7 +6,8 @@ import WireTerrain from "@/components/ui/wire-terrain";
  * Originkit), drawn in the page's colours: --color-primary for the ground and
  * sky, --color-secondary for the wires, --color-shadow for the sun. The
  * component needs real colour values, not var(), so they are read from the
- * page and read again when the theme switch changes them.
+ * page and read again when the theme switch changes them. A theme can set
+ * --color-sun to give the sun its own colour.
  *
  * It waits for the hero's entrance before it starts moving, so it doesn't
  * compete with the 3D intro for the GPU. Reduced Motion gets one still frame.
@@ -26,7 +27,7 @@ function readPalette(el: Element): Palette {
   return {
     ground: read("--color-primary", FALLBACK.ground),
     wire: read("--color-secondary", FALLBACK.wire),
-    sun: read("--color-shadow", FALLBACK.sun),
+    sun: read("--color-sun", "") || read("--color-shadow", FALLBACK.sun),
   };
 }
 

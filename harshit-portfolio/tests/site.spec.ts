@@ -510,6 +510,24 @@ test.describe("header and keyboard reach", () => {
     await expect(toggle).toHaveAttribute("aria-pressed", "true", { timeout: 5_000 });
   });
 
+  test("the contrast toggle switches to the dark green theme, with the logo and sun in its colours", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/", { waitUntil: "load" });
+    await page.locator(".js-contrast").dispatchEvent("click");
+    await expect(page.locator("html")).toHaveClass(/theme-contrasted/, { timeout: 5_000 });
+    const vars = await page.evaluate(() => {
+      const css = getComputedStyle(document.documentElement);
+      return ["primary", "secondary", "sun"].map((n) => css.getPropertyValue(`--color-${n}`).trim());
+    });
+    expect(vars).toEqual(["#0f3324", "#e3f4d7", "#9fe870"]);
+    // The logo is hardcoded to the red theme's ink, so it is recoloured.
+    await expect(page.locator(".js-logo path").first()).toHaveCSS("fill", "rgb(227, 244, 215)");
+    const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
+    expect(results.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`)).toEqual([]);
+  });
+
   test("every project can be reached with the keyboard", async ({ page }) => {
     // Reduced motion skips the intro, so Tab starts from the page itself.
     await page.emulateMedia({ reducedMotion: "reduce" });
