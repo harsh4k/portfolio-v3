@@ -26,7 +26,7 @@ class PortfolioWidget : AppWidgetProvider() {
         for (id in appWidgetIds) {
             val views = RemoteViews(context.packageName, R.layout.widget_portfolio)
             val intent = Intent(context, LauncherActivity::class.java).apply {
-                data = Uri.parse("https://harshitchauhan.dev/?source=widget")
+                data = Uri.parse("https://harshh.pages.dev/?source=widget")
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             }
             val flags =

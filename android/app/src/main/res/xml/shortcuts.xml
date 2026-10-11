@@ -8,7 +8,7 @@
         android:shortcutShortLabel="@string/shortcut_about">
         <intent
             android:action="android.intent.action.VIEW"
-            android:data="https://harshitchauhan.dev/#about"
+            android:data="https://harshh.pages.dev/#about"
             android:targetClass="com.google.androidbrowserhelper.trusted.LauncherActivity"
             android:targetPackage="dev.harshitchauhan.portfolio" />
     </shortcut>
@@ -20,7 +20,7 @@
         android:shortcutShortLabel="@string/shortcut_work">
         <intent
             android:action="android.intent.action.VIEW"
-            android:data="https://harshitchauhan.dev/#work"
+            android:data="https://harshh.pages.dev/#work"
             android:targetClass="com.google.androidbrowserhelper.trusted.LauncherActivity"
             android:targetPackage="dev.harshitchauhan.portfolio" />
     </shortcut>
@@ -32,7 +32,7 @@
         android:shortcutShortLabel="@string/shortcut_contact">
         <intent
             android:action="android.intent.action.VIEW"
-            android:data="https://harshitchauhan.dev/#contact"
+            android:data="https://harshh.pages.dev/#contact"
             android:targetClass="com.google.androidbrowserhelper.trusted.LauncherActivity"
             android:targetPackage="dev.harshitchauhan.portfolio" />
     </shortcut>

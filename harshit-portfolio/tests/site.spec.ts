@@ -149,6 +149,23 @@ test.describe("layout and accessibility", () => {
     expect(boxes.first?.right ?? Infinity).toBeLessThan(boxes.star?.left ?? 0);
   });
 
+  test("the hero's binary strip spells Harshit's name, not the design's author", async ({ page }) => {
+    await page.goto("/");
+    const words = await page
+      .locator(".s-hero a-separator")
+      .first()
+      .evaluate((strip) =>
+        [...strip.querySelectorAll(".a__code")]
+          .map((code) => {
+            const bits = [...code.querySelectorAll(".a__char")].map((cell) => cell.textContent?.trim() ?? "");
+            const letters = bits.join(",").split(",,");
+            return letters.map((letter) => String.fromCharCode(parseInt(letter.replaceAll(",", ""), 2))).join("");
+          })
+          .join(""),
+      );
+    expect(words).toBe("HarshitChauhan");
+  });
+
   test("every image has alt text, empty only where a caption already names it", async ({ page }) => {
     await page.goto("/");
     const missingAlt = await page.locator("img:not([alt])").count();
@@ -289,6 +306,35 @@ test.describe("intro", () => {
     await expect(page.locator("#intro-layer")).toHaveCount(0, { timeout: 10_000 });
     await expect(page).toHaveTitle(title);
     await expect(page.locator(".site-head")).toHaveCSS("opacity", "1");
+  });
+
+  test("on a phone, swiping down on the scene enters the site", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "Desktop pulls the 3D hand instead.");
+    // The swipe is bridge.js's own; holding the 3D bundle back keeps the
+    // main thread free so the gesture lands on time on a busy runner.
+    await page.route("**/assets/index-wQJ6Ws5X.js", () => new Promise(() => {}));
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await page.evaluate(() => window.dispatchEvent(new Event("intro:ready")));
+    await expect(page.locator(".intro-swipe-hint")).toBeVisible({ timeout: 15_000 });
+    await page.evaluate(() => {
+      const x = innerWidth / 2;
+      const fire = (type: string, y: number) =>
+        window.dispatchEvent(
+          new PointerEvent(type, {
+            pointerId: 1,
+            pointerType: "touch",
+            clientX: x,
+            clientY: y,
+            bubbles: true,
+            cancelable: true,
+          }),
+        );
+      fire("pointerdown", innerHeight * 0.3);
+      for (let i = 1; i <= 8; i++) fire("pointermove", innerHeight * (0.3 + i * 0.045));
+      fire("pointerup", innerHeight * 0.66);
+    });
+    await expect(page.locator("#intro-layer")).toHaveCount(0, { timeout: 10_000 });
+    await expect(page.locator(".site-head")).toHaveCSS("opacity", "1", { timeout: 15_000 });
   });
 
   test("the 3D intro bundle keeps its ready hook and none of its author's details", () => {

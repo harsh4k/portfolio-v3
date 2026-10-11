@@ -119,6 +119,8 @@
     if (navigating) return;
     navigating = true;
     unbindSwipe();
+    // The page-wide panel watcher below has done its job however we got here.
+    observer.disconnect();
     document.removeEventListener("keydown", onSkipKey);
     window.clearTimeout(introTimeout);
 
@@ -377,7 +379,6 @@
   // --- Keyboard skip for accessibility (removed once the intro is gone) ---
   function onSkipKey(e) {
     if (e.key === "Escape" || e.key === "Enter") {
-      observer.disconnect();
       revealPortfolio(true);
     }
   }
