@@ -240,7 +240,10 @@ test.describe("search and AI visibility", () => {
   test("the head carries a title, description and canonical URL", async ({ page }) => {
     await page.goto("/");
     await expect(page).toHaveTitle("Harshit Chauhan — Software Developer");
-    await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /software developer/);
+    const description = await page.locator('meta[name="description"]').getAttribute("content");
+    expect(description).toMatch(/software developer/i);
+    // Longer descriptions are cut off in search results.
+    expect(description?.length).toBeLessThanOrEqual(155);
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", SITE);
     await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
   });
@@ -251,6 +254,19 @@ test.describe("search and AI visibility", () => {
     const h1 = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/)?.[1] ?? "";
     const plain = h1.match(/<span class="u-sr-only[^"]*">([\s\S]*?)<\/span>/)?.[1] ?? "";
     expect(plain.replace(/\s+/g, " ").trim()).toBe("Harshit Chauhan, Software Developer");
+  });
+
+  test("lettered headings and slogans read as words, each once", async ({ page }) => {
+    await page.goto("/", { waitUntil: "networkidle" });
+    // Sections below the fold are hidden until scrolled to, so check the markup rather than the accessibility tree.
+    await expect(page.locator("#work h2 .u-sr-only")).toHaveText("Work");
+    await expect(page.locator("#work h2 .js-title")).toHaveAttribute("aria-hidden", "true");
+    const contact = page.locator("#contact .s__cta");
+    await expect(contact.locator(".u-sr-only")).toHaveText("Let's rock");
+    for (const line of await contact.locator(".s__cta__line").all())
+      await expect(line).toHaveAttribute("aria-hidden", "true");
+    await expect(page.locator(".s__catcher__distorted-wrapper")).toHaveAttribute("aria-hidden", "true");
+    await expect(page.locator(".s__catcher__normal-wrapper")).not.toHaveAttribute("aria-hidden", /.*/);
   });
 
   test("the JSON-LD describes Harshit and every project", async ({ page }) => {
