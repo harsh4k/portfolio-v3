@@ -55,6 +55,34 @@ html:not(.intro-ready) .intro-swipe-hint {
 }
 
 /*
+  The About doodle: two frames side by side in one alpha mask, drawn in the
+  section's ink colour so it follows the theme. It kicks and blinks by
+  stepping between the frames; reduced motion keeps the first frame.
+*/
+.about-doodle {
+  width: min(100%, 26rem);
+  aspect-ratio: 800 / 572;
+  margin: 0 auto 2.5rem;
+  background: var(--color-secondary);
+  -webkit-mask: url(/images/about-doodle.webp) 0 0 / 200% 100% no-repeat;
+  mask: url(/images/about-doodle.webp) 0 0 / 200% 100% no-repeat;
+  animation: about-doodle 1.2s steps(1) infinite;
+}
+
+@keyframes about-doodle {
+  50% {
+    -webkit-mask-position: 100% 0;
+    mask-position: 100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-doodle {
+    animation: none;
+  }
+}
+
+/*
   Phones draw a translucent blue box over anything tapped. The intro's
   stylesheet turned it off, but that stylesheet is removed once the intro
   ends, so the box came back on the GO button and other links.
