@@ -98,6 +98,15 @@ test.describe("page contract", () => {
 });
 
 test.describe("layout and accessibility", () => {
+  test("the hero heading reads as plain words once its letters are split", async ({ page }) => {
+    await page.goto("/", { waitUntil: "networkidle" });
+    await expect(page.getByRole("heading", { level: 1 })).toHaveAccessibleName("Software Developer");
+    // The split letters are hidden from assistive tech, so nothing spells the words out.
+    await expect(page.locator("h1 .js-word")).toHaveCount(2);
+    for (const word of await page.locator("h1 .js-word").all())
+      await expect(word).toHaveAttribute("aria-hidden", "true");
+  });
+
   test("has no axe violations", async ({ page }) => {
     // Waits for the loader before scanning, which takes most of the default 30s on a slow runner.
     test.setTimeout(60_000);
