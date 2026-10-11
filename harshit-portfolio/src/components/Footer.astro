@@ -1,8 +1,69 @@
 ---
 import FooterWordmark from "./FooterWordmark";
+import { getContributions } from "../data/github";
+import { profile } from "../data/profile";
+
+const [github] = profile.socials;
+const contributions = github ? await getContributions(github.handle) : null;
+
+// The graph as GitHub draws it: a column per week (Sunday at the top), shaded by GitHub's level.
+const CELL = 10;
+const GAP = 3;
+const weeks: { x: number; y: number; level: number; date: string }[] = [];
+if (contributions) {
+  const firstDay = new Date(`${contributions.days[0]?.date}T00:00:00Z`).getUTCDay();
+  contributions.days.forEach((day, index) => {
+    const slot = index + firstDay;
+    weeks.push({
+      x: Math.floor(slot / 7) * (CELL + GAP),
+      y: (slot % 7) * (CELL + GAP),
+      level: day.level,
+      date: day.date,
+    });
+  });
+}
+const graphWidth = weeks.length ? Math.max(...weeks.map((cell) => cell.x)) + CELL : 0;
+const graphHeight = 7 * (CELL + GAP) - GAP;
 ---
 
 <footer class="site-foot site-foot--wordmark astro-75cegwoc">
+  <div class="site-foot__meta">
+    <p class="site-foot__status">
+      <span>{profile.location}</span>
+      <span aria-hidden="true">·</span>
+      <span>
+        <time class="js-local-time" data-zone={profile.timeZone}>
+          IST
+        </time>{" "}
+        local time
+      </span>
+      <span aria-hidden="true">·</span>
+      <span>{profile.availability}</span>
+    </p>
+    <button type="button" class="site-foot__copy js-copy-email">
+      Copy email
+    </button>
+  </div>
+  {github && contributions && (
+    <a class="site-foot__graph" href={github.url} target="_blank" rel="noopener noreferrer">
+      <svg
+        viewBox={`0 0 ${graphWidth} ${graphHeight}`}
+        width={graphWidth}
+        height={graphHeight}
+        preserveAspectRatio="xMaxYMid meet"
+        aria-hidden="true"
+      >
+        {weeks.map((cell) => (
+          <rect x={cell.x} y={cell.y} width={CELL} height={CELL} data-level={cell.level} />
+        ))}
+      </svg>
+      <span class="site-foot__graph-label">
+        {contributions.total === undefined
+          ? "GitHub activity, last year"
+          : `${contributions.total.toLocaleString("en-US")} contributions on GitHub in the last year`}
+      </span>
+    </a>
+  )}
   <!--
     HARSHIT CHAUHAN in Audiowide with the shutter-glyph animations
     (src/components/FooterWordmark.tsx). Server-rendered, then hydrated by
@@ -15,6 +76,7 @@ import FooterWordmark from "./FooterWordmark";
 
 <script>
   import "../scripts/footer-wordmark";
+  import "../scripts/footer-meta";
 </script>
 
 <style is:global>
@@ -28,12 +90,121 @@ import FooterWordmark from "./FooterWordmark";
     src: url("/fonts/Audiowide-Regular.woff2") format("woff2");
   }
 
-  .site-foot--wordmark {
+  /*
+    Status and the GitHub graph side by side above the wordmark; stacked on
+    narrow screens. Two classes to beat the design's flex row on .site-foot.
+    The bottom padding keeps the corner Jump button (SiteNav.astro) off the wordmark.
+  */
+  .site-foot.site-foot--wordmark {
     --sgf-ink: var(--color-secondary, #160000);
-    padding: clamp(1rem, 2.4vw, 1.75rem) 1rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 1.5rem 3rem;
+    padding: clamp(1rem, 2.4vw, 1.75rem) 1rem calc(4rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  @media only screen and (max-width: 987px) {
+    .site-foot.site-foot--wordmark {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  .site-foot__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1.5rem;
+    margin: 0;
+    color: var(--color-secondary);
+    font: 400 12px/1.5 var(--font-family-fraktion);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .site-foot__status {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.6rem;
+    margin: 0;
+    min-width: 0;
+  }
+
+  .site-foot__status time {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .site-foot__copy {
+    padding: 0.4rem 0.75rem;
+    border: 1px solid var(--color-secondary);
+    background: transparent;
+    color: inherit;
+    font: 700 12px/1 var(--font-family-fraktion);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .site-foot__copy:hover,
+  .site-foot__copy:focus-visible {
+    background: var(--color-secondary);
+    color: var(--color-primary);
+  }
+
+  .site-foot__graph {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 0;
+    margin: 0;
+    color: var(--color-secondary);
+    text-decoration: none;
+  }
+
+  /* Wide enough for every week on a desktop; on a phone, the latest weeks, right-aligned. */
+  .site-foot__graph svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 7rem;
+  }
+
+  .site-foot__graph rect {
+    fill: var(--color-secondary);
+    fill-opacity: 0.1;
+  }
+
+  .site-foot__graph rect[data-level="1"] {
+    fill-opacity: 0.35;
+  }
+
+  .site-foot__graph rect[data-level="2"] {
+    fill-opacity: 0.55;
+  }
+
+  .site-foot__graph rect[data-level="3"] {
+    fill-opacity: 0.78;
+  }
+
+  .site-foot__graph rect[data-level="4"] {
+    fill-opacity: 1;
+  }
+
+  .site-foot__graph-label {
+    font: 400 12px/1.4 var(--font-family-fraktion);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .site-foot__graph:hover .site-foot__graph-label,
+  .site-foot__graph:focus-visible .site-foot__graph-label {
+    text-decoration: underline;
   }
 
   .site-foot__mark {
+    grid-column: 1 / -1;
+    justify-self: center;
     max-width: 100%;
     font-family: "Audiowide", var(--font-family-fraktion, sans-serif);
     font-size: clamp(1.25rem, 5.4vw, 2.75rem);
