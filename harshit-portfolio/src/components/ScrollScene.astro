@@ -1,0 +1,229 @@
+---
+/**
+ * A full-screen WebGL section in the scroll page: a tall block whose sticky,
+ * screen-high stage holds the canvas (src/scripts/scroll-scenes/), a title
+ * strip, and the steps the camera passes. Scrolling through the block drives
+ * the camera; the step it is passing shows over the canvas.
+ *
+ * The steps are plain HTML, so screen readers get all of them, and without
+ * WebGL (or before the scene starts) they show as an ordinary list.
+ */
+interface Step {
+  mark: string;
+  title?: string;
+  detail: string;
+}
+
+interface Props {
+  id: string;
+  scene: "rail" | "helix";
+  title: string;
+  steps: readonly Step[];
+  /** The block's height in screen heights; more means a slower camera. */
+  length: number;
+}
+
+const { id, scene, title, steps, length } = Astro.props;
+---
+
+<section
+  id={id}
+  class={`s3d s3d--${scene}`}
+  data-scroll-scene={scene}
+  aria-labelledby={`${id}-title`}
+  style={`--s3d-length: ${length}`}
+>
+  <div class="s3d__stage">
+    <div class="s3d__canvas js-s3d-canvas"></div>
+    <h2 id={`${id}-title`} class="s3d__title">
+      {title}
+    </h2>
+    <ol class="s3d__steps">
+      {steps.map((step, index) => (
+        <li class="s3d__step js-s3d-step" data-active={index === 0 ? "" : undefined}>
+          <span class="s3d__mark">{step.mark}</span>
+          {step.title && <span class="s3d__name">{step.title}</span>}
+          <span class="s3d__detail">{step.detail}</span>
+        </li>
+      ))}
+    </ol>
+    <div class="s3d__progress" aria-hidden="true">
+      {steps.map(() => (
+        <span class="s3d__tick js-s3d-tick" />
+      ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  import "../scripts/scroll-scenes";
+</script>
+
+<style is:global>
+  .s3d {
+    position: relative;
+    border-top: 1px solid var(--color-secondary);
+    background: var(--color-primary);
+    color: var(--color-secondary);
+  }
+
+  .s3d__stage {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding: 0 0 3rem;
+  }
+
+  .s3d__canvas {
+    display: none;
+  }
+
+  .s3d__title {
+    margin: 0;
+    padding: 0 0 2px;
+    background: var(--color-secondary);
+    color: var(--color-primary);
+    font: 700 12px/24px var(--font-family-fraktion);
+    letter-spacing: 0.1em;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  .s3d__steps {
+    display: grid;
+    gap: 2rem;
+    margin: 0;
+    padding: 0 1.5rem;
+    list-style: none;
+  }
+
+  .s3d__step {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .s3d__mark {
+    font: 700 clamp(3.5rem, 9vw, 8rem) / 0.85 var(--font-family-bigger);
+    text-transform: uppercase;
+  }
+
+  .s3d__name {
+    font: 700 14px/1.4 var(--font-family-fraktion);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .s3d__detail {
+    font: 400 13px/1.5 var(--font-family-fraktion);
+  }
+
+  .s3d__progress {
+    display: none;
+  }
+
+  /* Once the scene draws: a tall block with a sticky stage over the canvas. */
+  .s3d[data-s3d="live"] {
+    height: calc(var(--s3d-length) * 100svh);
+  }
+
+  .s3d[data-s3d="live"] .s3d__stage {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .s3d[data-s3d="live"] .s3d__canvas {
+    position: absolute;
+    inset: 0;
+    display: block;
+  }
+
+  .s3d__canvas canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .s3d[data-s3d="live"] .s3d__title {
+    position: relative;
+  }
+
+  .s3d[data-s3d="live"] .s3d__steps {
+    position: absolute;
+    left: 1.5rem;
+    right: 1.5rem;
+    bottom: 2.5rem;
+    display: block;
+    padding: 0;
+    pointer-events: none;
+  }
+
+  .s3d[data-s3d="live"] .s3d__step {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    max-width: 34rem;
+    padding: 1rem 1.25rem 1.125rem;
+    background: var(--color-primary);
+    border: 1px solid var(--color-secondary);
+    opacity: 0;
+    transform: translateY(1rem);
+    transition:
+      opacity 0.35s ease,
+      transform 0.35s ease;
+  }
+
+  .s3d[data-s3d="live"] .s3d__step[data-active] {
+    opacity: 1;
+    transform: none;
+  }
+
+  .s3d[data-s3d="live"] .s3d__progress {
+    position: absolute;
+    top: 3.5rem;
+    right: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .s3d__tick {
+    width: 10px;
+    height: 10px;
+    border: 1px solid var(--color-secondary);
+  }
+
+  .s3d__tick[data-active] {
+    background: var(--color-secondary);
+  }
+
+  @media only screen and (max-width: 576px) {
+    .s3d[data-s3d="live"] .s3d__steps {
+      left: 0.75rem;
+      right: 0.75rem;
+      bottom: 1.25rem;
+    }
+
+    .s3d[data-s3d="live"] .s3d__step {
+      right: 0;
+    }
+
+    .s3d__mark {
+      font-size: 3.5rem;
+    }
+
+    .s3d[data-s3d="live"] .s3d__progress {
+      top: 3rem;
+      right: 0.75rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .s3d[data-s3d="live"] .s3d__step {
+      transition: none;
+    }
+  }
+</style>
