@@ -1,6 +1,6 @@
 ---
 /**
- * Fixed layers the motion engine drives: the "HC" loader that plays after the
+ * Fixed layers the motion engine drives: the logo reveal that plays after the
  * 3D intro, the page mount, the contrast-toggle mask and the custom scrollbar.
  * The loader starts opaque and full-screen so nothing flashes before it runs.
  */
@@ -10,13 +10,21 @@
   class="site-intro js-intro astro-j7pv25f6"
   style="opacity: 1; position: fixed; top: 0; left: 0; z-index: 50; width: 100%; height: 100%; background: #F40C3F;"
 >
+  <!--
+    The logo (public/images/logo.svg), cut into three vertical slices. The
+    motion engine grows each .js-logo-line-v up from the bottom in turn, then
+    folds them away. It also tweens .js-logo-line-h (the old HC monogram's
+    crossbars); those stay as empty, hidden nodes so its timeline keeps them.
+  -->
   <div class="sb-logo js-logo astro-j7pv25f6">
-    <div class="sb__path sb__path--v sb__path--v-1 js-logo-line-v astro-j7pv25f6"></div>
-    <div class="sb__path sb__path--v sb__path--v-2 js-logo-line-v astro-j7pv25f6"></div>
-    <div class="sb__path sb__path--h sb__path--h-1 js-logo-line-h astro-j7pv25f6"></div>
-    <div class="sb__path sb__path--v sb__path--v-3 js-logo-line-v astro-j7pv25f6"></div>
-    <div class="sb__path sb__path--h sb__path--h-2 js-logo-line-h astro-j7pv25f6"></div>
-    <div class="sb__path sb__path--h sb__path--h-3 js-logo-line-h astro-j7pv25f6"></div>
+    {[0, 1, 2].map((slice) => (
+      <div class={`sb__path sb__path--v sb__slice sb__slice--${slice} js-logo-line-v astro-j7pv25f6`}>
+        <img src="/images/logo.svg" width="48" height="48" alt="" />
+      </div>
+    ))}
+    <div class="sb__path sb__path--h js-logo-line-h astro-j7pv25f6" hidden></div>
+    <div class="sb__path sb__path--h js-logo-line-h astro-j7pv25f6" hidden></div>
+    <div class="sb__path sb__path--h js-logo-line-h astro-j7pv25f6" hidden></div>
   </div>
   <!-- .sb-logo -->
   <div class="site-intro__border site-intro__border--top js-border-top astro-j7pv25f6"></div>
