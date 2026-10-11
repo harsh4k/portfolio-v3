@@ -251,8 +251,9 @@ html.theme-contrasted .site-contrast-mask {
 
 /*
   The theme switch's wipe, where the browser has view transitions
-  (src/scripts/theme-wipe.ts): the new theme is revealed left to right over a
-  snapshot of the old one, on the design's curve and timing.
+  (src/scripts/theme-wipe.ts): the new theme is revealed over a snapshot of
+  the old one, in the design's directions (right to left into the green
+  theme, left to right back to red), curve and timing.
 */
 html.has-theme-wipe .site-contrast-mask {
   visibility: hidden;
@@ -265,10 +266,23 @@ html.has-theme-wipe .site-contrast-mask {
 }
 
 ::view-transition-new(root) {
-  animation: theme-wipe 1s cubic-bezier(0.87, 0, 0.13, 1) both;
+  animation: theme-wipe-in 1s cubic-bezier(0.87, 0, 0.13, 1) both;
 }
 
-@keyframes theme-wipe {
+html.theme-wipe-back::view-transition-new(root) {
+  animation-name: theme-wipe-back;
+}
+
+@keyframes theme-wipe-in {
+  from {
+    clip-path: inset(0 0 0 100%);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes theme-wipe-back {
   from {
     clip-path: inset(0 100% 0 0);
   }

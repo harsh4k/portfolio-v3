@@ -22,12 +22,6 @@ const root = document.documentElement;
 const button = document.querySelector<HTMLButtonElement>(".js-contrast");
 const reduced = matchMedia("(prefers-reduced-motion: reduce)");
 
-const afterFrames = (n: number) =>
-  new Promise<void>((resolve) => {
-    const step = () => (n-- <= 0 ? resolve() : requestAnimationFrame(step));
-    step();
-  });
-
 if (button && "startViewTransition" in document) {
   root.classList.add("has-theme-wipe");
   let passThrough = false;
@@ -50,10 +44,16 @@ if (button && "startViewTransition" in document) {
         button.click();
         passThrough = false;
         root.classList.toggle("theme-contrasted", contrasted);
-        // Let the hero terrain redraw in the new colours before the snapshot.
-        await afterFrames(2);
+        // The design's wipe runs right to left into the green theme and left
+        // to right back out of it; site.css picks the direction from this.
+        root.classList.toggle("theme-wipe-back", !contrasted);
+        // The hero terrain hears the class change in a microtask and redraws
+        // in the new colours right away. No waiting on animation frames:
+        // they are held back until this callback ends, so it would hang
+        // until the browser gave up on the transition.
+        await Promise.resolve();
       });
-      transition.finished.catch(() => {});
+      transition.finished.finally(() => root.classList.remove("theme-wipe-back")).catch(() => {});
     },
     true,
   );
