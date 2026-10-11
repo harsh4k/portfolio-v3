@@ -201,3 +201,101 @@ html {
   font: 400 14px/1.4 var(--font-family-fraktion);
   text-transform: uppercase;
 }
+
+/*
+  The logo badge (src/components/Logo.astro). Ink follows the theme's ink; the
+  face is white on the red theme and the ground colour on the contrasted one.
+  The contrasted rule carries an extra class so it outranks theme rules that
+  recolour every `.js-logo path` with the ink.
+*/
+.logo-badge .logo-badge__ink {
+  fill: var(--color-secondary);
+}
+
+.logo-badge .logo-badge__paper {
+  fill: #fff;
+}
+
+html.theme-contrasted .logo-badge .logo-badge__paper {
+  fill: var(--color-primary);
+}
+
+.logo-badge .logo-badge__cutout {
+  stroke: currentColor;
+  stroke-width: 4;
+  stroke-linejoin: round;
+  color: #fff;
+}
+
+html.theme-contrasted .logo-badge .logo-badge__cutout {
+  color: var(--color-primary);
+}
+
+.logo-badge .logo-badge__line {
+  fill: none;
+  stroke: var(--color-secondary);
+  stroke-width: 3.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.logo-badge .logo-badge__line--fine {
+  stroke-width: 1.8;
+}
+
+/*
+  Intro logo reveal (src/components/SiteChrome.astro): the badge in three
+  vertical slices. Each slice shows its third of a full-size badge, overlapping
+  its neighbour by a pixel so no seam shows while they scale.
+*/
+.site-intro.astro-j7pv25f6 .sb-logo.astro-j7pv25f6.js-logo {
+  --badge: 4.5rem;
+  width: var(--badge);
+  height: var(--badge);
+}
+
+@media only screen and (max-width: 767px) and (orientation: landscape), only screen and (max-width: 576px) {
+  .site-intro.astro-j7pv25f6 .sb-logo.astro-j7pv25f6.js-logo {
+    --badge: 3.5rem;
+  }
+}
+
+.site-intro.astro-j7pv25f6 .sb-logo.astro-j7pv25f6 .sb__slice.sb__path.astro-j7pv25f6 {
+  top: 0;
+  width: calc(var(--badge) / 3 + 1px);
+  height: 100%;
+  overflow: hidden;
+  background: none;
+  transform-origin: 50% 100%;
+}
+
+.site-intro.astro-j7pv25f6 .sb-logo.astro-j7pv25f6 .sb__slice--0.sb__path.astro-j7pv25f6 {
+  left: 0;
+}
+
+.site-intro.astro-j7pv25f6 .sb-logo.astro-j7pv25f6 .sb__slice--1.sb__path.astro-j7pv25f6 {
+  left: calc(var(--badge) / 3);
+}
+
+.site-intro.astro-j7pv25f6 .sb-logo.astro-j7pv25f6 .sb__slice--2.sb__path.astro-j7pv25f6 {
+  left: calc(var(--badge) * 2 / 3);
+}
+
+.site-intro .sb__slice .logo-badge {
+  position: absolute;
+  top: 0;
+  width: var(--badge);
+  height: var(--badge);
+}
+
+.site-intro .sb__slice--1 .logo-badge {
+  left: calc(var(--badge) / -3);
+}
+
+.site-intro .sb__slice--2 .logo-badge {
+  left: calc(var(--badge) * -2 / 3);
+}
+
+.site-intro.astro-j7pv25f6 .sb-logo.astro-j7pv25f6 .sb__path--h.sb__path.astro-j7pv25f6 {
+  display: none;
+}

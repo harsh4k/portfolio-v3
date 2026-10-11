@@ -310,7 +310,7 @@ test.describe("intro", () => {
     expect(seen).toEqual(["0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"]);
   });
 
-  test("no page text shows through the HC loader after the intro", async ({ page }) => {
+  test("no page text shows through the logo reveal after the intro", async ({ page }) => {
     await page.goto("/", { waitUntil: "load" });
     await page.keyboard.press("Escape");
     await expect(page.locator("html")).toHaveClass(/intro-started/);
