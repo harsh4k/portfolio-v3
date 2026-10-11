@@ -11,6 +11,8 @@ export const profile = {
   timeZone: "Asia/Kolkata",
   email: "harshitsinhchauhan250@gmail.com",
   since: 2024,
+  school: "NMIMS Mumbai",
+  stack: ["React", "TypeScript", "Next.js", "Three.js", "GSAP", "Tailwind", "Supabase", "Python"],
   description:
     "Harshit Chauhan — Computer Engineering student at NMIMS Mumbai and software developer building production web applications, motion-led sites and local-first AI tools.",
   socials: [
@@ -50,7 +52,7 @@ export const highlights = [
     slot: "commArt2017",
     burst: "code",
     kind: "text",
-    lines: ["Stack: React · TypeScript · Next.js · Three.js · GSAP · Tailwind · Supabase · Python"],
+    lines: [`Stack: ${profile.stack.join(" · ")}`],
   },
   { kind: "blank" },
   { slot: "cssda", burst: "spark", kind: "counter", name: "DEGREE", counters: ["NMIMS Mumbai", "B.Tech CE"] },
