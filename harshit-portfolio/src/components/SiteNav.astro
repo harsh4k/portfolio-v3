@@ -1,0 +1,369 @@
+---
+/**
+ * Two ways around the long scroll page:
+ * - a section index on the right edge (wide screens) that shows where you are
+ *   and jumps to a section;
+ * - a command menu (Ctrl/⌘ K, or the button in the corner) to jump anywhere,
+ *   copy the email, open the resume, switch theme, or open a project page.
+ * Behaviour lives in src/scripts/site-nav.ts.
+ */
+import { getOrdered } from "../data/collections";
+import { getContributions } from "../data/github";
+import { profile } from "../data/profile";
+
+const [github, linkedin] = profile.socials;
+// The GitHub section is left out when the build couldn't reach GitHub (GithubSection.astro).
+const hasGithubSection = github ? (await getContributions(github.handle)) !== null : false;
+
+const sections = [
+  { id: "top", label: "Home" },
+  { id: "about", label: "About" },
+  { id: "process", label: "How I work" },
+  { id: "work", label: "Work" },
+  { id: "toolkit", label: "Toolkit" },
+  ...(hasGithubSection ? [{ id: "github", label: "GitHub" }] : []),
+  { id: "since", label: "Since 2024" },
+  { id: "contact", label: "Contact" },
+];
+
+const projects = await getOrdered("projects");
+
+interface Command {
+  label: string;
+  group: string;
+  href?: string;
+  action?: "copy-email" | "theme";
+  className?: string;
+  external?: boolean;
+  keywords?: string;
+}
+
+const commands: Command[] = [
+  ...sections.map((section) => ({ label: section.label, group: "Go to", href: `#${section.id}` })),
+  { label: "Copy email address", group: "Do", action: "copy-email", keywords: profile.email },
+  { label: "Open resume", group: "Do", href: "#resume", className: "js-resume-open", keywords: "cv pdf" },
+  { label: "Switch theme", group: "Do", action: "theme", keywords: "contrast green red dark" },
+  ...projects.map(({ id, data }) => ({
+    label: data.title,
+    group: "Projects",
+    href: `/work/${id}/`,
+    keywords: data.summary ?? "",
+  })),
+  ...(github
+    ? [{ label: "GitHub", group: "Elsewhere", href: github.url, external: true, keywords: github.handle }]
+    : []),
+  ...(linkedin
+    ? [{ label: "LinkedIn", group: "Elsewhere", href: linkedin.url, external: true, keywords: linkedin.handle }]
+    : []),
+];
+---
+
+<nav class="sn-index js-sn-index" aria-label="Sections">
+  <ol>
+    {sections.map((section) => (
+      <li>
+        <a href={`#${section.id}`} class="sn-index__link js-sn-jump" data-section={section.id}>
+          <span class="sn-index__label">{section.label}</span>
+        </a>
+      </li>
+    ))}
+  </ol>
+</nav>
+
+<button type="button" class="sn-open js-sn-open" aria-haspopup="dialog" aria-keyshortcuts="Control+K Meta+K">
+  <span class="sn-open__text">Jump</span>
+  <kbd class="sn-open__keys js-sn-keys">Ctrl K</kbd>
+</button>
+
+<dialog class="sn-menu js-sn-menu" aria-label="Command menu" data-lenis-prevent>
+  <div class="sn-menu__panel">
+    <input
+      class="sn-menu__search js-sn-search"
+      type="text"
+      role="combobox"
+      aria-expanded="true"
+      aria-controls="sn-menu-list"
+      aria-autocomplete="list"
+      aria-label="Search sections, projects and actions"
+      placeholder="Jump to…"
+      autocomplete="off"
+      spellcheck="false"
+    />
+    <ul id="sn-menu-list" class="sn-menu__list js-sn-list" role="listbox" aria-label="Results">
+      {commands.map((command, index) => (
+        <li
+          id={`sn-option-${index}`}
+          class="sn-menu__item js-sn-item"
+          role="option"
+          aria-selected="false"
+          data-group={command.group}
+          data-search={`${command.label} ${command.group} ${command.keywords ?? ""}`.toLowerCase()}
+        >
+          {command.href ? (
+            <a
+              href={command.href}
+              class:list={["sn-menu__action", command.className, { "js-sn-jump": command.href.startsWith("#") }]}
+              tabindex="-1"
+              {...(command.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+            >
+              <span>{command.label}</span>
+              <span class="sn-menu__group">{command.group}</span>
+            </a>
+          ) : (
+            <button type="button" class="sn-menu__action" data-action={command.action} tabindex="-1">
+              <span>{command.label}</span>
+              <span class="sn-menu__group">{command.group}</span>
+            </button>
+          )}
+        </li>
+      ))}
+    </ul>
+    <p class="sn-menu__empty js-sn-empty" hidden>
+      Nothing matches. Try “work” or “resume”.
+    </p>
+    <p class="sn-menu__hint" aria-hidden="true">
+      ↑ ↓ to move · Enter to open · Esc to close
+    </p>
+  </div>
+</dialog>
+
+<p class="sn-toast js-sn-toast" role="status" aria-live="polite"></p>
+
+<script>
+  import "../scripts/site-nav";
+</script>
+
+<style is:global>
+  /* Hidden under the intro, like the rest of the page below the hero. */
+  html.is-scroll-blocked .sn-index,
+  html.is-scroll-blocked .sn-open {
+    visibility: hidden;
+  }
+
+  .sn-index {
+    position: fixed;
+    top: 50%;
+    right: 0.75rem;
+    z-index: 40;
+    transform: translateY(-50%);
+  }
+
+  .sn-index ol {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .sn-index__link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    width: 1.5rem;
+    height: 1.5rem;
+    color: var(--color-secondary);
+    text-decoration: none;
+  }
+
+  .sn-index__link::after {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border: 1px solid currentColor;
+    background: var(--color-primary);
+    transition:
+      width 0.2s ease,
+      background 0.2s ease;
+  }
+
+  .sn-index__link[aria-current="true"]::after {
+    width: 16px;
+    background: currentColor;
+  }
+
+  .sn-index__label {
+    position: absolute;
+    right: 1.75rem;
+    padding: 2px 6px;
+    background: var(--color-secondary);
+    color: var(--color-primary);
+    font: 700 11px/16px var(--font-family-fraktion);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+  }
+
+  .sn-index__link:hover .sn-index__label,
+  .sn-index__link:focus-visible .sn-index__label {
+    opacity: 1;
+  }
+
+  .sn-index__link:focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 2px;
+  }
+
+  .sn-open {
+    position: fixed;
+    right: 1rem;
+    bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--color-secondary);
+    background: var(--color-primary);
+    color: var(--color-secondary);
+    font: 700 12px/1 var(--font-family-fraktion);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .sn-open:hover,
+  .sn-open:focus-visible {
+    background: var(--color-secondary);
+    color: var(--color-primary);
+  }
+
+  .sn-open__keys {
+    font: inherit;
+    opacity: 0.7;
+  }
+
+  .sn-menu {
+    width: min(36rem, calc(100vw - 2rem));
+    max-height: min(32rem, calc(100svh - 4rem));
+    margin: 12svh auto auto;
+    padding: 0;
+    /* Only the list scrolls; the dialog itself never does. */
+    overflow: hidden;
+    border: 1px solid var(--color-secondary);
+    background: var(--color-primary);
+    color: var(--color-secondary);
+  }
+
+  .sn-menu::backdrop {
+    background: color-mix(in srgb, var(--color-shadow, #160000) 70%, transparent);
+  }
+
+  .sn-menu__panel {
+    display: flex;
+    flex-direction: column;
+    max-height: inherit;
+  }
+
+  .sn-menu__search {
+    padding: 1rem 1.25rem;
+    border: 0;
+    border-bottom: 1px solid var(--color-secondary);
+    background: transparent;
+    color: inherit;
+    font: 400 18px/1.3 var(--font-family-fraktion);
+  }
+
+  .sn-menu__search::placeholder {
+    color: inherit;
+    opacity: 0.6;
+  }
+
+  .sn-menu__search:focus {
+    outline: none;
+  }
+
+  .sn-menu__list {
+    flex: 1;
+    min-height: 0;
+    margin: 0;
+    padding: 0.5rem 0;
+    overflow-y: auto;
+    list-style: none;
+  }
+
+  .sn-menu__action {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    padding: 0.625rem 1.25rem;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: 400 15px/1.3 var(--font-family-fraktion);
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .sn-menu__group {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+
+  .sn-menu__item[aria-selected="true"] .sn-menu__action {
+    background: var(--color-secondary);
+    color: var(--color-primary);
+  }
+
+  .sn-menu__empty,
+  .sn-menu__hint {
+    margin: 0;
+    padding: 0.75rem 1.25rem;
+    font: 400 12px/1.4 var(--font-family-fraktion);
+  }
+
+  .sn-menu__hint {
+    border-top: 1px solid var(--color-secondary);
+    opacity: 0.7;
+  }
+
+  .sn-toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+    z-index: 60;
+    margin: 0;
+    padding: 0.5rem 0.875rem;
+    background: var(--color-secondary);
+    color: var(--color-primary);
+    font: 700 12px/1.3 var(--font-family-fraktion);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    transform: translate(-50%, 0);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .sn-toast.is-shown {
+    opacity: 1;
+  }
+
+  @media only screen and (max-width: 987px) {
+    .sn-index {
+      display: none;
+    }
+
+    .sn-open__keys {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sn-index__link::after,
+    .sn-index__label,
+    .sn-toast {
+      transition: none;
+    }
+  }
+</style>

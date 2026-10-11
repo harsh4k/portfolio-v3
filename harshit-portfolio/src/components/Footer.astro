@@ -1,8 +1,21 @@
 ---
 import FooterWordmark from "./FooterWordmark";
+import { profile } from "../data/profile";
 ---
 
 <footer class="site-foot site-foot--wordmark astro-75cegwoc">
+  <p class="site-foot__status">
+    <span>{profile.location}</span>
+    <span aria-hidden="true">·</span>
+    <span>
+      <time class="js-local-time" data-zone={profile.timeZone}>
+        IST
+      </time>{" "}
+      local time
+    </span>
+    <span aria-hidden="true">·</span>
+    <span>{profile.availability}</span>
+  </p>
   <!--
     HARSHIT CHAUHAN in Audiowide with the shutter-glyph animations
     (src/components/FooterWordmark.tsx). Server-rendered, then hydrated by
@@ -15,6 +28,7 @@ import FooterWordmark from "./FooterWordmark";
 
 <script>
   import "../scripts/footer-wordmark";
+  import "../scripts/footer-meta";
 </script>
 
 <style is:global>
@@ -28,9 +42,42 @@ import FooterWordmark from "./FooterWordmark";
     src: url("/fonts/Audiowide-Regular.woff2") format("woff2");
   }
 
-  .site-foot--wordmark {
+  /*
+    The status line centred over the wordmark, in a thin strip. Two classes to
+    beat the design's flex row on .site-foot. Below 988px the wordmark spans
+    the width, so the bottom padding keeps the corner Jump button
+    (SiteNav.astro) off it.
+  */
+  .site-foot.site-foot--wordmark {
     --sgf-ink: var(--color-secondary, #160000);
-    padding: clamp(1rem, 2.4vw, 1.75rem) 1rem;
+    display: grid;
+    justify-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+  }
+
+  @media only screen and (max-width: 987px) {
+    .site-foot.site-foot--wordmark {
+      padding-bottom: calc(3.75rem + env(safe-area-inset-bottom, 0px));
+    }
+  }
+
+  .site-foot__status {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.25rem 0.6rem;
+    margin: 0;
+    min-width: 0;
+    color: var(--color-secondary);
+    font: 400 12px/1.5 var(--font-family-fraktion);
+    letter-spacing: 0.06em;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  .site-foot__status time {
+    font-variant-numeric: tabular-nums;
   }
 
   .site-foot__mark {

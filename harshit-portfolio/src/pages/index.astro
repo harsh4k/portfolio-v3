@@ -8,8 +8,11 @@ import Work from "../components/Work.astro";
 import Archive from "../components/Archive.astro";
 import Contact from "../components/Contact.astro";
 import Footer from "../components/Footer.astro";
+import GithubSection from "../components/GithubSection.astro";
 import SiteChrome from "../components/SiteChrome.astro";
-import { profile } from "../data/profile";
+import ScrollScene from "../components/ScrollScene.astro";
+import SiteNav from "../components/SiteNav.astro";
+import { profile, toolkit, workSteps } from "../data/profile";
 
 const separatorClass = "style--secondary astro-j7pv25f6 astro-rdpcjfuz";
 const motto = ["Do", "Things", "Your", "Way"];
@@ -19,11 +22,15 @@ const motto = ["Do", "Things", "Your", "Way"];
   <Header />
   <Hero />
   <About />
+  <ScrollScene id="process" scene="helix" title="How I work" steps={workSteps} length={4} />
   <Separator class={separatorClass} codes={motto} />
   <Work />
+  <ScrollScene id="toolkit" scene="rail" title="Toolkit" steps={toolkit} length={4.5} />
+  <GithubSection />
   <Separator class={separatorClass} codes={motto} />
   <Archive />
   <Contact />
   <Footer />
+  <SiteNav />
   <SiteChrome slot="after" />
 </Base>

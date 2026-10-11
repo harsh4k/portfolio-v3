@@ -1,0 +1,305 @@
+---
+/**
+ * A page per project: what it is, the live link, and the case-study lines
+ * (role, stack, problem, outcome) from src/content/projects.json, each shown
+ * only when it is filled in. A light page of its own, without the home page's
+ * engine, in the site's red and ink.
+ */
+import type { GetStaticPaths } from "astro";
+import { getOrdered } from "../../data/collections";
+import { profile } from "../../data/profile";
+
+export const getStaticPaths = (async () => {
+  const projects = await getOrdered("projects");
+  return projects.map((project, index) => ({
+    params: { id: project.id },
+    props: {
+      project: project.data,
+      index,
+      total: projects.length,
+      previous: projects[(index - 1 + projects.length) % projects.length],
+      next: projects[(index + 1) % projects.length],
+    },
+  }));
+}) satisfies GetStaticPaths;
+
+const { project, index, total, previous, next } = Astro.props;
+const title = `${project.title} — ${profile.name}`;
+const description = project.summary
+  ? `${project.title}: ${project.summary}. Built by ${profile.name}, ${profile.role.toLowerCase()} in ${profile.location}.`
+  : `${project.title}, built by ${profile.name}, ${profile.role.toLowerCase()} in ${profile.location}.`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const image = new URL(project.image, Astro.site);
+const key = `#${project.code}-${String(index + 1).padStart(4, "0")}/${total}`;
+const host = new URL(project.url).host.replace(/^www\./, "");
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/png" href="/icons/logo.png" />
+    <link rel="shortcut icon" href="/icons/favicon.ico" />
+    <meta name="theme-color" content="#F40C3F" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={image} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preload" href="/fonts/Bigger-Display.woff2" as="font" type="font/woff2" crossorigin />
+  </head>
+  <body>
+    <header class="bar">
+      <a href="/#work" class="back">
+        ← All work
+      </a>
+      <span class="key">{key}</span>
+    </header>
+
+    <main>
+      <h1>{project.title}</h1>
+      {project.summary && <p class="summary">{project.summary}</p>}
+      <a class="visit" href={project.url} target="_blank" rel="noopener noreferrer">
+        Visit {host} ↗
+      </a>
+
+      <figure>
+        <img src={project.image} alt={`${project.title}, home page`} width="1082" height="636" decoding="async" />
+      </figure>
+
+      {(project.role || project.stack || project.problem || project.outcome) && (
+        <dl class="facts">
+          {project.role && (
+            <div>
+              <dt>Role</dt>
+              <dd>{project.role}</dd>
+            </div>
+          )}
+          {project.stack && (
+            <div>
+              <dt>Stack</dt>
+              <dd>{project.stack.join(" · ")}</dd>
+            </div>
+          )}
+          {project.problem && (
+            <div>
+              <dt>The problem</dt>
+              <dd>{project.problem}</dd>
+            </div>
+          )}
+          {project.outcome && (
+            <div>
+              <dt>The result</dt>
+              <dd>{project.outcome}</dd>
+            </div>
+          )}
+        </dl>
+      )}
+    </main>
+
+    <nav class="pager" aria-label="More projects">
+      {previous && (
+        <a href={`/work/${previous.id}/`} rel="prev">
+          <span>Previous</span>
+          {previous.data.title}
+        </a>
+      )}
+      {next && (
+        <a href={`/work/${next.id}/`} rel="next">
+          <span>Next</span>
+          {next.data.title}
+        </a>
+      )}
+    </nav>
+
+    <footer class="foot">
+      <a href="/">{profile.name}</a>
+      <span>
+        {profile.role} · {profile.location}
+      </span>
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  @font-face {
+    font-family: "Bigger Display";
+    font-weight: 700;
+    font-display: swap;
+    src: url("/fonts/Bigger-Display.woff2") format("woff2");
+  }
+
+  @font-face {
+    font-family: "Fraktion Mono";
+    font-weight: 400;
+    font-display: swap;
+    src: url("/fonts/PPFraktionMono-Regular.woff2") format("woff2");
+  }
+
+  @font-face {
+    font-family: "Fraktion Mono";
+    font-weight: 700;
+    font-display: swap;
+    src: url("/fonts/PPFraktionMono-Bold.woff2") format("woff2");
+  }
+
+  @font-face {
+    font-family: "Editorial New";
+    font-weight: 400;
+    font-display: swap;
+    src: url("/fonts/PPEditorialNew-Regular.woff2") format("woff2");
+  }
+
+  :root {
+    --ground: #f40c3f;
+    --ink: #160000;
+    --display: "Bigger Display", "Arial Narrow", sans-serif;
+    --mono: "Fraktion Mono", ui-monospace, monospace;
+    --serif: "Editorial New", Georgia, serif;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font: 400 18px/1.5 var(--serif);
+  }
+
+  a {
+    color: inherit;
+  }
+
+  a:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 3px;
+  }
+
+  .bar,
+  .foot {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    padding: 1rem 1.5rem;
+    font: 700 12px/1.4 var(--mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .bar {
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .back {
+    text-decoration: none;
+  }
+
+  main {
+    display: grid;
+    gap: 1.5rem;
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 3rem 1.5rem;
+  }
+
+  h1 {
+    margin: 0;
+    font: 700 clamp(4rem, 16vw, 13rem) / 0.82 var(--display);
+    text-transform: uppercase;
+    text-wrap: balance;
+  }
+
+  .summary {
+    max-width: 40ch;
+    margin: 0;
+    font-size: clamp(1.25rem, 2.6vw, 1.75rem);
+    line-height: 1.3;
+  }
+
+  .visit {
+    justify-self: start;
+    padding: 0.75rem 1rem;
+    background: var(--ink);
+    color: var(--ground);
+    font: 700 13px/1 var(--mono);
+    letter-spacing: 0.1em;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+
+  figure {
+    margin: 1rem 0 0;
+    border: 1px solid var(--ink);
+  }
+
+  figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 0;
+    margin: 0;
+    border-top: 1px solid var(--ink);
+  }
+
+  .facts div {
+    padding: 1.25rem 0;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .facts dt {
+    font: 700 12px/1.4 var(--mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .facts dd {
+    max-width: 60ch;
+    margin: 0.5rem 1.5rem 0 0;
+  }
+
+  .pager {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .pager a {
+    display: grid;
+    gap: 0.25rem;
+    padding: 1.5rem;
+    font: 700 clamp(1.75rem, 5vw, 3.5rem) / 0.9 var(--display);
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+
+  .pager a + a {
+    border-left: 1px solid var(--ink);
+    text-align: right;
+  }
+
+  .pager span {
+    font: 700 12px/1.4 var(--mono);
+    letter-spacing: 0.1em;
+  }
+
+  .pager a:hover,
+  .pager a:focus-visible {
+    background: var(--ink);
+    color: var(--ground);
+  }
+</style>
