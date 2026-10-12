@@ -1,19 +1,5 @@
 ---
-import ProjectLink from "./ProjectLink.astro";
-import { getOrdered } from "../data/collections";
 import { highlights } from "../data/profile";
-
-// The bio links these projects by name; the build fails if one is removed.
-const projects = await getOrdered("projects");
-const linked = (id: string) => {
-  const project = projects.find((entry) => entry.id === id);
-  if (!project) throw new Error(`About links to project "${id}", which is not in projects.json`);
-  return project.data;
-};
-const velsaro = linked("velsaro");
-const nexcart = linked("nexcart");
-const synapical = linked("synapical");
-const attendo = linked("attendo");
 ---
 
 <section id="about" class="s-about astro-am7g2yfn" data-intersect>
@@ -23,14 +9,16 @@ const attendo = linked("attendo");
       <div class="s__content astro-am7g2yfn">
         <div class="about-doodle" aria-hidden="true"></div>
         <p class="astro-am7g2yfn">
-          I design and build production web applications, motion-led studio sites, and local-first AI tools — balancing
-          performance, interaction, and clean systems.
+          I'm Harshit, a software and full-stack developer who loves bringing ideas to life through code, design and
+          curiosity. I build things that are useful, easy to explore and thoughtfully put together, from responsive
+          interfaces to backend systems and experiments with AI, and I'm especially interested in how technology can
+          make everyday tools feel smarter and more personal.
         </p>
         <p class="astro-am7g2yfn">
-          I'm a Computer Engineering student at NMIMS Mumbai and frontend developer crafting considered digital
-          experiences. I learn quickest by taking things apart, building from scratch, and shipping — from e-commerce
-          platforms like <ProjectLink project={velsaro} /> and <ProjectLink project={nexcart} /> to studio sites like
-          <ProjectLink project={synapical} /> and college systems like <ProjectLink project={attendo} />.
+          For me, development is more than writing code: it's understanding the problem, thinking through how someone
+          will use the solution, and refining the details until it works and feels right. I learn by making things
+          rather than waiting until I know everything. Still growing, still curious, and always excited by the next
+          challenge.
         </p>
       </div>
     </div>
