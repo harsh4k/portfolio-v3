@@ -12,9 +12,9 @@ import WireTerrain from "@/components/ui/wire-terrain";
  *
  * It starts drawing only once the visitor leaves the 3D intro, so the two
  * don't compete for the GPU. It draws one hidden frame under the HC loader
- * that follows, so its shaders are ready, then fades in and moves as the
- * title and header arrive, not ahead of them. Reduced Motion gets one still
- * frame.
+ * that follows, so its shaders are ready, then fades in and moves with the
+ * hero's entrance: the design's "intro" event on document, the same signal
+ * the title and header animate in on. Reduced Motion gets one still frame.
  */
 
 interface Palette {
@@ -80,8 +80,9 @@ export default function HeroTerrain({ mount }: { mount: HTMLElement }) {
     theme.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
 
     const show = () => setShown(true);
-    // The class watcher above shows it on the scroll unlock; the long timer
-    // only covers an engine that never unlocks.
+    // The hero's entrance starts on the design's "intro" event. The waves'
+    // introend and the class watcher above (scroll unlock) come seconds later
+    // and only back it up; the long timer covers an engine that never unlocks.
     let warmTimer = 0;
     let warmFrame = 0;
     let timer = 0;
@@ -94,6 +95,7 @@ export default function HeroTerrain({ mount }: { mount: HTMLElement }) {
       warmTimer = window.setTimeout(warmUp, WARMUP_MS);
       timer = window.setTimeout(show, ENTRANCE_MAX_MS);
     };
+    document.addEventListener("intro", show, { once: true });
     const waves = mount.closest("a-waves");
     waves?.addEventListener("introend", show, { once: true });
     window.addEventListener("portfolio:entered", showLater, { once: true });
@@ -102,6 +104,7 @@ export default function HeroTerrain({ mount }: { mount: HTMLElement }) {
       window.clearTimeout(warmTimer);
       cancelAnimationFrame(warmFrame);
       window.clearTimeout(timer);
+      document.removeEventListener("intro", show);
       waves?.removeEventListener("introend", show);
       window.removeEventListener("portfolio:entered", showLater);
     };

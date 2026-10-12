@@ -40,20 +40,15 @@ export const hireMe = `mailto:${profile.email}?subject=${encodeURIComponent("Hel
  * (public/images/burst/<burst>.svg).
  */
 export const highlights = [
-  {
-    slot: "webby2025",
-    burst: "spark",
-    kind: "text",
-    lines: ["NamasteDev Hackathon 2026 Winner", "GetCited AEO & GEO Website Platform"],
-  },
+  { slot: "webby2025", burst: "spark", kind: "text", lines: ["NamasteDev Hackathon 2026", "Top 17 Winner"] },
   { slot: "awwwards", burst: "face", kind: "counter", name: "SHIPPED", counters: ["11 Projects", "Production"] },
-  { slot: "netMag2016", burst: "code", kind: "text", lines: ["Synapical Junior Dev Intern", "Summer 2025"] },
-  { slot: "fwa", burst: "code", kind: "counter", name: "INTERN", counters: ["Synapical", "Junior Dev"] },
+  { slot: "netMag2016", burst: "code", kind: "text", lines: ["Synapical", "Software Developer Intern"] },
+  { slot: "fwa", burst: "face", kind: "counter", name: "SPORTS", counters: ["Football", "Volleyball"] },
   {
     slot: "commArt2017",
-    burst: "code",
+    burst: "spark",
     kind: "text",
-    lines: [`Stack: ${profile.stack.join(" · ")}`],
+    lines: ["Off the clock: gaming, anime, Marvel,", "sci-fi and How I Met Your Mother"],
   },
   { kind: "blank" },
   { slot: "cssda", burst: "spark", kind: "counter", name: "DEGREE", counters: ["NMIMS Mumbai", "B.Tech CE"] },
@@ -65,12 +60,7 @@ export const highlights = [
     lines: ["Local AI & Voice Tools", "Tauri, Rust & Node Pipelines"],
   },
   { slot: "CSSDA2016", burst: "bug", kind: "text", lines: [`Based in ${profile.location}`, profile.availability] },
-  {
-    slot: "CSSDA2015",
-    burst: "face",
-    kind: "text",
-    lines: ["Building Considered Digital Products", `Since ${profile.since}`],
-  },
+  { slot: "CSSDA2015", burst: "face", kind: "text", lines: ["Space-Inspired Visuals", "Futuristic Design"] },
 ] as const;
 
 /**
