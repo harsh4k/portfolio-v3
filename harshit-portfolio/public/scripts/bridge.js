@@ -112,8 +112,8 @@
   }
 
   /**
-   * Hand pull or swipe → start the Wodniack loader immediately, fade the 3D
-   * cover, then drop it. Navbar timing is owned by Wodniack's header intro().
+   * Hand pull or swipe → start the site loader immediately, fade the 3D
+   * cover, then drop it. Navbar timing is owned by the header's intro().
    */
   const revealPortfolio = (isFast = false, { fullPage = false } = {}) => {
     if (navigating) return;
