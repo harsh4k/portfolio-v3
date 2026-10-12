@@ -63,7 +63,7 @@ The build fails, rather than shipping a broken page, when a project URL is not `
 
 ## Design
 
-The visual design (the red grid, the WORK lettering, the Highlights grid and the section motion) is based on [Antoine Wodniack's portfolio](https://wodniack.dev), and the 3D intro is based on [Adrien Lamy's portfolio](https://adrienlamy.fr). Both are credited in the site footer. The intro's drawings (face, hand, scribbles, skull) were redrawn as Harshit's own; the scene code itself is still Adrien Lamy's and is being replaced with an intro written from scratch.
+The visual design (the red grid, the WORK lettering, the Highlights grid and the section motion) is a remix of [Antoine Wodniack's portfolio](https://wodniack.dev), and the 3D intro's drawing style and layout are inspired by [Adrien Lamy's portfolio](https://adrienlamy.fr). Both are credited in the site footer. The intro's drawings (face, hand, scribbles, skull) are Harshit's own. The intro's scene code (`public/assets/index-wQJ6Ws5X.js`) still comes from Adrien Lamy's site.
 
 The files in `public/_astro/`, `public/assets/`, `public/styles/`, `public/fonts/` and `public/webgl/` came over unchanged from the previous build of this site, and lint and Prettier skip them. New styling goes in `src/styles/site.css`, never in those files. The components in `src/components/` emit the same markup and class names those files expect, with the text, links and lists coming from `src/content/` and `src/data/profile.ts`. Keep the class names (including the `astro-…` ones) as they are: the stylesheet and motion engine select on them.
 
