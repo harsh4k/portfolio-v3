@@ -63,11 +63,13 @@ The build fails, rather than shipping a broken page, when a project URL is not `
 
 ## Design
 
-The design is the live site's, carried over unchanged: the files in `public/_astro/`, `public/assets/`, `public/styles/`, `public/fonts/` and `public/webgl/` are copies of the live site's, and lint and Prettier skip them. New styling goes in `src/styles/site.css`, never in those files. The components in `src/components/` emit the same markup and class names those files expect, with the text, links and lists coming from `src/content/` and `src/data/profile.ts`. Keep the class names (including the `astro-…` ones) as they are: the stylesheet and motion engine select on them.
+The visual design (the red grid, the WORK lettering, the Highlights grid and the section motion) is based on [Antoine Wodniack's portfolio](https://wodniack.dev), and the 3D intro is based on [Adrien Lamy's portfolio](https://adrienlamy.fr). Both are credited in the site footer. The intro's drawings (face, hand, scribbles, skull) were redrawn as Harshit's own; the scene code itself is still Adrien Lamy's and is being replaced with an intro written from scratch.
+
+The files in `public/_astro/`, `public/assets/`, `public/styles/`, `public/fonts/` and `public/webgl/` came over unchanged from the previous build of this site, and lint and Prettier skip them. New styling goes in `src/styles/site.css`, never in those files. The components in `src/components/` emit the same markup and class names those files expect, with the text, links and lists coming from `src/content/` and `src/data/profile.ts`. Keep the class names (including the `astro-…` ones) as they are: the stylesheet and motion engine select on them.
 
 Changes made to the copied files, each covered by a test:
 
-- `public/assets/index-wQJ6Ws5X.js` (3D intro): fires `intro:ready` on its first rendered frame so the loader can hide, and its LinkedIn link and tab title name Harshit instead of the scene's original author, and its panel says Software Developer.
+- `public/assets/index-wQJ6Ws5X.js` (3D intro): fires `intro:ready` on its first rendered frame so the loader can hide, uses Harshit's redrawn artwork, and its contact panel and tab titles describe Harshit (a software developer) rather than the original author.
 - `public/scripts/bridge.js`: shows a loader until `intro:ready` (or enters the site after 20 s or if the bundle fails), starts the portfolio intro only after page load (it stayed blank under Reduced Motion otherwise), restores the tab title and drops its Enter/Escape listener once the intro is gone.
 - `public/scripts/resume-dock.js`: the wheel scrolls the resume rather than the page, focus stays in the dock while it is open, Ctrl/Cmd-click on Resume opens a new tab, and an Open link shows the PDF full size.
 

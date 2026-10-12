@@ -24,6 +24,21 @@ import { profile } from "../data/profile";
   -->
   <!-- prettier-ignore -->
   <div class="site-foot__mark js-wordmark"><FooterWordmark /></div>
+  <p class="site-foot__credit">
+    <span>
+      Design inspired by{" "}
+      <a href="https://wodniack.dev" target="_blank" rel="noopener noreferrer">
+        Antoine Wodniack
+      </a>
+    </span>
+    <span aria-hidden="true">·</span>
+    <span>
+      Intro inspired by{" "}
+      <a href="https://adrienlamy.fr" target="_blank" rel="noopener noreferrer">
+        Adrien Lamy
+      </a>
+    </span>
+  </p>
 </footer>
 
 <script>
@@ -78,6 +93,25 @@ import { profile } from "../data/profile";
 
   .site-foot__status time {
     font-variant-numeric: tabular-nums;
+  }
+
+  /* Credit for the sites this one's look and intro grew out of. */
+  .site-foot__credit {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0 0.5rem;
+    margin: 0;
+    color: var(--color-secondary);
+    font: 400 11px/1.5 var(--font-family-fraktion);
+    letter-spacing: 0.04em;
+    text-align: center;
+  }
+
+  .site-foot__credit a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
   }
 
   .site-foot__mark {
