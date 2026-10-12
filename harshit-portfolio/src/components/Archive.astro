@@ -8,7 +8,10 @@ const stars = Array.from({ length: 10 });
 const catchLines = ["Building", "with intent", "since", String(profile.since)];
 ---
 
-<section id="since" class="s-my-way astro-fiibiggq" data-intersect>
+<section id="since" class="s-my-way astro-fiibiggq" data-intersect aria-labelledby="since-title">
+  <h2 id="since-title" class="u-sr-only">
+    Since {profile.since}
+  </h2>
   <svg
     class="s__smiley js-smiley astro-fiibiggq"
     xmlns="http://www.w3.org/2000/svg"
