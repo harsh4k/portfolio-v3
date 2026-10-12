@@ -1,5 +1,5 @@
 ---
-import { hireMe, profile } from "../data/profile";
+import { callMe, hireMe, profile } from "../data/profile";
 
 const [github, linkedin] = profile.socials;
 
@@ -92,7 +92,10 @@ const links = [
     <aside class="sb-availability astro-5qrshpxv">
       <p class="astro-5qrshpxv">
         <span class="sb__line astro-5qrshpxv">
-          <span class="sb__text astro-5qrshpxv">Coding from {profile.location}.</span>
+          <span class="sb__text astro-5qrshpxv">{profile.location} ·</span>
+          <a href={callMe} class="sb__link sb__call astro-5qrshpxv">
+            {profile.phone.display}
+          </a>
         </span>
         <span class="sb__line astro-5qrshpxv">
           <span class="sb__text astro-5qrshpxv">{profile.availability} →</span>
