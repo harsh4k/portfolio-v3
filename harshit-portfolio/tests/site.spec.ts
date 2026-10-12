@@ -464,10 +464,11 @@ test.describe("intro", () => {
     await expect(page.locator(".site-head")).toHaveCSS("opacity", "1", { timeout: 15_000 });
   });
 
-  test("the 3D intro bundle keeps its ready hook and none of its author's details", () => {
+  test("the 3D intro bundle keeps its ready hook and links only to Harshit", () => {
     const bundle = readFileSync(new URL("../public/assets/index-wQJ6Ws5X.js", import.meta.url), "utf8");
     expect(bundle).toContain('window.dispatchEvent(new Event("intro:ready"))');
-    expect(bundle).not.toContain("adrien-lamy");
+    // Every LinkedIn link in it is Harshit's.
+    expect(bundle.match(/linkedin\.com\/in\/[\w-]+/g)).toEqual(["linkedin.com/in/harshit-chauhan-17a898364"]);
     expect(bundle).not.toContain("frank leboeuf");
     // Its intro panel and screen-reader title say "software developer", like the rest of the site.
     expect(bundle.toLowerCase()).not.toContain("creative developer");
