@@ -949,6 +949,20 @@ test.describe("project pages", () => {
     }
   });
 
+  test("a written-up project shows its role, stack, problem, result and source link", async ({ page }) => {
+    await page.goto("/work/attendo/");
+    await expect(page.locator(".meta dt")).toHaveText(["Role", "Stack"]);
+    await expect(page.locator(".stack li").first()).toBeVisible();
+    await expect(page.locator(".story h2")).toHaveText([/The problem/, /The result/]);
+    await expect(page.locator('a[href="https://github.com/harsh4k/attendov1"]')).toHaveCount(1);
+  });
+
+  test("a project without a write-up shows no empty case-study blocks", async ({ page }) => {
+    await page.goto("/work/velsaro/");
+    await expect(page.locator(".meta, .story")).toHaveCount(0);
+    await expect(page.locator(".eyebrow")).toContainText("Project");
+  });
+
   test("project pages are in the sitemap", async ({ request }) => {
     const sitemap = await (await request.get("/sitemap.xml")).text();
     for (const project of projects) expect(sitemap).toContain(`/work/${project.id}/`);
