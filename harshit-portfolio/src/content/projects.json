@@ -33,7 +33,18 @@
     "code": "attd",
     "url": "https://attendov1.vercel.app/",
     "image": "/images/attendo.webp",
-    "summary": "College attendance system"
+    "summary": "College attendance system",
+    "role": "Full-stack developer",
+    "stack": [
+      "React",
+      "TypeScript",
+      "TanStack",
+      "Zod",
+      "Auth + RLS"
+    ],
+    "repo": "https://github.com/harsh4k/attendov1",
+    "problem": "Students, faculty and admins all work with the same attendance records, but each should only see and change their own part of them.",
+    "outcome": "Three production dashboards for students, faculty and admins, with auth and row-level security keeping each role to its own data. Lectures move through four states, from scheduled to cancelled, with present/absent marking and Zod-validated forms."
   },
   {
     "id": "coffee-digital",
@@ -73,7 +84,16 @@
     "title": "Rudo AI",
     "code": "rudo",
     "url": "https://github.com/harsh4k/rudo",
-    "image": "/images/rudo.webp"
+    "image": "/images/rudo.webp",
+    "summary": "Local AI terminal assistant",
+    "role": "Built the agent, its tools and memory",
+    "stack": [
+      "Gemma 3 (4B)",
+      "Ollama",
+      "RAG"
+    ],
+    "problem": "A terminal assistant that can act on your machine without a cloud LLM, on an ordinary 16 GB laptop.",
+    "outcome": "Streaming chat, voice in and out and persistent memory, with five tools (shell, files, search, notes, timer), five live system signals and RAG over notes, in an 8,192-token context on 16 GB of RAM."
   },
   {
     "id": "bunny-os",
@@ -81,7 +101,21 @@
     "title": "Bunny OS",
     "code": "bnny",
     "url": "https://harsh4k.github.io/Bunny-OS/",
-    "image": "/images/bunny-os.webp"
+    "image": "/images/bunny-os.webp",
+    "summary": "Local voice assistant for Windows and macOS",
+    "role": "Built and released the desktop app",
+    "stack": [
+      "Tauri v2",
+      "React",
+      "TypeScript",
+      "Rust",
+      "Python",
+      "Ollama",
+      "faster-whisper"
+    ],
+    "repo": "https://github.com/harsh4k/Bunny-OS",
+    "problem": "Most voice assistants send what you say to the cloud. Bunny OS had to run entirely on your own machine and still be safe to let act on it.",
+    "outcome": "Shipped v0.3.4 as a Windows MSI and a macOS DMG. Speech and inference run 100% locally through faster-whisper and Ollama, with no cloud APIs or telemetry, and risky actions wait for on-screen confirmation."
   },
   {
     "id": "getcited",
@@ -90,6 +124,16 @@
     "code": "gtct",
     "url": "https://github.com/harsh4k/Getcited",
     "image": "/images/getcited.webp",
-    "summary": "AEO & GEO website platform \u00b7 NamasteDev Hackathon 2026 winner"
+    "summary": "AEO & GEO website platform · NamasteDev Hackathon 2026 Top 17 winner",
+    "role": "Full-stack developer",
+    "stack": [
+      "Next.js",
+      "TypeScript",
+      "Supabase",
+      "CLIP",
+      "DeepGaze"
+    ],
+    "problem": "AI assistants now answer questions themselves, so a site has to be easy for them to read and cite. Site owners had no way to tell how likely ChatGPT, Gemini, Claude, Perplexity or Copilot were to cite them.",
+    "outcome": "A crawler and audit pipeline that returns two scores and a prioritised fix list across five layers: metadata, schema, HTML, crawlability and structured data, plus CLIP and DeepGaze saliency. A Top 17 winner at NamasteDev Hackathon 2026."
   }
 ]

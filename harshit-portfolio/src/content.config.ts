@@ -31,6 +31,8 @@ const projects = defineCollection({
     stack: z.array(z.string().trim().min(1).max(30)).max(12).optional(),
     problem: z.string().trim().min(1).max(600).optional(),
     outcome: z.string().trim().min(1).max(600).optional(),
+    /** Source code, when it lives somewhere other than `url`. */
+    repo: httpsUrl.refine((value) => value.startsWith("https://github.com/"), "Repos link to github.com").optional(),
   }),
 });
 
