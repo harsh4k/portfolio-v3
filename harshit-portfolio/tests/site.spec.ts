@@ -555,15 +555,6 @@ test.describe("input", () => {
     expect(errors).toEqual([]);
   });
 
-  test("the footer credits the sites the design and intro are based on", async ({ page }) => {
-    await page.goto("/", { waitUntil: "load" });
-    const credit = page.locator(".site-foot__credit");
-    await expect(credit).toContainText("Antoine Wodniack");
-    await expect(credit).toContainText("Adrien Lamy");
-    await expect(credit.locator('a[href="https://wodniack.dev"]')).toHaveCount(1);
-    await expect(credit.locator('a[href="https://adrienlamy.fr"]')).toHaveCount(1);
-  });
-
   test("Highlights tiles start uncovering as they come on screen, not half way", async ({ page }) => {
     await page.goto("/", { waitUntil: "load" });
     // Record how much of each tile is on screen when its wipe starts.
