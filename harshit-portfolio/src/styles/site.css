@@ -330,3 +330,60 @@ html.theme-wipe-back::view-transition-new(root) {
     clip-path: inset(0 0 0 0);
   }
 }
+
+/*
+  Keyboard reach for the contact email (Contact.astro). The design opens the
+  "Let's Rock" circle, and with it the email link, only on hover, and takes the
+  whole block out of the page (display: none) while the section is off screen,
+  so Tab skipped the link, and when it did land on it the link was invisible.
+  Keep the block in the page, paused, so Tab can reach it, and open the circle
+  as the design's hover does while the link has keyboard focus.
+*/
+.s-cta.astro-25kxajgh.is-out-of-view .s__hover.astro-25kxajgh {
+  display: block;
+}
+
+.s-cta.astro-25kxajgh.is-out-of-view .s__hover.astro-25kxajgh * {
+  animation-play-state: paused;
+}
+
+.s-cta.astro-25kxajgh .s__hover.astro-25kxajgh:has(.s__cta__link:focus-visible) .s__cta.astro-25kxajgh {
+  clip-path: circle(50% at 50% 50%);
+  pointer-events: auto;
+}
+
+.s-cta.astro-25kxajgh .s__hover.astro-25kxajgh:has(.s__cta__link:focus-visible) .s__cta.astro-25kxajgh::before {
+  border-width: 1rem;
+}
+
+.s-cta.astro-25kxajgh .s__hover.astro-25kxajgh:has(.s__cta__link:focus-visible) .s__cta.astro-25kxajgh::after {
+  border-width: 1px;
+}
+
+.s-cta.astro-25kxajgh .s__hover.astro-25kxajgh:has(.s__cta__link:focus-visible) .s__cta__line,
+.s-cta.astro-25kxajgh .s__hover.astro-25kxajgh:has(.s__cta__link:focus-visible) .s__cta__stars,
+.s-cta.astro-25kxajgh .s__hover.astro-25kxajgh:has(.s__cta__link:focus-visible) .a-dots {
+  scale: 1;
+}
+
+/* No delay: the focused link shows at once, while the circle opens around it. */
+.s-cta.astro-25kxajgh .s__hover.astro-25kxajgh:has(.s__cta__link:focus-visible) .s__cta__link.astro-25kxajgh {
+  opacity: 1;
+  transform: translate3d(-50%, 0, 0);
+  transition: none;
+}
+
+/*
+  The site's ink focus ring (public/styles/integration.css, !important) would
+  vanish against the circle's ink, so this one ring is drawn in the ground colour.
+*/
+.s-cta.astro-25kxajgh .s__cta__link.astro-25kxajgh:focus-visible {
+  outline: 2px solid var(--color-primary) !important;
+  outline-offset: -6px !important;
+}
+
+@media only screen and (max-width: 767px) and (orientation: landscape), only screen and (max-width: 576px) {
+  .s-cta.astro-25kxajgh .s__hover.astro-25kxajgh:has(.s__cta__link:focus-visible) .s__cta.astro-25kxajgh::before {
+    border-width: 0.5rem;
+  }
+}

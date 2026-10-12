@@ -20,16 +20,19 @@ const motto = ["Do", "Things", "Your", "Way"];
 
 <Base title={`${profile.name} — ${profile.role}`} description={profile.description}>
   <Header />
-  <Hero />
-  <About />
-  <ScrollScene id="process" scene="helix" title="How I work" steps={workSteps} length={4} />
-  <Separator class={separatorClass} codes={motto} />
-  <Work />
-  <ScrollScene id="toolkit" scene="rail" title="Toolkit" steps={toolkit} length={4.5} />
-  <GithubSection />
-  <Separator class={separatorClass} codes={motto} />
-  <Archive />
-  <Contact />
+  <!-- Everything between the header and the footer is the page's main content. -->
+  <main>
+    <Hero />
+    <About />
+    <ScrollScene id="process" scene="helix" title="How I work" steps={workSteps} length={4} />
+    <Separator class={separatorClass} codes={motto} />
+    <Work />
+    <ScrollScene id="toolkit" scene="rail" title="Toolkit" steps={toolkit} length={4.5} />
+    <GithubSection />
+    <Separator class={separatorClass} codes={motto} />
+    <Archive />
+    <Contact />
+  </main>
   <Footer />
   <SiteNav />
   <SiteChrome slot="after" />
