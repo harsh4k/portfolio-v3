@@ -10,6 +10,8 @@ export const profile = {
   availability: "Available for projects & roles",
   timeZone: "Asia/Kolkata",
   email: "harshitsinhchauhan250@gmail.com",
+  /** `display` is what people read; `tel` is the dialable E.164 form for tel: links. */
+  phone: { display: "+91 84549 63092", tel: "+918454963092" },
   since: 2024,
   school: "NMIMS Mumbai",
   stack: ["React", "TypeScript", "Next.js", "Three.js", "GSAP", "Tailwind", "Supabase", "Python"],
@@ -31,6 +33,9 @@ export const profile = {
  * The "Hire me" link. The subject is percent-encoded: an unencoded space ends
  * the subject early in some mail clients.
  */
+/** The phone number as a tel: link. */
+export const callMe = `tel:${profile.phone.tel}`;
+
 export const hireMe = `mailto:${profile.email}?subject=${encodeURIComponent("Hello Harshit")}`;
 
 /**

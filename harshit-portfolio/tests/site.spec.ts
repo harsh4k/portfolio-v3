@@ -926,6 +926,16 @@ test.describe("command menu and footer extras", () => {
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe("harshitsinhchauhan250@gmail.com");
   });
 
+  test("the phone number is a tel: link in the footer, and in the header where it fits", async ({ page }) => {
+    await page.goto("/");
+    const call = 'a[href="tel:+918454963092"]';
+    await expect(page.locator(`.site-foot ${call}`)).toHaveText("+91 84549 63092");
+    const header = page.locator(`.sb-availability ${call}`);
+    await expect(header).toHaveCount(1);
+    if ((page.viewportSize()?.width ?? 0) > 576) await expect(header).toBeVisible();
+    else await expect(header).toBeHidden();
+  });
+
   test("the footer shows the time in Mumbai", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator(".js-local-time")).toHaveText(/^\d{2}:\d{2} IST$/);
@@ -959,7 +969,7 @@ test.describe("project pages", () => {
   });
 
   test("a project without a write-up shows no empty case-study blocks", async ({ page }) => {
-    await page.goto("/work/velsaro/");
+    await page.goto("/work/coffee-digital/");
     await expect(page.locator(".meta, .story")).toHaveCount(0);
     await expect(page.locator(".eyebrow")).toContainText("Project");
   });

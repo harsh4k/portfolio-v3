@@ -41,6 +41,12 @@ interface Command {
 const commands: Command[] = [
   ...sections.map((section) => ({ label: section.label, group: "Go to", href: `#${section.id}` })),
   { label: "Copy email address", group: "Do", action: "copy-email", keywords: profile.email },
+  {
+    label: `Call ${profile.phone.display}`,
+    group: "Do",
+    href: `tel:${profile.phone.tel}`,
+    keywords: "phone call mobile",
+  },
   { label: "Open resume", group: "Do", href: "#resume", className: "js-resume-open", keywords: "cv pdf" },
   { label: "Switch theme", group: "Do", action: "theme", keywords: "contrast green red dark" },
   ...projects.map(({ id, data }) => ({

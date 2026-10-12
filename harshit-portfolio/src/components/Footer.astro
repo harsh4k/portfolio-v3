@@ -1,6 +1,6 @@
 ---
 import FooterWordmark from "./FooterWordmark";
-import { profile } from "../data/profile";
+import { callMe, profile } from "../data/profile";
 ---
 
 <footer class="site-foot site-foot--wordmark astro-75cegwoc">
@@ -15,6 +15,10 @@ import { profile } from "../data/profile";
     </span>
     <span aria-hidden="true">·</span>
     <span>{profile.availability}</span>
+    <span aria-hidden="true">·</span>
+    <a href={callMe} class="site-foot__call">
+      {profile.phone.display}
+    </a>
   </p>
   <!--
     HARSHIT CHAUHAN in Audiowide with the shutter-glyph animations
@@ -74,6 +78,11 @@ import { profile } from "../data/profile";
     letter-spacing: 0.06em;
     text-align: center;
     text-transform: uppercase;
+  }
+
+  .site-foot__call {
+    color: inherit;
+    text-underline-offset: 0.2em;
   }
 
   .site-foot__status time {

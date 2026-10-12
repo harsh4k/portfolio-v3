@@ -113,6 +113,12 @@ html {
 }
 
 @media only screen and (max-width: 767px) and (orientation: landscape), only screen and (max-width: 576px) {
+  /* The design hides the availability text here; the phone number goes with it
+     (it stays in the footer and the Jump menu). */
+  html .site-head.site-head.site-head.site-head .sb-availability .sb__call {
+    display: none;
+  }
+
   .s-hero.astro-7dteeuzc h1.s__title.astro-7dteeuzc {
     font-size: calc(27.3vw - 0.66rem);
   }

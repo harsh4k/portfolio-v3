@@ -6,7 +6,14 @@
     "code": "vlsr",
     "url": "https://www.velsaro.in/",
     "image": "/images/velsaro.webp",
-    "summary": "E-commerce platform"
+    "summary": "E-commerce store for an Indian attar house",
+    "role": "Web developer: design, build and deploy",
+    "stack": [
+      "React",
+      "TypeScript"
+    ],
+    "problem": "A small-batch attar house selling saffron, sandalwood and jasmine fragrances needed a storefront that feels as considered as the product, with room for gifting, offers and the brand's story.",
+    "outcome": "A live store at velsaro.in with shop, gifting, offers, a fragrance guide and an Our Story section, plus search, accounts, a wishlist and a cart. I also handle the domain, hosting and deploys."
   },
   {
     "id": "nexcart",
@@ -15,7 +22,14 @@
     "code": "nxtc",
     "url": "https://nexcart-v1.vercel.app/",
     "image": "/images/nexcart.webp",
-    "summary": "E-commerce platform"
+    "summary": "E-commerce storefront for audio gear",
+    "role": "Designed and built it",
+    "stack": [
+      "React",
+      "TypeScript"
+    ],
+    "problem": "A storefront that has to sell one hero product properly, not just list it, while still working as a full shop.",
+    "outcome": "A shop with Shop, Stories and About pages, search, accounts, a wishlist and a cart, led by a featured-product showcase with a spec grid and a pre-order call to action. Deployed on Vercel."
   },
   {
     "id": "synapical",
@@ -24,7 +38,15 @@
     "code": "synp",
     "url": "https://synapical-com.pages.dev/",
     "image": "/images/synapical.webp",
-    "summary": "Studio site"
+    "summary": "Studio site for a Delhi software studio",
+    "role": "Software Developer Intern",
+    "stack": [
+      "Next.js",
+      "TypeScript",
+      "Tailwind CSS"
+    ],
+    "problem": "Synapical is a small software studio in Delhi working across web, mobile, AI and cloud. Its site has to show that range and turn visitors into new projects.",
+    "outcome": "I ship client-facing Next.js, TypeScript and Tailwind CSS work inside the studio's live production codebase, following the team's conventions on real client projects."
   },
   {
     "id": "attendo",
