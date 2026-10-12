@@ -3,7 +3,7 @@
    =================================================================== */
 
 /*
-  Hold Wodniack's .site-intro on the GSAP *from* frame until intro() starts.
+  Hold the .site-intro on the GSAP *from* frame until intro() starts.
   CSS rest state is the assembled monogram (the loader's last draw-in frame).
   After a delayed 3D pull that rest state would otherwise flash first.
 */

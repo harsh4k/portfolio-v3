@@ -31,7 +31,7 @@ src/
 ├── styles/site.css     # our additions on top of the design (intro loader, GitHub icon)
 └── pages/              # index and 404
 public/                 # served as-is
-├── _astro/, assets/    # the design's styles, motion engine and 3D intro (copied unchanged)
+├── _astro/, assets/    # the design's prebuilt styles, motion engine and 3D intro
 ├── scripts/, styles/   # intro hand-off, resume dock and the CSS joining them
 ├── fonts/, webgl/      # the design's fonts and 3D textures
 ├── images/             # project screenshots and archive photos
@@ -63,13 +63,11 @@ The build fails, rather than shipping a broken page, when a project URL is not `
 
 ## Design
 
-The visual design (the red grid, the WORK lettering, the Highlights grid and the section motion) is a remix of [Antoine Wodniack's portfolio](https://wodniack.dev), and the 3D intro's drawing style and layout are inspired by [Adrien Lamy's portfolio](https://adrienlamy.fr). Both are credited in the site footer. The intro's drawings (face, hand, scribbles, skull) are Harshit's own. The intro's scene code (`public/assets/index-wQJ6Ws5X.js`) still comes from Adrien Lamy's site.
+The files in `public/_astro/`, `public/assets/`, `public/styles/`, `public/fonts/` and `public/webgl/` are prebuilt bundles, and lint and Prettier skip them. New styling goes in `src/styles/site.css`, never in those files. The components in `src/components/` emit the same markup and class names those files expect, with the text, links and lists coming from `src/content/` and `src/data/profile.ts`. Keep the class names (including the `astro-…` ones) as they are: the stylesheet and motion engine select on them.
 
-The files in `public/_astro/`, `public/assets/`, `public/styles/`, `public/fonts/` and `public/webgl/` came over unchanged from the previous build of this site, and lint and Prettier skip them. New styling goes in `src/styles/site.css`, never in those files. The components in `src/components/` emit the same markup and class names those files expect, with the text, links and lists coming from `src/content/` and `src/data/profile.ts`. Keep the class names (including the `astro-…` ones) as they are: the stylesheet and motion engine select on them.
+Notes on the prebuilt files, each covered by a test:
 
-Changes made to the copied files, each covered by a test:
-
-- `public/assets/index-wQJ6Ws5X.js` (3D intro): fires `intro:ready` on its first rendered frame so the loader can hide, uses Harshit's redrawn artwork, and its contact panel and tab titles describe Harshit (a software developer) rather than the original author.
+- `public/assets/index-wQJ6Ws5X.js` (3D intro): fires `intro:ready` on its first rendered frame so the loader can hide; its artwork, contact panel and tab titles are Harshit's.
 - `public/scripts/bridge.js`: shows a loader until `intro:ready` (or enters the site after 20 s or if the bundle fails), starts the portfolio intro only after page load (it stayed blank under Reduced Motion otherwise), restores the tab title and drops its Enter/Escape listener once the intro is gone.
 - `public/scripts/resume-dock.js`: the wheel scrolls the resume rather than the page, focus stays in the dock while it is open, Ctrl/Cmd-click on Resume opens a new tab, and an Open link shows the PDF full size.
 
