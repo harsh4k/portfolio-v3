@@ -12,6 +12,9 @@ export default defineConfig({
   use: {
     baseURL: `http://127.0.0.1:${port}`,
     trace: "retain-on-failure",
+    // The site registers an offline worker. Off by default so no test is served a
+    // cached copy; the offline tests turn it back on.
+    serviceWorkers: "block",
   },
   projects: [
     { name: "desktop", use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } } },

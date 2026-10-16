@@ -810,28 +810,89 @@ test.describe("header and keyboard reach", () => {
   });
 });
 
-test.describe("service worker retirement", () => {
+test.describe("offline", () => {
+  // Every other test blocks workers (playwright.config.ts) so cached files can't hide a change.
   test.use({ serviceWorkers: "allow" });
 
-  test("the old offline worker clears its caches and unregisters", async ({ page }) => {
-    await page.goto("/");
-    // Simulate a returning visitor whose browser still has the old site's cache.
+  /** Loads the site once and waits until the offline worker has cached it and controls the page. */
+  async function visitOnline(page: Page) {
+    await page.goto("/", { waitUntil: "load" });
+    await page.evaluate(async () => {
+      await navigator.serviceWorker.ready;
+      if (!navigator.serviceWorker.controller)
+        await new Promise((resolve) => navigator.serviceWorker.addEventListener("controllerchange", resolve));
+    });
+  }
+
+  test("after one visit, the intro, sections and project pages work with no connection", async ({ page, context }) => {
+    test.setTimeout(90_000);
+    await visitOnline(page);
+    // setOffline doesn't reach the worker's own requests, so fail those too:
+    // anything that loads from here on came out of the cache.
+    await context.setOffline(true);
+    await context.route("**/*", (route) => route.abort("internetdisconnected"));
+    const errors = watchForErrors(page);
+
+    await page.reload({ waitUntil: "load" });
+    // The red cover only lifts once the 3D intro has drawn, so its textures came from the cache.
+    await expect(page.locator(".js-intro-loader")).toHaveCount(0, { timeout: 20_000 });
+    await expect(page.locator("#app canvas")).not.toHaveCount(0);
+    await page.keyboard.press("Escape");
+    await expect(page.locator("html")).not.toHaveClass(/is-scroll-blocked/, { timeout: 15_000 });
+    for (const id of SECTIONS) await expect(page.locator(`#${id}`)).toHaveCount(1);
+    await page.locator("#work").scrollIntoViewIfNeeded();
+    await expect(page.locator("#work img").first()).toHaveJSProperty("complete", true);
+
+    // Any spelling of a project's address, and the tagged social links, open offline.
+    for (const [path, heading] of [
+      ["/work/velsaro", "Velsaro"],
+      ["/work/getcited/", "GetCited"],
+    ] as const) {
+      await page.goto(path);
+      await expect(page.locator("h1")).toContainText(heading);
+    }
+    expect(errors).toEqual([]);
+    // Checked after the errors: under /via/ the 3D intro asks for /via/webgl/...
+    // textures, which fails online as well.
+    await page.goto("/via/linkedin", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveTitle(/Harshit Chauhan/);
+
+    // A page it has no copy of gets the offline notice instead of the browser's error.
+    await page.goto("/not-a-page");
+    await expect(page.locator("h1")).toHaveText("No connection.");
+  });
+
+  test("the resume and downloads are cached once the page is idle", async ({ page }) => {
+    // No 3D intro: these only check the cache, and a busy GPU thread slows every evaluate.
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await visitOnline(page);
+    await expect
+      .poll(() => page.evaluate(async () => Boolean(await caches.match("/scripts/pdf.worker.min.mjs"))), {
+        timeout: 20_000,
+      })
+      .toBe(true);
+    expect(await page.evaluate(async () => Boolean(await caches.match("/resume.pdf")))).toBe(true);
+  });
+
+  test("clears the previous site's offline cache and reloads its tabs", async ({ page }) => {
+    // No 3D intro: these only check the cache, and a busy GPU thread slows every evaluate.
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    // A returning visitor whose browser still has the old site's cache, under its own name.
+    // Set up from the 404 page, which registers no worker.
+    await page.goto("/404");
     await page.evaluate(async () => {
       const cache = await caches.open("portfolio-old-build");
       await cache.put("/stale", new Response("old site"));
-      await navigator.serviceWorker.register("/sw.js");
     });
 
+    let loads = 0;
+    page.on("load", () => (loads += 1));
+    await page.goto("/");
+    // The home page's own load, then the worker's reload once it takes over.
+    await expect.poll(() => loads, { timeout: 20_000 }).toBe(2);
     await expect
-      .poll(
-        () =>
-          page.evaluate(async () => ({
-            caches: (await caches.keys()).length,
-            workers: (await navigator.serviceWorker.getRegistrations()).length,
-          })),
-        { timeout: 15_000 },
-      )
-      .toEqual({ caches: 0, workers: 0 });
+      .poll(() => page.evaluate(async () => (await caches.keys()).map((name) => name.replace(/[0-9a-f]+$/, ""))))
+      .toEqual(["hc-offline-"]);
   });
 });
 

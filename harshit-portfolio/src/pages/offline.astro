@@ -1,0 +1,15 @@
+---
+import Notice from "../layouts/Notice.astro";
+
+/**
+ * Shown by the offline worker (public/sw.js) for a page it has no copy of while
+ * there is no connection. Not listed in the sitemap.
+ */
+---
+
+<Notice title="Offline" code="Offline" heading="No connection.">
+  <p>This page isn't saved on this device yet. The rest of the portfolio still works offline.</p>
+  <p>
+    <a href="">Try again</a> · <a href="/">Back to the portfolio</a>
+  </p>
+</Notice>

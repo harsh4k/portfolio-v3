@@ -1,0 +1,66 @@
+---
+import { profile } from "../data/profile";
+
+/** A one-message page on the site's red: the 404 and the offline fallback. */
+interface Props {
+  title: string;
+  code: string;
+  heading: string;
+}
+
+const { title, code, heading } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>{title} — {profile.name}</title>
+    <link rel="icon" href="/icons/favicon.ico" />
+  </head>
+  <body>
+    <main>
+      <p class="code">{code}</p>
+      <h1>{heading}</h1>
+      <slot />
+    </main>
+  </body>
+</html>
+
+<!-- Global: the page is just this layout, and the links come in through the slot. -->
+<style is:global>
+  @font-face {
+    font-family: "PP Editorial New";
+    src: url("/fonts/PPEditorialNew-Regular.woff2") format("woff2");
+    font-display: swap;
+  }
+
+  body {
+    display: grid;
+    place-items: center;
+    min-height: 100svh;
+    margin: 0;
+    padding: 1.5rem;
+    background: #f40c3f;
+    color: #160000;
+    font-family: "PP Editorial New", Georgia, serif;
+    text-align: center;
+  }
+
+  .code {
+    font-size: 0.875rem;
+    letter-spacing: 0.1em;
+  }
+
+  h1 {
+    margin: 0.5rem 0 1rem;
+    font-size: clamp(2.5rem, 8vw, 5rem);
+    font-weight: 400;
+  }
+
+  a {
+    color: inherit;
+  }
+</style>

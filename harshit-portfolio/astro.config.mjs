@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from "astro/config";
 import react from "@astrojs/react";
+import { offlinePrecache } from "./src/integrations/offline-precache.ts";
 
 export default defineConfig({
   site: "https://harshh.pages.dev",
@@ -9,7 +10,8 @@ export default defineConfig({
   trailingSlash: "ignore",
   devToolbar: { enabled: false },
   // React only for the intro preloader island (src/components/ui).
-  integrations: [react()],
+  // offlinePrecache writes the offline worker's file list into dist/sw.js.
+  integrations: [react(), offlinePrecache()],
   // Keep the whitespace between tags: the copied design has inline elements
   // whose spacing depends on it, exactly as the live page ships.
   compressHTML: false,

@@ -3,11 +3,11 @@ import { getOrdered } from "../data/collections";
 
 /**
  * Every .astro page under src/pages, so a new page is listed without editing
- * this file. 404, files starting with "_" and dynamic routes ([param]) are left
+ * this file. 404, the offline fallback, files starting with "_" and dynamic routes ([param]) are left
  * out; the project pages they generate are added from the collection.
  */
 const pages = Object.keys(import.meta.glob("./**/*.astro"))
-  .filter((file) => !/(^|\/)(_|404\.astro$)|\[/.test(file.slice(2)))
+  .filter((file) => !/(^|\/)(_|(404|offline)\.astro$)|\[/.test(file.slice(2)))
   .map((file) => file.slice(1).replace(/(index)?\.astro$/, ""))
   .map((path) => (path.endsWith("/") ? path : `${path}/`))
   .sort();

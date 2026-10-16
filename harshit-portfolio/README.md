@@ -35,7 +35,7 @@ public/                 # served as-is
 ├── scripts/, styles/   # intro hand-off, resume dock and the CSS joining them
 ├── fonts/, webgl/      # the design's fonts and 3D textures
 ├── images/             # project screenshots and archive photos
-└── _headers, sw.js     # security headers; the old service worker's retirement
+└── _headers, sw.js     # security headers; the offline worker
 tests/                  # Playwright
 ```
 
@@ -58,7 +58,7 @@ The build fails, rather than shipping a broken page, when a project URL is not `
 
 ## Notes
 
-- `public/sw.js` exists only to retire the service worker the previous site installed: it clears its caches, unregisters itself and reloads the tab. The new site registers no worker. Keep the file for a few months, until returning visitors have cycled through.
+- `public/sw.js` makes the site work offline after one visit. The build (`src/integrations/offline-precache.ts`) writes every shipped file and its hash into it, so nothing is listed by hand. Pages load from the network first and fall back to the saved copy (or `/offline/` for a page it has none of); files load from the cache, which is replaced on every deploy that changes one. It also deletes the previous site's offline cache and reloads its tabs. Tests block workers except in the `offline` group.
 - Section ids `#about`, `#work` and `#contact` are linked from the Android app's shortcuts; keep them stable.
 
 ## Design
