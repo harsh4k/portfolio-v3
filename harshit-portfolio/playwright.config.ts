@@ -12,6 +12,9 @@ export default defineConfig({
   use: {
     baseURL: `http://127.0.0.1:${port}`,
     trace: "retain-on-failure",
+    // The offline worker would answer requests that tests route or count.
+    // tests/offline.spec.ts turns it back on.
+    serviceWorkers: "block",
   },
   projects: [
     { name: "desktop", use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } } },

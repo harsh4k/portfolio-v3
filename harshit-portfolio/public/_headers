@@ -26,8 +26,8 @@
 /index.html
   Cache-Control: no-cache
 
-# Must never be HTTP-cached, or old visitors would not receive the retirement
-# worker that clears the previous site's offline cache.
+# Must never be HTTP-cached: browsers check it on every visit, and a new deploy
+# reaches offline visitors only through a new copy of this file.
 /sw.js
   Cache-Control: no-cache
 

@@ -810,31 +810,6 @@ test.describe("header and keyboard reach", () => {
   });
 });
 
-test.describe("service worker retirement", () => {
-  test.use({ serviceWorkers: "allow" });
-
-  test("the old offline worker clears its caches and unregisters", async ({ page }) => {
-    await page.goto("/");
-    // Simulate a returning visitor whose browser still has the old site's cache.
-    await page.evaluate(async () => {
-      const cache = await caches.open("portfolio-old-build");
-      await cache.put("/stale", new Response("old site"));
-      await navigator.serviceWorker.register("/sw.js");
-    });
-
-    await expect
-      .poll(
-        () =>
-          page.evaluate(async () => ({
-            caches: (await caches.keys()).length,
-            workers: (await navigator.serviceWorker.getRegistrations()).length,
-          })),
-        { timeout: 15_000 },
-      )
-      .toEqual({ caches: 0, workers: 0 });
-  });
-});
-
 /** Skips the 3D intro and waits until the page can scroll. */
 async function enterSite(page: Page) {
   await page.goto("/", { waitUntil: "load" });
