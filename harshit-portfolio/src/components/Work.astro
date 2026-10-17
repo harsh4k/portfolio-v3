@@ -21,10 +21,10 @@ const total = projects.length;
         </span>
       </h2>
       <div class="s__scene js-scene astro-doefkd43">
-        {projects.map(({ data }, index) => (
+        {projects.map(({ id, data }, index) => (
           <a-work class="s__scene__work s__scene__work--video js-work astro-meqjtcea">
             <div class="a__inner astro-meqjtcea">
-              <a href={data.url} target="_blank" rel="noopener noreferrer" class="astro-meqjtcea">
+              <a href={`/work/${id}/`} class="astro-meqjtcea">
                 <img
                   src={data.image}
                   alt={data.title}
@@ -61,7 +61,7 @@ const total = projects.length;
 </section>
 <!-- Outside the section so its stacking order can't hide the bar. The cards are skipped by the keyboard until scrolled into view; this list is always tabbable. -->
 <nav class="work-keys" aria-label="Projects">
-  {projects.map(({ data }) => (
-    <a href={data.url} target="_blank" rel="noopener noreferrer" set:text={data.title} />
+  {projects.map(({ id, data }) => (
+    <a href={`/work/${id}/`} set:text={data.title} />
   ))}
 </nav>

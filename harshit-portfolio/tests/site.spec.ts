@@ -924,6 +924,17 @@ test.describe("project pages", () => {
     url: string;
   }[];
 
+  test("the work cards and the keyboard list open each project's page", async ({ page }) => {
+    await page.goto("/");
+    const pages = projects.map((project) => `/work/${project.id}/`).sort();
+    for (const selector of [".js-work a", ".work-keys a"]) {
+      const links = page.locator(selector);
+      const hrefs = await links.evaluateAll((all) => all.map((a) => a.getAttribute("href") ?? ""));
+      expect(hrefs.sort()).toEqual(pages);
+      await expect(links.and(page.locator("[target]"))).toHaveCount(0);
+    }
+  });
+
   test("every project has a page with its title, live link and neighbours, and no errors", async ({ page }) => {
     for (const project of projects) {
       const errors = watchForErrors(page);
