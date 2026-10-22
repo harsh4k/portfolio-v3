@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
-import { readFileSync } from "node:fs";
+import { readFileSync, statSync } from "node:fs";
 import { parseContributions } from "../src/data/github";
 
 /** Sections the Android app shortcuts and the header nav link to. */
@@ -130,6 +130,42 @@ test.describe("page contract", () => {
     expect(redirects).toMatch(/^\/via\/\*\s+\/\s+200$/m);
     const headers = readFileSync(new URL("../public/_headers", import.meta.url), "utf8");
     expect(headers).toMatch(/^\/via\/\*\n\s+X-Robots-Tag: noindex$/m);
+  });
+
+  test("on the /via/ social links, the 3D intro's textures resolve to the real files", () => {
+    // Cloudflare Pages' _redirects matching: rules in order, the first match wins,
+    // ":name" is one path segment and "*" the rest, which the target gets as ":splat".
+    const rules = readFileSync(new URL("../public/_redirects", import.meta.url), "utf8")
+      .split("\n")
+      .filter((line) => line.trim() && !line.startsWith("#"))
+      .map((line) => {
+        const [from = "", to = ""] = line.trim().split(/\s+/);
+        const names: string[] = [];
+        const pattern = from.replace(/:(\w+)|\*/g, (_token, name: string | undefined) => {
+          names.push(name ?? "splat");
+          return name ? "([^/]+)" : "(.*)";
+        });
+        return { regex: new RegExp(`^${pattern}$`), names, to };
+      });
+    const serve = (path: string) => {
+      for (const { regex, names, to } of rules) {
+        const match = regex.exec(path);
+        if (match) return names.reduce((target, name, i) => target.replace(`:${name}`, match[i + 1] ?? ""), to);
+      }
+      return path;
+    };
+
+    // The intro bundle is copied unchanged from the design, so read its paths from it.
+    const bundle = readFileSync(new URL("../public/assets/index-wQJ6Ws5X.js", import.meta.url), "utf8");
+    const textures = [...new Set(bundle.match(/webgl\/textures\/[\w/.-]+/g))];
+    expect(textures.length).toBeGreaterThan(5);
+    for (const page of ["/via/linkedin", "/via/linkedin/"]) {
+      for (const texture of textures) {
+        const served = serve(new URL(texture, `https://site${page}`).pathname);
+        const file = statSync(new URL(`../public${served}`, import.meta.url), { throwIfNoEntry: false });
+        expect(file?.isFile(), `${page} -> ${served}`).toBe(true);
+      }
+    }
   });
 
   test("unknown paths get the 404 page", async ({ page }) => {
