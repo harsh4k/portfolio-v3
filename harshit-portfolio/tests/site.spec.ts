@@ -129,7 +129,7 @@ test.describe("page contract", () => {
     const redirects = readFileSync(new URL("../public/_redirects", import.meta.url), "utf8");
     expect(redirects).toMatch(/^\/via\/\*\s+\/\s+200$/m);
     const headers = readFileSync(new URL("../public/_headers", import.meta.url), "utf8");
-    expect(headers).toMatch(/^\/via\/\*\n\s+X-Robots-Tag: noindex$/m);
+    expect(headers).toMatch(/^\/via\/\*\r?\n[ \t]+X-Robots-Tag: noindex\r?$/m);
   });
 
   test("unknown paths get the 404 page", async ({ page }) => {

@@ -1,0 +1,9 @@
+{
+  "checks": [
+    { "name": "portfolio lint", "cwd": "harshit-portfolio", "run": ["npm", "run", "lint"] },
+    { "name": "portfolio formatting", "cwd": "harshit-portfolio", "run": ["npm", "run", "format:check"] },
+    { "name": "Astro and TypeScript diagnostics", "cwd": "harshit-portfolio", "run": ["npm", "run", "check"] },
+    { "name": "portfolio build", "cwd": "harshit-portfolio", "run": ["npm", "run", "build"] },
+    { "name": "portfolio browser tests", "cwd": "harshit-portfolio", "run": ["npm", "test", "--", "--workers=2"] }
+  ]
+}
